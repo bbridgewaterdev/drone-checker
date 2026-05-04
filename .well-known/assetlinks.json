@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "uk.co.dronechecker.twa",
+        "sha256_cert_fingerprints": ["39:1E:45:74:4F:CE:81:BA:BE:10:08:AE:47:7C:5E:AA:25:A7:B3:5B:CB:E6:1D:04:A4:F8:12:9A:38:0E:50:B6"]
+      }
+    }]

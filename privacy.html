@@ -24,6 +24,7 @@
     .footer{margin-top:40px;padding-top:20px;border-top:1px solid #334155;font-size:12px;color:#64748b;text-align:center;}
     .footer a{color:#3B82F6;text-decoration:none;}
     a{color:#3B82F6;text-decoration:none;}
+    .sub-h{font-size:14px;margin-top:16px;margin-bottom:6px;color:#94a3b8;font-weight:600;}
   </style>
 </head>
 <body>
@@ -70,33 +71,53 @@
 
   <div class="card">
     <h2>3. Information We Collect</h2>
-    <h2 style="font-size:14px;margin-top:0;color:#94a3b8;">3.1 Location Data</h2>
-    <p>DroneChecker requests access to your device's location (GPS) to display local weather, calculate golden hour times, and provide localised flying condition ratings.</p>
-    <p><strong>We do not store your location data.</strong> Location is used only in real time and is never transmitted to our servers or stored anywhere.</p>
-    <h2 style="font-size:14px;color:#94a3b8;">3.2 Search Queries</h2>
-    <p>If you use the postcode or town search feature, your query is sent to Postcodes.io and OpenStreetMap Nominatim solely to retrieve location coordinates. We do not store any search queries.</p>
-    <h2 style="font-size:14px;color:#94a3b8;">3.3 Notification Permissions</h2>
-    <p>If you enable daily fly condition alerts, your preference is stored locally on your device only and is never transmitted to us.</p>
-    <h2 style="font-size:14px;color:#94a3b8;">3.4 No Accounts Required</h2>
+
+    <p class="sub-h">3.1 Location Data</p>
+    <p>DroneChecker requests access to your device's location (GPS) to display local weather conditions, calculate golden hour and blue hour times, centre the rain radar, and provide localised flying condition ratings.</p>
+    <p><strong>We do not store your location data.</strong> Location is used only in real time and is never transmitted to our servers or stored permanently. Your coordinates are passed to third-party weather and mapping services (listed in Section 4) solely to retrieve relevant data.</p>
+
+    <p class="sub-h">3.2 Search Queries</p>
+    <p>If you use the postcode or town search feature, your query is sent to Postcodes.io and the Open-Meteo Geocoding API solely to retrieve location coordinates. We do not store any search queries.</p>
+
+    <p class="sub-h">3.3 Notification Permissions</p>
+    <p>If you enable daily fly condition alerts, your notification preference is stored locally on your device only and is never transmitted to us or any third party. Notifications are scheduled entirely on-device.</p>
+
+    <p class="sub-h">3.4 No Accounts Required</p>
     <p>DroneChecker does not require you to create an account. We do not collect your name, email address, or any other personal identifiers.</p>
+
+    <p class="sub-h">3.5 Device Preferences</p>
+    <p>To improve your experience, the following preferences are saved locally on your device using browser local storage. None of this data is transmitted to us or any third party:</p>
+    <ul>
+      <li><strong>Drone profile</strong> — your selected drone model, used to personalise wind limit thresholds.</li>
+      <li><strong>Pre-flight checklist state</strong> — which checklist items you have ticked, so your progress is preserved between sessions.</li>
+      <li><strong>Cached weather data</strong> — the most recently loaded weather conditions, stored with a timestamp to allow the app to display last known data when you have no internet connection at a flying site. This data contains weather readings only and no personal information.</li>
+    </ul>
+    <p>You can clear this data at any time by clearing your browser or app cache.</p>
   </div>
 
   <div class="card">
     <h2>4. Third-Party Services</h2>
-    <p>DroneChecker uses the following third-party services. Each has its own privacy policy:</p>
+    <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data:</p>
     <table>
       <tr><th>Service</th><th>Purpose</th><th>Privacy Policy</th></tr>
-      <tr><td>Open-Meteo</td><td>Live weather data</td><td><a href="https://open-meteo.com/en/terms" target="_blank">View</a></td></tr>
+      <tr><td>Open-Meteo</td><td>Live weather and forecast data</td><td><a href="https://open-meteo.com/en/terms" target="_blank">View</a></td></tr>
+      <tr><td>RainViewer</td><td>Live animated rain radar tiles</td><td><a href="https://www.rainviewer.com/privacy.html" target="_blank">View</a></td></tr>
       <tr><td>Postcodes.io</td><td>UK postcode lookup</td><td><a href="https://postcodes.io" target="_blank">View</a></td></tr>
-      <tr><td>OpenStreetMap Nominatim</td><td>Location search</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">View</a></td></tr>
-      <tr><td>NOAA Space Weather</td><td>KP geomagnetic index</td><td><a href="https://www.noaa.gov/privacy" target="_blank">View</a></td></tr>
-      <tr><td>GitHub Pages</td><td>App hosting</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank">View</a></td></tr>
+      <tr><td>OpenStreetMap Nominatim</td><td>Reverse geocoding (place names from coordinates)</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">View</a></td></tr>
+      <tr><td>NOAA Space Weather</td><td>KP geomagnetic index data</td><td><a href="https://www.noaa.gov/privacy" target="_blank">View</a></td></tr>
+      <tr><td>GitHub Pages</td><td>App hosting and delivery</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank">View</a></td></tr>
     </table>
+    <p>When you use features such as weather, radar, or location search, your coordinates or search query may be sent to the relevant service above. No personal identifying information is included in these requests.</p>
   </div>
 
   <div class="card">
-    <h2>5. Cookies and Local Storage</h2>
-    <p>DroneChecker may use your browser's local storage to cache app files for offline use via a service worker. This improves performance and allows the app to load with limited connectivity. No personal data is stored in local storage.</p>
+    <h2>5. Local Storage and Offline Mode</h2>
+    <p>DroneChecker uses your device's local storage in two ways:</p>
+    <ul>
+      <li><strong>Service worker cache</strong> — app files (HTML, CSS, scripts) are cached locally so the app loads quickly and works offline.</li>
+      <li><strong>User preferences and weather cache</strong> — your drone profile, checklist state, and the most recent weather data are stored locally to improve your experience and enable offline use (see Section 3.5).</li>
+    </ul>
+    <p>No personal data is stored in local storage. All stored data remains on your device and is never transmitted to DroneChecker's servers.</p>
   </div>
 
   <div class="card">
@@ -106,7 +127,7 @@
 
   <div class="card">
     <h2>7. Your Rights (UK GDPR)</h2>
-    <p>Under UK GDPR, you have the right to access, correct, or delete any personal data we hold, and to lodge a complaint with the <a href="https://ico.org.uk" target="_blank">Information Commissioner's Office (ICO)</a>. As DroneChecker does not collect or store personal data on our servers, most of these rights are satisfied by the nature of the app itself.</p>
+    <p>Under UK GDPR, you have the right to access, correct, or delete any personal data we hold, and to lodge a complaint with the <a href="https://ico.org.uk" target="_blank">Information Commissioner's Office (ICO)</a>. As DroneChecker does not collect or store personal data on our servers, most of these rights are satisfied by the nature of the app itself. Any locally stored preferences can be cleared by clearing your browser or app cache.</p>
   </div>
 
   <div class="card">

@@ -96,6 +96,12 @@
     .fc-dot.amber{background:var(--amber);}
     .fc-dot.red{background:var(--red);}
 
+    /* Radar toggle */
+    .radar-toggle{position:absolute;top:0;left:0;right:0;height:44px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;z-index:900;flex-shrink:0;}
+    .rtog{flex:1;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
+    .rtog.on{color:var(--accent);border-bottom:2px solid var(--accent);}
+    .rtog:hover{color:var(--text);}
+
     /* Radar */
     #radar-map{width:100%;height:100%;}
     .radar-ctrl{position:absolute;bottom:16px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:800;pointer-events:none;}
@@ -256,21 +262,34 @@
 
       <!-- RAIN RADAR -->
       <div class="tab" id="tab-radar">
-        <div id="radar-map"></div>
-        <div class="radar-leg">
-          <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#00d4ff;"></div><span>Light rain</span></div>
-          <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#0096ff;"></div><span>Moderate</span></div>
-          <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#ff9600;"></div><span>Heavy</span></div>
-          <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#ff0000;"></div><span>Intense</span></div>
+        <div class="radar-toggle">
+          <button class="rtog on" id="rtog-rain" onclick="switchRadarView('rain',this)">🌧️ Rain Radar</button>
+          <button class="rtog" id="rtog-wind" onclick="switchRadarView('wind',this)">💨 Wind Map</button>
         </div>
-        <div class="radar-status" id="radar-status">Loading radar...</div>
-        <div class="radar-ctrl">
-          <div class="radar-time-pill" id="radar-time">--:--</div>
-          <div class="radar-btns">
-            <button class="radar-btn" onclick="radarStep(-1)">&#9664; Prev</button>
-            <button class="radar-btn play" id="radar-play-btn" onclick="toggleRadarPlay()">&#9654; Play</button>
-            <button class="radar-btn" onclick="radarStep(1)">Next &#9654;</button>
+        <div id="radar-rain-wrap" style="position:absolute;top:44px;left:0;right:0;bottom:0;">
+          <div id="radar-map" style="width:100%;height:100%;"></div>
+          <div class="radar-leg">
+            <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#00d4ff;"></div><span>Light rain</span></div>
+            <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#0096ff;"></div><span>Moderate</span></div>
+            <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#ff9600;"></div><span>Heavy</span></div>
+            <div class="radar-leg-row"><div class="radar-leg-dot" style="background:#ff0000;"></div><span>Intense</span></div>
           </div>
+          <div class="radar-status" id="radar-status">Loading radar...</div>
+          <div class="radar-ctrl">
+            <div class="radar-time-pill" id="radar-time">--:--</div>
+            <div class="radar-btns">
+              <button class="radar-btn" onclick="radarStep(-1)">&#9664; Prev</button>
+              <button class="radar-btn play" id="radar-play-btn" onclick="toggleRadarPlay()">&#9654; Play</button>
+              <button class="radar-btn" onclick="radarStep(1)">Next &#9654;</button>
+            </div>
+          </div>
+        </div>
+        <div id="radar-wind-wrap" style="position:absolute;top:44px;left:0;right:0;bottom:0;display:none;">
+          <iframe id="windy-frame"
+            src=""
+            style="width:100%;height:100%;border:none;"
+            allowfullscreen>
+          </iframe>
         </div>
       </div>
 
@@ -666,16 +685,53 @@ function renderFc(){
 // ---- Rain Radar ----
 var radarMap=null,radarDone=false,radarFrames=[],radarIdx=0,radarTimer=null,radarLayers=[];
 
-function initRadar(){
-  if(radarDone) return;
-  radarDone=true;
-  var clat=uLat||54, clng=uLng||-2;
-  radarMap=L.map('radar-map',{zoomControl:true,attributionControl:true}).setView([clat,clng],6);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(radarMap);
-  if(uLat&&uLng){
-    L.circleMarker([uLat,uLng],{radius:8,color:'#3B82F6',fillColor:'#3B82F6',fillOpacity:0.9,weight:2})
-      .addTo(radarMap).bindPopup('Your location').openPopup();
+function switchRadarView(view, btn){
+  document.querySelectorAll('.rtog').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  var rainWrap=document.getElementById('radar-rain-wrap');
+  var windWrap=document.getElementById('radar-wind-wrap');
+  if(view==='rain'){
+    rainWrap.style.display='block';
+    windWrap.style.display='none';
+    if(radarMap) radarMap.invalidateSize();
+  } else {
+    rainWrap.style.display='none';
+    windWrap.style.display='block';
+    // Load Windy embed centred on user location
+    var frame=document.getElementById('windy-frame');
+    var lat=uLat||54, lng=uLng||-2;
+    var zoom=7;
+    var src='https://embed.windy.com/embed2.html?lat='+lat+'&lon='+lng+'&detailLat='+lat+'&detailLon='+lng+
+      '&width=650&height=450&zoom='+zoom+'&level=surface&overlay=wind&product=ecmwf&menu=&message=&marker=true'+
+      '&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1';
+    if(frame.src!==src) frame.src=src;
   }
+}
+
+
+  var clat=uLat||54, clng=uLng||-2;
+  if(!radarDone){
+    radarDone=true;
+    radarMap=L.map('radar-map',{zoomControl:true,attributionControl:true}).setView([clat,clng],6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(radarMap);
+    if(uLat&&uLng){
+      L.circleMarker([uLat,uLng],{radius:8,color:'#3B82F6',fillColor:'#3B82F6',fillOpacity:0.9,weight:2})
+        .addTo(radarMap).bindPopup('Your location').openPopup();
+    }
+  }
+  // Always reload fresh radar frames each time tab is opened
+  refreshRadarFrames();
+}
+
+function refreshRadarFrames(){
+  // Stop any playing animation
+  if(radarTimer){clearInterval(radarTimer);radarTimer=null;
+    var btn=document.getElementById('radar-play-btn');
+    if(btn){btn.innerHTML='&#9654; Play';btn.style.background='';btn.style.borderColor='';}
+  }
+  // Remove old layers from map
+  radarLayers.forEach(function(l){if(radarMap&&radarMap.hasLayer(l))radarMap.removeLayer(l);});
+  radarLayers=[];radarFrames=[];radarIdx=0;
   loadRadarFrames();
 }
 

@@ -101,23 +101,7 @@
     .fc-dot.amber{background:var(--amber);}
     .fc-dot.red{background:var(--red);}
 
-    /* Radar */
-    .radar-toggle{position:absolute;top:0;left:0;right:0;height:44px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;z-index:900;}
-    .rtog{flex:1;border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
-    .rtog.on{color:var(--accent);border-bottom:2px solid var(--accent);}
-    #radar-rain-wrap{position:absolute;top:44px;left:0;right:0;bottom:0;}
-    #radar-map{width:100%;height:100%;}
-    #radar-wind-wrap{position:absolute;top:44px;left:0;right:0;bottom:0;display:none;}
-    .radar-leg{position:absolute;top:10px;right:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;z-index:800;font-size:11px;}
-    .radar-leg-row{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
-    .radar-leg-row:last-child{margin-bottom:0;}
-    .radar-leg-dot{width:14px;height:10px;border-radius:2px;}
-    .radar-status{position:absolute;top:10px;left:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 12px;z-index:800;font-size:12px;color:var(--muted);}
-    .radar-ctrl{position:absolute;bottom:16px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:800;pointer-events:none;}
-    .radar-time-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 16px;font-size:12px;font-weight:600;}
-    .radar-btns{display:flex;align-items:center;gap:10px;pointer-events:all;}
-    .radar-btn{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 18px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
-    .radar-btn.play{background:var(--accent);border-color:var(--accent);color:#fff;}
+
 
     /* Checklist */
     .cl-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
@@ -340,8 +324,12 @@
         Forecast
       </button>
       <button class="nb" id="nb-radar" onclick="goTab('radar',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 17.58A5 5 0 0018 8h-1.26A8 8 0 104 16.25"/><line x1="8" y1="19" x2="8" y2="21"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="12" y1="19" x2="12" y2="21"/><line x1="12" y1="13" x2="12" y2="15"/><line x1="16" y1="19" x2="16" y2="21"/><line x1="16" y1="13" x2="16" y2="15"/></svg>
-        Radar
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9.59 4.59A2 2 0 1111 8H2"/>
+          <path d="M12.59 19.41A2 2 0 1114 16H2"/>
+          <path d="M6.59 11.59A2 2 0 108 15H2"/>
+        </svg>
+        Wind
       </button>
       <button class="nb" id="nb-gh" onclick="goTab('gh',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -380,7 +368,7 @@ var DRONES={
 };
 // -------------------------------------------------------
 // PASTE YOUR OpenWeatherMap API key here (used for wind map only)
-var OWM_KEY = 'ba5ff2e988eb33806f93418d104ca26f';
+var OWM_KEY = 'PASTE_YOUR_OPENWEATHERMAP_KEY_HERE';
 // -------------------------------------------------------
 var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null;
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
@@ -626,84 +614,14 @@ function renderFc(){
 }
 
 // ---- Rain Radar (lazy loads Leaflet only when needed) ----
-var radarMap=null,radarDone=false,radarFrames=[],radarIdx=0,radarTimer=null,radarLayers=[];
-var leafletLoaded=false;
 
-function loadLeafletThen(cb){
-  if(leafletLoaded){cb();return;}
-  var s=document.createElement('script');
-  s.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-  s.onload=function(){leafletLoaded=true;cb();};
-  document.head.appendChild(s);
-}
-
-function initRadar(){
-  loadLeafletThen(function(){
-    var clat=uLat||54,clng=uLng||-2;
-    if(!radarDone){
-      radarDone=true;
-      radarMap=L.map('radar-map',{zoomControl:true}).setView([clat,clng],6);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:18}).addTo(radarMap);
-      if(uLat&&uLng){L.circleMarker([uLat,uLng],{radius:8,color:'#3B82F6',fillColor:'#3B82F6',fillOpacity:0.9,weight:2}).addTo(radarMap).bindPopup('Your location').openPopup();}
-    }
-    refreshRadarFrames();
-  });
-}
-
-function refreshRadarFrames(){
-  if(radarTimer){clearInterval(radarTimer);radarTimer=null;var btn=document.getElementById('radar-play-btn');if(btn){btn.innerHTML='&#9654; Play';btn.style.background='';btn.style.borderColor='';}}
-  radarLayers.forEach(function(l){if(radarMap&&radarMap.hasLayer(l))radarMap.removeLayer(l);});
-  radarLayers=[];radarFrames=[];radarIdx=0;
-  loadRadarFrames();
-}
-
-function loadRadarFrames(){
-  var statusEl=document.getElementById('radar-status');if(statusEl)statusEl.textContent='Loading radar data...';
-  fetch('https://api.rainviewer.com/public/weather-maps.json')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      radarFrames=[];
-      if(data.radar&&data.radar.past)data.radar.past.forEach(function(f){radarFrames.push({ts:f.time,path:f.path});});
-      if(data.radar&&data.radar.nowcast)data.radar.nowcast.forEach(function(f){radarFrames.push({ts:f.time,path:f.path});});
-      if(!radarFrames.length){if(statusEl)statusEl.textContent='No radar data';return;}
-      radarFrames.forEach(function(f){
-        var layer=L.tileLayer('https://tilecache.rainviewer.com'+f.path+'/256/{z}/{x}/{y}/2/1_1.png',{opacity:0.7,tileSize:256,zIndex:10,attribution:'RainViewer'});
-        radarLayers.push(layer);
-      });
-      radarIdx=radarFrames.length-1;
-      showRadarFrame(radarIdx);
-      if(statusEl){statusEl.textContent='✓ Radar loaded — '+radarFrames.length+' frames';setTimeout(function(){statusEl.style.display='none';},3000);}
-    }).catch(function(){if(statusEl)statusEl.textContent='Radar unavailable';});
-}
-
-function showRadarFrame(idx){
-  radarLayers.forEach(function(l){if(radarMap&&radarMap.hasLayer(l))radarMap.removeLayer(l);});
-  if(!radarLayers[idx])return;
-  radarMap.addLayer(radarLayers[idx]);
-  var frame=radarFrames[idx],d=new Date(frame.ts*1000);
-  var timeEl=document.getElementById('radar-time');
-  if(timeEl)timeEl.textContent=pad(d.getHours())+':'+pad(d.getMinutes())+(d<=new Date()?' (past)':' (forecast)');
-}
-function radarStep(dir){radarIdx=Math.max(0,Math.min(radarFrames.length-1,radarIdx+dir));showRadarFrame(radarIdx);}
-function toggleRadarPlay(){
-  var btn=document.getElementById('radar-play-btn');
-  if(radarTimer){clearInterval(radarTimer);radarTimer=null;if(btn){btn.innerHTML='&#9654; Play';btn.style.background='';btn.style.borderColor='';}}
-  else{if(btn){btn.innerHTML='&#9646;&#9646; Pause';btn.style.background='var(--amber)';btn.style.borderColor='var(--amber)';}radarTimer=setInterval(function(){radarIdx=(radarIdx+1)%radarFrames.length;showRadarFrame(radarIdx);},600);}
-}
-function switchRadarView(view,btn){
-  document.querySelectorAll('.rtog').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');
-  var rw=document.getElementById('radar-rain-wrap'),ww=document.getElementById('radar-wind-wrap');
-  if(view==='rain'){
-    rw.style.display='block';ww.style.display='none';
-    if(radarMap)radarMap.invalidateSize();
-  } else {
-    rw.style.display='none';ww.style.display='block';
-    initWindMap();
-  }
-}
 
 var windMap=null,windDone=false;
 function initWindMap(){
+  if(!wxData||!wxData.current){
+    document.getElementById('wind-map').innerHTML='<div class="loading"><div class="spin"></div><p>Waiting for weather data...</p></div>';
+    return;
+  }
   loadLeafletThen(function(){
     var clat=uLat||54,clng=uLng||-2;
     if(!windDone){
@@ -779,7 +697,7 @@ function goTab(id,btn){
   var nbs=document.querySelectorAll('.nb');for(var i=0;i<nbs.length;i++)nbs[i].classList.remove('on');
   var tabEl=document.getElementById('tab-'+id);if(tabEl)tabEl.classList.add('on');
   btn.classList.add('on');
-  if(id==='radar')setTimeout(function(){initRadar();if(radarMap)radarMap.invalidateSize();},60);
+  if(id==='radar')setTimeout(function(){initWindMap();if(windMap)windMap.invalidateSize();},60);
   if(id==='gh')renderGolden();
   if(id==='cl')renderChecklist();
 }

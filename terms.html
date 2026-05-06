@@ -65,11 +65,15 @@
     <h2>2. Description of Service</h2>
     <p>DroneChecker is an informational application providing:</p>
     <ul>
-      <li>Live weather conditions and flying condition ratings</li>
-      <li>Geomagnetic activity (KP index) information</li>
+      <li>Live weather conditions and flying condition ratings tailored to your drone model</li>
+      <li>24-hour and 5-day weather forecasts with per-slot flying condition ratings</li>
+      <li>Wind direction map showing current wind bearing and speed at your location</li>
+      <li>Geomagnetic activity (KP index) information from NOAA</li>
       <li>Golden hour and blue hour calculations for aerial photography</li>
+      <li>Pre-flight checklist for drone pilots</li>
       <li>General UK CAA regulatory guidance</li>
       <li>Links to official airspace information tools</li>
+      <li>Offline mode showing last known conditions when no internet connection is available</li>
     </ul>
   </div>
 
@@ -80,9 +84,11 @@
     <ul>
       <li>Flying conditions data is not guaranteed to be accurate, complete, or current.</li>
       <li>You are solely responsible for ensuring your drone flight complies with all applicable UK laws and CAA regulations.</li>
-      <li>You must always check official sources before flying, including NATS Drone Assist (dronesafe.uk).</li>
+      <li>You must always check official sources before flying, including the CAA Drone Safety page at <a href="https://www.caa.co.uk/drones" target="_blank">caa.co.uk/drones</a>.</li>
       <li>DroneChecker does not provide real-time NOTAM data. Temporary flight restrictions may exist that are not reflected in the App.</li>
-      <li>Flying condition ratings are algorithmically generated estimates and do not constitute official aviation advice.</li>
+      <li>Flying condition ratings are algorithmically generated estimates based on your selected drone profile and do not constitute official aviation advice.</li>
+      <li>Wind direction data is sourced from Open-Meteo weather forecasts and represents conditions at 10m above ground level, which may differ from conditions at flying altitude.</li>
+      <li>Offline cached weather data may be outdated and should not be relied upon as current conditions.</li>
       <li>You fly your drone entirely at your own risk. DroneChecker, its developers, and operators accept no liability for any incident, accident, injury, damage, regulatory penalty, or loss arising from reliance on this App.</li>
     </ul>
   </div>
@@ -92,10 +98,12 @@
     <p>It is your responsibility to comply with all applicable regulations including:</p>
     <ul>
       <li>UK Civil Aviation Authority (CAA) drone regulations</li>
-      <li>CAA Operator ID registration (required for drones over 250g)</li>
+      <li>CAA Operator ID registration — required for drones over 100g with a camera (£12.34/year)</li>
+      <li>CAA Flyer ID — required for drones over 100g (free)</li>
       <li>The Air Navigation Order 2016 (as amended)</li>
       <li>Any local bylaws or restrictions at your flying location</li>
     </ul>
+    <p>Regulations are subject to change. Always refer to <a href="https://www.caa.co.uk/drones" target="_blank">caa.co.uk/drones</a> for the most current requirements.</p>
   </div>
 
   <div class="card">
@@ -104,7 +112,10 @@
     <ul>
       <li>Weather data is sourced from Open-Meteo and may not reflect hyperlocal conditions</li>
       <li>KP index data is sourced from NOAA and may be subject to delays</li>
-      <li>Golden hour calculations are mathematical estimates and may vary slightly</li>
+      <li>Wind direction and speed data is sourced from Open-Meteo at 10m above ground level and may differ from conditions at drone flying altitude</li>
+      <li>Golden hour calculations are mathematical estimates and may vary slightly from observed conditions</li>
+      <li>Drone wind limit thresholds are based on manufacturer specifications and may differ from real-world performance</li>
+      <li>Offline cached data reflects conditions at the time of last successful data fetch and may be significantly outdated</li>
       <li>CAA rules displayed are subject to change — always refer to <a href="https://www.caa.co.uk" target="_blank">caa.co.uk</a> for current regulations</li>
     </ul>
   </div>
@@ -120,8 +131,8 @@
   </div>
 
   <div class="card">
-    <h2>8. Third-Party Links</h2>
-    <p>DroneChecker contains links to third-party websites including NATS Drone Assist and the CAA website. These are provided for convenience only. We are not responsible for the content, accuracy, or practices of any third-party websites.</p>
+    <h2>8. Third-Party Links and Services</h2>
+    <p>DroneChecker integrates data from and contains links to third-party services including the CAA, Open-Meteo, NOAA, OpenStreetMap, and Postcodes.io. These are provided for convenience and functionality only. We are not responsible for the content, accuracy, availability, or practices of any third-party services. Each third-party service is subject to its own terms and privacy policy.</p>
   </div>
 
   <div class="card">

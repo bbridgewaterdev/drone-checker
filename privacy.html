@@ -73,11 +73,11 @@
     <h2>3. Information We Collect</h2>
 
     <p class="sub-h">3.1 Location Data</p>
-    <p>DroneChecker requests access to your device's location (GPS) to display local weather conditions, calculate golden hour and blue hour times, centre the rain radar, and provide localised flying condition ratings.</p>
+    <p>DroneChecker requests access to your device's location (GPS) to display local weather conditions, calculate golden hour and blue hour times, centre the wind direction map, and provide localised flying condition ratings.</p>
     <p><strong>We do not store your location data.</strong> Location is used only in real time and is never transmitted to our servers or stored permanently. Your coordinates are passed to third-party weather and mapping services (listed in Section 4) solely to retrieve relevant data.</p>
 
     <p class="sub-h">3.2 Search Queries</p>
-    <p>If you use the postcode or town search feature, your query is sent to Postcodes.io and the Open-Meteo Geocoding API solely to retrieve location coordinates. We do not store any search queries.</p>
+    <p>If you use the postcode or town search feature, your query is sent to Postcodes.io (for postcodes) or the Open-Meteo Geocoding API (for town and city names) solely to retrieve location coordinates. We do not store any search queries.</p>
 
     <p class="sub-h">3.3 Notification Permissions</p>
     <p>If you enable daily fly condition alerts, your notification preference is stored locally on your device only and is never transmitted to us or any third party. Notifications are scheduled entirely on-device.</p>
@@ -97,17 +97,16 @@
 
   <div class="card">
     <h2>4. Third-Party Services</h2>
-    <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data:</p>
+    <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data. When you use features such as weather, wind map, or location search, your coordinates or search query may be sent to the relevant service. No personal identifying information is included in these requests.</p>
     <table>
       <tr><th>Service</th><th>Purpose</th><th>Privacy Policy</th></tr>
-      <tr><td>Open-Meteo</td><td>Live weather and forecast data</td><td><a href="https://open-meteo.com/en/terms" target="_blank">View</a></td></tr>
-      <tr><td>RainViewer</td><td>Live animated rain radar tiles</td><td><a href="https://www.rainviewer.com/privacy.html" target="_blank">View</a></td></tr>
+      <tr><td>Open-Meteo</td><td>Live weather, forecast data and town/city geocoding</td><td><a href="https://open-meteo.com/en/terms" target="_blank">View</a></td></tr>
+      <tr><td>OpenStreetMap</td><td>Map tiles for wind direction map</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">View</a></td></tr>
       <tr><td>Postcodes.io</td><td>UK postcode lookup</td><td><a href="https://postcodes.io" target="_blank">View</a></td></tr>
       <tr><td>OpenStreetMap Nominatim</td><td>Reverse geocoding (place names from coordinates)</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">View</a></td></tr>
       <tr><td>NOAA Space Weather</td><td>KP geomagnetic index data</td><td><a href="https://www.noaa.gov/privacy" target="_blank">View</a></td></tr>
       <tr><td>GitHub Pages</td><td>App hosting and delivery</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank">View</a></td></tr>
     </table>
-    <p>When you use features such as weather, radar, or location search, your coordinates or search query may be sent to the relevant service above. No personal identifying information is included in these requests.</p>
   </div>
 
   <div class="card">

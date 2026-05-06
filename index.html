@@ -9,9 +9,7 @@
   <meta name="description" content="UK drone flying conditions, weather &amp; golden hour calculator.">
   <link rel="manifest" href="manifest.json">
   <title>DroneChecker</title>
-  <!-- Leaflet CSS loaded async so it doesn't block render -->
-  <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"></noscript>
+
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9;}
@@ -616,7 +614,6 @@ function renderFc(){
 // ---- Rain Radar (lazy loads Leaflet only when needed) ----
 
 
-var windMap=null,windDone=false;
 function initWindMap(){
   if(!wxData||!wxData.current){
     document.getElementById('wind-map').innerHTML='<div class="loading"><div class="spin"></div><p>Waiting for weather data...</p></div>';

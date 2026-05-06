@@ -1,4 +1,4 @@
-const CACHE = 'dronechecker-v11';
+const CACHE = 'dronechecker-v12';
 
 const STATIC = [
   '/index.html',
@@ -44,13 +44,13 @@ self.addEventListener('fetch', e => {
   // Never cache API calls — always fetch fresh
   if (url.includes('open-meteo.com') ||
       url.includes('openweathermap.org') ||
+      url.includes('tile.openweathermap.org') ||
       url.includes('postcodes.io') ||
       url.includes('swpc.noaa.gov') ||
       url.includes('rainviewer.com') ||
       url.includes('tilecache.rainviewer') ||
       url.includes('nominatim.openstreetmap.org') ||
-      url.includes('geocoding-api.open-meteo.com') ||
-      url.includes('windy.com')) {
+      url.includes('geocoding-api.open-meteo.com')) {
     e.respondWith(
       fetch(e.request).catch(() => new Response('{}', {headers:{'Content-Type':'application/json'}}))
     );

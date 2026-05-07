@@ -1,8 +1,8 @@
 [{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "uk.co.dronechecker.twa",
-        "sha256_cert_fingerprints": ["39:1E:45:74:4F:CE:81:BA:BE:10:08:AE:47:7C:5E:AA:25:A7:B3:5B:CB:E6:1D:04:A4:F8:12:9A:38:0E:50:B6"]
-      }
-    }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "uk.co.dronechecker.twa",
+    "sha256_cert_fingerprints": ["47:88:55:E1:1F:BF:D1:96:86:B3:4E:D3:71:51:A8:A6:CF:53:45:4A:77:BA:F1:FD:22:09:2E:9A:49:D1:0C:30"]
+  }
+}]

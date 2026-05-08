@@ -339,7 +339,7 @@ var DRONES={
 var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0;
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
 function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])selectedDrone=s;}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;updateDroneLimits();}
 function saveDrone(){var sel=document.getElementById('drone-sel');if(!sel)return;selectedDrone=sel.value;try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}updateDroneLimits();if(wxData)renderDash();}
@@ -382,29 +382,50 @@ function renderChecklist(){
 
 function wmoInfo(code){
   var map={0:{desc:'Clear sky',emoji:'☀️'},1:{desc:'Mainly clear',emoji:'🌤️'},2:{desc:'Partly cloudy',emoji:'⛅'},3:{desc:'Overcast',emoji:'☁️'},
-    45:{desc:'Fog',emoji:'🌫️'},48:{desc:'Icy fog',emoji:'🌫️'},51:{desc:'Light drizzle',emoji:'🌦️'},53:{desc:'Drizzle',emoji:'🌦️'},55:{desc:'Heavy drizzle',emoji:'🌧️'},
-    61:{desc:'Light rain',emoji:'🌧️'},63:{desc:'Rain',emoji:'🌧️'},65:{desc:'Heavy rain',emoji:'🌧️'},71:{desc:'Light snow',emoji:'❄️'},73:{desc:'Snow',emoji:'❄️'},
-    75:{desc:'Heavy snow',emoji:'❄️'},77:{desc:'Snow grains',emoji:'❄️'},80:{desc:'Light showers',emoji:'🌦️'},81:{desc:'Showers',emoji:'🌧️'},
-    82:{desc:'Heavy showers',emoji:'🌧️'},85:{desc:'Snow showers',emoji:'❄️'},86:{desc:'Heavy snow showers',emoji:'❄️'},
-    95:{desc:'Thunderstorm',emoji:'⛈️'},96:{desc:'Thunderstorm w/ hail',emoji:'⛈️'},99:{desc:'Thunderstorm w/ hail',emoji:'⛈️'}};
+    45:{desc:'Fog',emoji:'🌫️'},48:{desc:'Icy fog',emoji:'🌫️'},
+    51:{desc:'Light drizzle',emoji:'🌦️'},53:{desc:'Drizzle',emoji:'🌦️'},55:{desc:'Heavy drizzle',emoji:'🌧️'},
+    56:{desc:'Light freezing drizzle',emoji:'🌨️'},57:{desc:'Freezing drizzle',emoji:'🌨️'},
+    61:{desc:'Light rain',emoji:'🌧️'},63:{desc:'Rain',emoji:'🌧️'},65:{desc:'Heavy rain',emoji:'🌧️'},
+    66:{desc:'Light freezing rain',emoji:'🌨️'},67:{desc:'Freezing rain',emoji:'🌨️'},
+    71:{desc:'Light snow',emoji:'❄️'},73:{desc:'Snow',emoji:'❄️'},75:{desc:'Heavy snow',emoji:'❄️'},77:{desc:'Snow grains',emoji:'❄️'},
+    80:{desc:'Light showers',emoji:'🌦️'},81:{desc:'Showers',emoji:'🌧️'},82:{desc:'Heavy showers',emoji:'🌧️'},
+    85:{desc:'Snow showers',emoji:'❄️'},86:{desc:'Heavy snow showers',emoji:'❄️'},
+    95:{desc:'Thunderstorm',emoji:'⛈️'},96:{desc:'Thunderstorm w/ hail',emoji:'⛈️'},99:{desc:'Thunderstorm w/ heavy hail',emoji:'⛈️'}};
   return map[code]||{desc:'Unknown',emoji:'🌡️'};
 }
-function flyRating(wind,gust,vis,wmo){
+function flyRating(wind,gust,vis,wmo,kp){
   var d=getDrone(),lvl='green',issues=[];
+  // Wind & gusts
   if(gust>=d.gustRed){issues.push('Gusts too strong ('+Math.round(gust)+' km/h)');lvl='red';}
   else if(gust>=d.gustAmber){issues.push('Strong gusts ('+Math.round(gust)+' km/h)');if(lvl!=='red')lvl='amber';}
   if(wind>=d.windRed){issues.push('Wind too strong ('+Math.round(wind)+' km/h)');lvl='red';}
   else if(wind>=d.windAmber){issues.push('Moderate wind ('+Math.round(wind)+' km/h)');if(lvl!=='red')lvl='amber';}
-  if(vis<1000){issues.push('Very poor visibility');lvl='red';}else if(vis<5000){issues.push('Reduced visibility');if(lvl!=='red')lvl='amber';}
+  // Visibility
+  if(vis<1000){issues.push('Very poor visibility');lvl='red';}
+  else if(vis<5000){issues.push('Reduced visibility');if(lvl!=='red')lvl='amber';}
+  // Weather — ordered by severity
   if(wmo>=95){issues.push('Thunderstorm');lvl='red';}
-  else if(wmo>=61&&wmo<=67){issues.push('Rain');if(lvl!=='red')lvl='amber';}
-  else if(wmo>=71&&wmo<=77){issues.push('Snow');if(lvl!=='red')lvl='amber';}
-  else if(wmo>=80&&wmo<=82){issues.push('Rain showers');if(lvl!=='red')lvl='amber';}
-  else if(wmo===45||wmo===48){issues.push('Fog');if(lvl!=='red')lvl='amber';}
+  else if(wmo===65||wmo===67||wmo===75||wmo===82||wmo===86){issues.push('Heavy precipitation — do not fly');lvl='red';}
+  else if(wmo===56||wmo===57||wmo===66){issues.push('Freezing precipitation — ice risk');lvl='red';}
+  else if(wmo===63||wmo===73||wmo===81){issues.push(wmo===73?'Snow':'Rain — water ingress risk');lvl='red';}
+  else if(wmo===55){issues.push('Heavy drizzle — water ingress risk');if(lvl!=='red')lvl='amber';}
+  else if(wmo===51||wmo===53){issues.push('Drizzle — no water resistance on most drones');if(lvl!=='red')lvl='amber';}
+  else if(wmo===61||wmo===80){issues.push('Light rain — water ingress risk');if(lvl!=='red')lvl='amber';}
+  else if(wmo===71||wmo===77||wmo===85){issues.push('Light snow — motor and prop interference');if(lvl!=='red')lvl='amber';}
+  else if(wmo===45||wmo===48){issues.push('Fog — poor visibility');if(lvl!=='red')lvl='amber';}
+  // KP index
+  var kpVal=kp||currentKp||0;
+  if(kpVal>=6){issues.push('Severe geomagnetic storm (KP '+kpVal.toFixed(1)+') — GPS unreliable');lvl='red';}
+  else if(kpVal>=4){issues.push('Geomagnetic activity (KP '+kpVal.toFixed(1)+') — possible GPS drift');if(lvl!=='red')lvl='amber';}
   var labels={green:'Good to Fly',amber:'Fly with Caution',red:'Do Not Fly'};
   return{lvl:lvl,label:labels[lvl],desc:lvl==='green'?'Conditions look good for your '+getDrone().name+'.':issues.join('. ')+(lvl==='amber'?' — fly carefully.':' — not safe for your '+getDrone().name+'.')};
 }
-function fcRating(wind,gust,vis,wmo){var d=getDrone();if(gust>=d.gustRed||wmo>=95||vis<1000)return'red';if(wind>=d.windAmber||(wmo>=61&&wmo<=67)||vis<5000||(wmo===45||wmo===48))return'amber';return'green';}
+function fcRating(wind,gust,vis,wmo){
+  var d=getDrone();
+  if(gust>=d.gustRed||wmo>=95||vis<1000||wmo===65||wmo===67||wmo===75||wmo===82||wmo===86||wmo===56||wmo===57||wmo===66||wmo===63||wmo===73||wmo===81)return'red';
+  if(wind>=d.windAmber||wmo===55||wmo===51||wmo===53||wmo===61||wmo===80||wmo===71||wmo===77||wmo===85||wmo===45||wmo===48||vis<5000)return'amber';
+  return'green';
+}
 function dirLabel(deg){return['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];}
 function pad(n){return(n<10?'0':'')+n;}
 function fmtTime(d){return pad(d.getHours())+':'+pad(d.getMinutes());}
@@ -471,6 +492,8 @@ function fetchKp(){
     .then(function(r){return r.json();})
     .then(function(d){
       var latest=d[d.length-1],kp=parseFloat(latest.kp_index||latest.Kp||0);
+      currentKp=kp;
+      if(wxData)renderDash();
       var lvl,label,emoji,desc;
       if(kp<2){lvl='green';label='Quiet';emoji='🟢';desc='Calm conditions. No impact on GPS or compass.';}
       else if(kp<4){lvl='green';label='Unsettled';emoji='🟢';desc='Minor activity. Negligible impact on drone systems.';}
@@ -522,7 +545,6 @@ function renderDash(){
       '3️⃣&nbsp; Tap <strong style="color:var(--text);">Add</strong> — done!'+
       '</div></div>'
     :'')+
-    (isStandalone?'<div style="font-size:12px;color:var(--green);margin-bottom:16px;">✓ Running as installed app</div>':'')+
     '<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">'+
     '<a href="/privacy.html" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none;">Privacy Policy</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+

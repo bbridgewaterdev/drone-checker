@@ -44,16 +44,16 @@
     .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--muted);font-size:9.5px;cursor:pointer;font-family:inherit;padding:0 2px;}
     .nb.on{color:var(--accent);}
     .nb svg{width:19px;height:19px;}
-    .search{display:flex;gap:8px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--border);}
-    .search input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 13px;color:var(--text);font-size:14px;outline:none;font-family:inherit;}
+    .search{display:flex;gap:6px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--border);}
+    .search input{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;color:var(--text);font-size:14px;outline:none;font-family:inherit;}
     .search input:focus{border-color:var(--accent);}
     .search input::placeholder{color:var(--muted);}
-    .search button{background:var(--accent);border:none;border-radius:var(--radius-sm);padding:9px 14px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;}
+    .search button{background:var(--accent);border:none;border-radius:var(--radius-sm);padding:9px 11px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
     .serr{font-size:12px;color:var(--red);padding:4px 12px 0;display:none;}
-    .drone-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-bottom:1px solid var(--border);}
-    .drone-bar label{font-size:12px;color:var(--muted);white-space:nowrap;}
-    .drone-bar select{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;color:var(--text);font-size:13px;font-weight:600;outline:none;font-family:inherit;cursor:pointer;}
-    .drone-limits{font-size:11px;color:var(--muted);white-space:nowrap;}
+    .drone-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--border);}
+    .drone-bar label{font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+    .drone-bar select{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 6px;color:var(--text);font-size:13px;font-weight:600;outline:none;font-family:inherit;cursor:pointer;}
+    .drone-limits{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;}
     .offline-bar{background:rgba(245,158,11,.12);border-bottom:1px solid rgba(245,158,11,.3);padding:7px 12px;font-size:12px;color:var(--amber);display:none;align-items:center;gap:6px;}
     .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:12px 12px 0;}
     .card-ttl{font-size:11px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px;}
@@ -143,7 +143,7 @@
     @keyframes sp{to{transform:rotate(360deg);}}
     .loading p{font-size:13px;color:var(--muted);}
     .err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-sm);padding:14px;margin:12px;font-size:13px;color:var(--red);line-height:1.6;}
-    .unit-toggle{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 10px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+    .unit-toggle{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 7px;color:var(--muted);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
     .unit-toggle.active{background:var(--accent);color:#fff;border-color:var(--accent);}
     .fav-bar{display:none;padding:6px 12px 8px;gap:8px;flex-wrap:wrap;align-items:center;background:var(--bg2);border-bottom:1px solid var(--border);}
     .fav-bar.show{display:flex;}
@@ -164,7 +164,7 @@
     .week-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
     .log-empty{display:none;}
     .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--bg3);color:var(--text);padding:10px 18px;border-radius:20px;font-size:13px;z-index:9999;border:1px solid var(--border);white-space:nowrap;pointer-events:none;transition:opacity .3s;}
-    .myloc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted);white-space:nowrap;flex-shrink:0;}
+    .myloc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted);white-space:nowrap;flex-shrink:0;}
     @media(min-width:700px){
       .body-area{flex-direction:row;overflow:hidden;}
       .nav{flex-direction:column;width:180px;height:auto;border-top:none;border-right:1px solid var(--border);padding:16px 0;justify-content:flex-start;flex-shrink:0;}
@@ -282,9 +282,9 @@
         </div>
         <div class="search">
           <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. LS1 or Leeds" onkeydown="if(event.key==='Enter')doSearch()"/>
-          <button onclick="doSearch()">&#x1F50D; Search</button>
+          <button onclick="doSearch()">Search</button>
           <button class="myloc-btn" onclick="useMyLocation()" title="Use my location">📍</button>
-          <button onclick="toggleFavCurrent()" id="fav-btn" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0;">☆</button>
+          <button onclick="toggleFavCurrent()" id="fav-btn" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0;">☆</button>
         </div>
         <div class="fav-bar" id="fav-bar"></div>
         <div class="serr" id="serr"></div>

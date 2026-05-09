@@ -71,7 +71,13 @@
     .cond-lbl.red{color:var(--red);}
     .cond-desc{font-size:12px;color:var(--muted);line-height:1.5;}
     .wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-    .wx-tile{background:var(--bg3);border-radius:var(--radius-sm);padding:11px;}
+    .wx-tile{background:var(--bg3);border-radius:var(--radius-sm);padding:11px;border-left:3px solid transparent;}
+    .wx-tile.green{border-left-color:var(--green);}
+    .wx-tile.amber{border-left-color:var(--amber);}
+    .wx-tile.red{border-left-color:var(--red);}
+    .wx-val-green{color:var(--green);}
+    .wx-val-amber{color:var(--amber);}
+    .wx-val-red{color:var(--red);}
     .wx-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
     .wx-val{font-size:18px;font-weight:600;}
     .wx-sub{font-size:11px;color:var(--muted);margin-top:2px;}
@@ -126,7 +132,6 @@
     .gh-tmrw-tile{background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center;}
     .gh-tmrw-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;}
     .gh-tmrw-val{font-size:14px;font-weight:600;}
-    .notif-btn{width:100%;background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;}
     .nats-card{display:flex;align-items:center;gap:14px;}
     .nats-card a{background:var(--accent);color:#fff;border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;}
     .skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:var(--radius-sm);}
@@ -511,21 +516,30 @@ function fetchKp(){
     }).catch(function(){var card=document.getElementById('kp-card');if(card)card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div style="font-size:12px;color:var(--muted);">Could not load KP data.</div>';});
 }
 
+function tileWind(v){var d=getDrone();return v>=d.windRed?'red':v>=d.windAmber?'amber':'green';}
+function tileGust(v){var d=getDrone();return v>=d.gustRed?'red':v>=d.gustAmber?'amber':'green';}
+function tileVis(v){return v<1000?'red':v<5000?'amber':'green';}
+function tileCloud(v){return v>=95?'amber':v>=70?'amber':'green';}
+function tileHum(v){return v>90?'red':v>75?'amber':'green';}
+function tilePres(v){return v<980?'red':v<1000?'amber':'green';}
+function tileCol(r){return r==='green'?'var(--green)':r==='amber'?'var(--amber)':'var(--red)';}
+
 function renderDash(){
   var c=wxData.current,wind=c.wind_speed_10m||0,gust=c.wind_gusts_10m||0,vis=c.visibility||10000,wmo=c.weather_code||0;
   var info=wmoInfo(wmo),cond=flyRating(wind,gust,vis,wmo);
   var temp=Math.round(c.temperature_2m),feels=Math.round(c.apparent_temperature),cloud=c.cloud_cover||0,hum=c.relative_humidity_2m,pres=Math.round(c.surface_pressure||0);
+  var rWind=tileWind(wind),rGust=tileGust(gust),rVis=tileVis(vis),rCloud=tileCloud(cloud),rHum=tileHum(hum),rPres=tilePres(pres);
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div></div>'+
     '<div class="card" id="kp-card"><div class="card-ttl">Geomagnetic Activity — KP Index</div><div class="skel" style="height:60px;margin-top:4px;"></div></div>'+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+temp+'°C</div><div class="wx-desc">'+info.desc+' &middot; feels '+feels+'°C</div></div></div>'+
     '<div class="wx-grid">'+
-    '<div class="wx-tile"><div class="wx-lbl">Wind</div><div class="wx-val">'+Math.round(wind)+' <span style="font-size:13px;font-weight:400;">km/h</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div></div>'+
-    '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val">'+Math.round(gust)+' <span style="font-size:13px;font-weight:400;">km/h</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div></div>'+
-    '<div class="wx-tile"><div class="wx-lbl">Visibility</div><div class="wx-val">'+(vis>=1000?(vis/1000).toFixed(0):vis)+' <span style="font-size:13px;font-weight:400;">'+(vis>=1000?'km':'m')+'</span></div><div class="wx-sub">'+(vis>=5000?'Good VLOS':'Reduced VLOS')+'</div></div>'+
-    '<div class="wx-tile"><div class="wx-lbl">Cloud Cover</div><div class="wx-val">'+cloud+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(cloud<30?'Clear':cloud<70?'Partial':'Overcast')+'</div></div>'+
-    '<div class="wx-tile"><div class="wx-lbl">Humidity</div><div class="wx-val">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">&nbsp;</div></div>'+
-    '<div class="wx-tile"><div class="wx-lbl">Pressure</div><div class="wx-val" style="font-size:16px;">'+pres+'</div><div class="wx-sub">hPa</div></div>'+
+    '<div class="wx-tile '+rWind+'"><div class="wx-lbl">Wind</div><div class="wx-val wx-val-'+rWind+'">'+Math.round(wind)+' <span style="font-size:13px;font-weight:400;">km/h</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div></div>'+
+    '<div class="wx-tile '+rGust+'"><div class="wx-lbl">Gusts</div><div class="wx-val wx-val-'+rGust+'">'+Math.round(gust)+' <span style="font-size:13px;font-weight:400;">km/h</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div></div>'+
+    '<div class="wx-tile '+rVis+'"><div class="wx-lbl">Visibility</div><div class="wx-val wx-val-'+rVis+'">'+(vis>=1000?(vis/1000).toFixed(0):vis)+' <span style="font-size:13px;font-weight:400;">'+(vis>=1000?'km':'m')+'</span></div><div class="wx-sub">'+(vis>=5000?'Good VLOS':'Reduced VLOS')+'</div></div>'+
+    '<div class="wx-tile '+rCloud+'"><div class="wx-lbl">Cloud Cover</div><div class="wx-val wx-val-'+rCloud+'">'+cloud+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(cloud<30?'Clear':cloud<70?'Partial':'Overcast')+'</div></div>'+
+    '<div class="wx-tile '+rHum+'"><div class="wx-lbl">Humidity</div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div></div>'+
+    '<div class="wx-tile '+rPres+'"><div class="wx-lbl">Pressure</div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div></div>'+
     '</div></div>'+
     '<div class="card"><div class="card-ttl">UK CAA Rules — Quick Guide</div>'+
     '<div class="rule"><div class="rule-ico">📏</div><div><div class="rule-ttl">Max altitude 120m (400ft)</div><div class="rule-body">Do not fly above 120m AGL without special authorisation.</div></div></div>'+
@@ -677,16 +691,9 @@ function renderGolden(){
     tmTile('🌑 Blue Dawn','#818cf8',tm.nautDawn)+tmTile('🌅 Golden Morning','#f59e0b',tm.goldMornS)+
     tmTile('☀️ Sunrise','#f97316',tm.sunrise)+tmTile('🌇 Sunset','#f97316',tm.sunset)+
     tmTile('🌆 Golden Evening','#f59e0b',tm.goldEveS)+tmTile('🌃 Blue Dusk','#818cf8',tm.blueEveS)+
-    '</div></div><div class="card"><div class="card-ttl">Daily Fly Conditions Alert</div>'+
-    '<div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Get a notification every morning at 7am with today\'s flying conditions and golden hour times.</div>'+
-    '<div id="notif-status" style="margin-bottom:8px;font-size:12px;"></div>'+
-    '<button class="notif-btn" onclick="requestNotif()">🔔 Enable Daily Fly Alert</button></div><div style="height:14px;"></div>';
-  updateNotifStatus();
+    '</div></div><div style="height:14px;"></div>';
 }
 
-function updateNotifStatus(){var el=document.getElementById('notif-status');if(!el)return;if(typeof Notification==='undefined'){el.innerHTML='<span style="color:var(--muted);">Notifications not supported.</span>';return;}if(Notification.permission==='granted')el.innerHTML='<span style="color:var(--green);">✓ Daily alerts are enabled.</span>';if(Notification.permission==='denied')el.innerHTML='<span style="color:var(--red);">Notifications blocked — enable in your phone settings.</span>';}
-function requestNotif(){if(typeof Notification==='undefined')return;Notification.requestPermission().then(function(p){updateNotifStatus();if(p==='granted'){scheduleDailyNotif();new Notification('DroneChecker ✓',{body:'Daily fly alerts enabled!',icon:'/icons/icon-192.png'});}});}
-function scheduleDailyNotif(){if(typeof Notification==='undefined'||Notification.permission!=='granted'||!wxData||!uLat)return;var c=wxData.current,cond=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0),t=calcSunTimes(uLat,uLng,new Date()),golden=t.goldEveS?fmtTime(t.goldEveS):'N/A',loc=document.getElementById('loc-name').textContent,now=new Date(),target=new Date();target.setHours(7,0,0,0);if(now>=target)target.setDate(target.getDate()+1);setTimeout(function(){new Notification('DroneChecker — Morning Briefing ☀️',{body:cond.label+' near '+loc+'. Golden hour at '+golden+'.',icon:'/icons/icon-192.png'});scheduleDailyNotif();},target-now);}
 
 function goTab(id,btn){
   var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('on');

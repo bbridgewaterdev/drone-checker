@@ -576,8 +576,10 @@ function renderFc(){
 }
 
 function initWindMap(){
+  var windEl=document.getElementById('wind-display');
+  if(!windEl)return;
   if(!wxData||!wxData.current){
-    document.getElementById('wind-display').innerHTML='<div class="loading"><div class="spin"></div><p>Waiting for weather data...</p></div>';
+    windEl.innerHTML='<div class="loading"><div class="spin"></div><p>Search for a location to see wind data.</p></div>';
     return;
   }
   var c=wxData.current;
@@ -602,7 +604,7 @@ function initWindMap(){
     '</div>';
     count++;
   }
-  document.getElementById('wind-display').innerHTML=
+  windEl.innerHTML=
     '<div style="display:flex;flex-direction:column;align-items:center;padding:28px 16px 16px;">'+
       '<div style="position:relative;width:200px;height:200px;margin-bottom:20px;">'+
         '<svg width="200" height="200" viewBox="0 0 200 200">'+

@@ -35,7 +35,7 @@
     #splash p{font-size:14px;color:var(--muted);}
     .header{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
     .h-title{font-size:17px;font-weight:600;}
-    .h-loc{margin-left:auto;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .h-loc{margin-left:auto;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:flex-end;overflow:hidden;}
     .body-area{flex:1;overflow:hidden;display:flex;flex-direction:column;}
     .tabs{flex:1;overflow:hidden;position:relative;}
     .tab{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:8px;}
@@ -85,11 +85,6 @@
     .wx-icon{font-size:52px;line-height:1;}
     .wx-temp{font-size:56px;font-weight:700;line-height:1;letter-spacing:-2px;}
     .wx-desc{font-size:13px;color:var(--muted);margin-top:4px;padding-bottom:6px;}
-    .rule{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;}
-    .rule:last-child{margin-bottom:0;}
-    .rule-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
-    .rule-ttl{font-size:13px;font-weight:600;margin-bottom:3px;}
-    .rule-body{font-size:12px;color:var(--muted);line-height:1.5;}
     .kp-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
     .kp-num{font-size:36px;font-weight:700;line-height:1;}
     .kp-lbl{font-size:15px;font-weight:600;margin-bottom:3px;}
@@ -133,6 +128,11 @@
     .gh-tmrw-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;}
     .gh-tmrw-val{font-size:14px;font-weight:600;}
     .nats-card{display:flex;align-items:center;gap:14px;}
+    .rule{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;}
+    .rule:last-child{margin-bottom:0;}
+    .rule-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .rule-ttl{font-size:13px;font-weight:600;margin-bottom:3px;}
+    .rule-body{font-size:12px;color:var(--muted);line-height:1.5;}
     .nats-card a{background:var(--accent);color:#fff;border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;}
     .skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:var(--radius-sm);}
     @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
@@ -143,6 +143,28 @@
     @keyframes sp{to{transform:rotate(360deg);}}
     .loading p{font-size:13px;color:var(--muted);}
     .err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-sm);padding:14px;margin:12px;font-size:13px;color:var(--red);line-height:1.6;}
+    .unit-toggle{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 10px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+    .unit-toggle.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .fav-bar{display:none;padding:6px 12px 8px;gap:8px;flex-wrap:wrap;align-items:center;background:var(--bg2);border-bottom:1px solid var(--border);}
+    .fav-bar.show{display:flex;}
+    .fav-lbl{font-size:11px;color:var(--muted);white-space:nowrap;}
+    .fav-pill{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text);cursor:pointer;white-space:nowrap;font-family:inherit;}
+    .fav-pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+    .fav-pill-del{background:none;border:none;color:var(--muted);cursor:pointer;padding:0 0 0 4px;font-size:14px;line-height:1;font-family:inherit;}
+    .fav-add{background:none;border:1px dashed var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit;}
+    .week-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:12px 12px 0;}
+    .week-best-badge{display:inline-block;background:rgba(34,197,94,.15);color:var(--green);font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+    .week-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+    .week-row:last-child{border-bottom:none;}
+    .week-row.best-day{background:rgba(34,197,94,.07);border-radius:var(--radius-sm);padding:9px 8px;margin:0 -8px;border-bottom:none;}
+    .week-day{font-size:13px;font-weight:600;width:38px;flex-shrink:0;}
+    .week-emoji{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+    .week-info{flex:1;font-size:12px;color:var(--muted);}
+    .week-wind{font-size:12px;color:var(--muted);width:56px;text-align:right;flex-shrink:0;}
+    .week-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .log-empty{display:none;}
+    .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--bg3);color:var(--text);padding:10px 18px;border-radius:20px;font-size:13px;z-index:9999;border:1px solid var(--border);white-space:nowrap;pointer-events:none;transition:opacity .3s;}
+    .myloc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted);white-space:nowrap;flex-shrink:0;}
     @media(min-width:700px){
       .body-area{flex-direction:row;overflow:hidden;}
       .nav{flex-direction:column;width:180px;height:auto;border-top:none;border-right:1px solid var(--border);padding:16px 0;justify-content:flex-start;flex-shrink:0;}
@@ -202,8 +224,14 @@
     </svg>
     <span class="h-title">DroneChecker</span>
     <span class="h-loc">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span id="loc-name">Locating...</span>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="loc-name">Locating...</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:1px;">
+        <span id="updated-txt" style="font-size:10px;color:var(--muted);">—</span>
+        <button onclick="fetchAll()" style="background:none;border:none;color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;line-height:1;">↻ Refresh</button>
+      </div>
     </span>
   </div>
 
@@ -250,11 +278,15 @@
             </optgroup>
           </select>
           <span class="drone-limits" id="drone-limits"></span>
+          <button class="unit-toggle" id="unit-toggle" onclick="toggleUnits()">mph</button>
         </div>
         <div class="search">
           <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. LS1 or Leeds" onkeydown="if(event.key==='Enter')doSearch()"/>
           <button onclick="doSearch()">&#x1F50D; Search</button>
+          <button class="myloc-btn" onclick="useMyLocation()" title="Use my location">📍</button>
+          <button onclick="toggleFavCurrent()" id="fav-btn" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0;">☆</button>
         </div>
+        <div class="fav-bar" id="fav-bar"></div>
         <div class="serr" id="serr"></div>
         <div class="offline-bar" id="offline-bar">⚡ Offline — showing cached data &bull; <span id="offline-age"></span></div>
         <div id="dash">
@@ -347,7 +379,7 @@ var DRONES={
 var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,useImperial=false,lastUpdated=null;
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
 function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])selectedDrone=s;}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;updateDroneLimits();}
 function saveDrone(){var sel=document.getElementById('drone-sel');if(!sel)return;selectedDrone=sel.value;try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}updateDroneLimits();if(wxData)renderDash();}
@@ -384,7 +416,20 @@ function renderChecklist(){
     if(item.section){html+='<div class="cl-section-hdr">'+item.section+'</div>';}
     else{var c=!!clState[item.id];html+='<div class="cl-item" onclick="toggleCheck(\''+item.id+'\')"><div class="cl-box'+(c?' checked':'')+'"><svg class="cl-tick" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3"/></svg></div><span class="cl-label'+(c?' checked':'')+'">'+item.label+'</span></div>';}
   });
-  html+='<button class="cl-reset" onclick="resetChecklist()">&#x21BA; Reset checklist</button></div><div style="height:14px;"></div>';
+  html+='<button class="cl-reset" onclick="resetChecklist()">&#x21BA; Reset checklist</button></div>'+
+  '<div class="card">'+
+  '<div class="card-ttl">UK CAA Rules — Quick Guide</div>'+
+  '<div class="rule"><div class="rule-ico">📏</div><div><div class="rule-ttl">Max altitude 120m (400ft)</div><div class="rule-body">Do not fly above 120m AGL without special authorisation.</div></div></div>'+
+  '<div class="rule"><div class="rule-ico">👁️</div><div><div class="rule-ttl">Visual line of sight always</div><div class="rule-body">Keep your drone in sight at all times. Max ~500m recommended.</div></div></div>'+
+  '<div class="rule"><div class="rule-ico">✈️</div><div><div class="rule-ttl">5km from airports</div><div class="rule-body">Never fly within the Flight Restriction Zone. Check the CAA website for airspace information before every flight.</div></div></div>'+
+  '<div class="rule"><div class="rule-ico">🪪</div><div><div class="rule-ttl">CAA registration required</div><div class="rule-body">Drones over 100g with a camera need an Operator ID (£12.34/year). A free Flyer ID is also required for drones over 100g.</div></div></div>'+
+  '</div>'+
+  '<div class="card" style="margin-bottom:0;">'+
+  '<div class="card-ttl">Official Resources</div>'+
+  '<a href="https://www.caa.co.uk/drones" target="_blank" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;text-decoration:none;">'+
+  '<div><div style="font-size:13px;font-weight:600;color:var(--text);">🪪 CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Official UK rules, registration and guidance</div></div>'+
+  '<span style="color:var(--accent);font-size:13px;font-weight:600;flex-shrink:0;">Open →</span></a>'+
+  '</div><div style="height:14px;"></div>';
   document.getElementById('cl-body').innerHTML=html;
 }
 
@@ -440,6 +485,105 @@ function fmtTime(d){return pad(d.getHours())+':'+pad(d.getMinutes());}
 
 var DRONE_SVG='<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>';
 
+// ---- UNITS ----
+function loadUnits(){try{useImperial=localStorage.getItem('dc_units')==='imperial';}catch(e){}updateUnitToggle();}
+function saveUnits(){try{localStorage.setItem('dc_units',useImperial?'imperial':'metric');}catch(e){}}
+function toggleUnits(){useImperial=!useImperial;saveUnits();updateUnitToggle();if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))initWindMap();}}
+function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;btn.textContent=useImperial?'mph ⇄':'km/h ⇄';btn.title=useImperial?'Switch to metric':'Switch to imperial';}
+function spd(v){return useImperial?Math.round(v*0.621):Math.round(v);}
+function spdU(){return useImperial?'mph':'km/h';}
+function tmp(v){return useImperial?Math.round(v*9/5+32):Math.round(v);}
+function tmpU(){return useImperial?'°F':'°C';}
+function visDisp(v){if(useImperial){if(v>=1609)return{val:(v/1609.34).toFixed(1),unit:'mi'};return{val:Math.round(v*3.281),unit:'ft'};}if(v>=1000)return{val:(v/1000).toFixed(0),unit:'km'};return{val:v,unit:'m'};}
+
+// ---- TOAST ----
+function showToast(msg){
+  var old=document.querySelector('.toast');if(old)old.remove();
+  var t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';setTimeout(function(){if(t.parentNode)t.remove();},300);},2200);
+}
+
+// ---- USE MY LOCATION ----
+function useMyLocation(){
+  document.getElementById('loc-inp').value='';
+  document.getElementById('serr').style.display='none';
+  document.getElementById('dash').innerHTML='<div class="skel skel-cond"></div><div class="skel skel-card"></div>';
+  showToast('Finding your location...');
+  if(!navigator.geolocation){showToast('Location not supported');return;}
+  navigator.geolocation.getCurrentPosition(
+    function(p){uLat=p.coords.latitude;uLng=p.coords.longitude;revGeo();fetchAll();},
+    function(){showToast('Could not get location');}
+  );
+}
+
+// ---- FAVOURITES ----
+function loadFavs(){try{return JSON.parse(localStorage.getItem('dc_favs'))||[];}catch(e){return[];}}
+function saveFavs(favs){try{localStorage.setItem('dc_favs',JSON.stringify(favs));}catch(e){}}
+function toggleFavCurrent(){
+  if(!uLat||!uLng)return;
+  var name=document.getElementById('loc-name').textContent;
+  if(name==='Locating...'||name==='London (default)')return;
+  var favs=loadFavs();
+  var idx=favs.findIndex(function(f){return f.name===name;});
+  if(idx>=0){favs.splice(idx,1);showToast('Removed from favourites');}
+  else{if(favs.length>=8)favs.shift();favs.push({name:name,lat:uLat,lng:uLng});showToast('⭐ '+name+' saved');}
+  saveFavs(favs);renderFavBar();
+}
+function renderFavBar(){
+  var favs=loadFavs();
+  var bar=document.getElementById('fav-bar');
+  var btn=document.getElementById('fav-btn');
+  if(!bar||!btn)return;
+  var curName=document.getElementById('loc-name').textContent;
+  var isFav=favs.some(function(f){return f.name===curName;});
+  btn.textContent=isFav?'★':'☆';
+  btn.style.color=isFav?'var(--amber)':'var(--muted)';
+  if(!favs.length){bar.classList.remove('show');return;}
+  bar.classList.add('show');
+  bar.innerHTML='<span class="fav-lbl">Saved:</span>';
+  favs.forEach(function(f){
+    var active=f.name===curName;
+    bar.innerHTML+='<button class="fav-pill'+(active?' active':'')+'" onclick="loadFav(\''+encodeURIComponent(f.name)+'\','+f.lat+','+f.lng+')">'+f.name+'</button>';
+  });
+}
+function loadFav(name,lat,lng){
+  uLat=lat;uLng=lng;
+  document.getElementById('loc-name').textContent=decodeURIComponent(name);
+  renderFavBar();fetchAll();
+}
+
+// ---- WEEK PLANNER ----
+function renderWeekPlanner(daily){
+  if(!daily||!daily.time)return'';
+  var bestIdx=1,bestScore=-1;
+  for(var i=1;i<daily.time.length&&i<=7;i++){
+    var r=fcRating(daily.wind_speed_10m_max[i]||0,daily.wind_gusts_10m_max[i]||0,10000,daily.weather_code[i]);
+    var score=r==='green'?2:r==='amber'?1:0;
+    var gust=daily.wind_gusts_10m_max[i]||0;
+    if(score>bestScore||(score===bestScore&&gust<(daily.wind_gusts_10m_max[bestIdx]||999))){bestScore=score;bestIdx=i;}
+  }
+  var rows='';
+  for(var j=1;j<daily.time.length&&j<=7;j++){
+    var date=new Date(daily.time[j]);
+    var dayLbl=date.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+    var dWmo=daily.weather_code[j],dInfo=wmoInfo(dWmo);
+    var dMax=tmp(Math.round(daily.temperature_2m_max[j])),dMin=tmp(Math.round(daily.temperature_2m_min[j]));
+    var dWind=spd(daily.wind_speed_10m_max[j]||0),dGust=spd(daily.wind_gusts_10m_max[j]||0);
+    var dr=fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo);
+    var dotCol=dr==='green'?'var(--green)':dr==='amber'?'var(--amber)':'var(--red)';
+    var isBest=j===bestIdx;
+    rows+='<div class="week-row'+(isBest?' best-day':'')+'">'+
+      '<div class="week-day">'+dayLbl.split(' ')[0]+'<div style="font-size:10px;color:var(--muted);font-weight:400;">'+dayLbl.split(' ').slice(1).join(' ')+'</div></div>'+
+      '<div class="week-emoji">'+dInfo.emoji+'</div>'+
+      '<div class="week-info">'+dMin+tmpU()+' / '+dMax+tmpU()+'<div style="color:var(--muted);">'+dInfo.desc+'</div></div>'+
+      '<div class="week-wind">'+dWind+' '+spdU()+'<div style="font-size:11px;">gust '+dGust+'</div></div>'+
+      '<div class="week-dot" style="background:'+dotCol+';">'+(isBest?'':'')+'</div>'+
+      (isBest?'<div style="font-size:10px;font-weight:600;color:var(--green);flex-shrink:0;">BEST</div>':'')+'</div>';
+  }
+  return'<div class="week-card"><div class="card-ttl">Best Day to Fly — Next 7 Days</div>'+rows+'</div>';
+}
+
 function getLoc(){
   if(!navigator.geolocation){setLoc(51.5074,-0.1278,'London (default)');return;}
   navigator.geolocation.getCurrentPosition(
@@ -447,11 +591,11 @@ function getLoc(){
     function(){setLoc(51.5074,-0.1278,'London (default)');}
   );
 }
-function setLoc(lat,lng,name){uLat=lat;uLng=lng;document.getElementById('loc-name').textContent=name;fetchAll();}
+function setLoc(lat,lng,name){uLat=lat;uLng=lng;document.getElementById('loc-name').textContent=name;renderFavBar();fetchAll();}
 function revGeo(){
   fetch('https://nominatim.openstreetmap.org/reverse?lat='+uLat+'&lon='+uLng+'&format=json')
     .then(function(r){return r.json();})
-    .then(function(d){var a=d.address;document.getElementById('loc-name').textContent=(a&&(a.city||a.town||a.village||a.county))||'Your Location';})
+    .then(function(d){var a=d.address;document.getElementById('loc-name').textContent=(a&&(a.city||a.town||a.village||a.county))||'Your Location';renderFavBar();})
     .catch(function(){});
 }
 function isPostcode(q){return /^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/i.test(q)||/^[A-Z]{1,2}\d{1,2}[A-Z]?$/i.test(q);}
@@ -484,36 +628,45 @@ function fetchAll(){
     '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,surface_pressure,visibility,cloud_cover'+
     '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility'+
     '&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max'+
-    '&wind_speed_unit=kmh&timezone=Europe%2FLondon&forecast_days=6';
+    '&wind_speed_unit=kmh&timezone=Europe%2FLondon&forecast_days=8';
   var cached=loadWxCache();
   if(cached){wxData=cached.data;hideSplash();renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}
-  fetchWithTimeout(url,8000)
-    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
-    .then(function(data){wxData=data;saveWxCache(data);hideOfflineBanner();hideSplash();renderDash();renderFc();renderGolden();setTimeout(fetchKp,100);if(typeof Notification!=='undefined'&&Notification.permission==='granted')scheduleDailyNotif();})
-    .catch(function(){hideSplash();if(!wxData)document.getElementById('dash').innerHTML='<div class="err">No internet connection and no cached data. Please connect to load weather.</div>';});
+  Promise.all([
+    fetchWithTimeout(url,8000),
+    fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json').catch(function(){return null;})
+  ])
+  .then(function(results){
+    if(!results[0].ok)throw new Error('HTTP '+results[0].status);
+    return Promise.all([results[0].json(),results[1]?results[1].json().catch(function(){return null;}):Promise.resolve(null)]);
+  })
+  .then(function(data){
+    wxData=data[0];lastUpdated=new Date();saveWxCache(wxData);hideOfflineBanner();hideSplash();
+    if(data[1]){var latest=data[1][data[1].length-1];currentKp=parseFloat(latest.kp_index||latest.Kp||0);}
+    renderDash();renderFc();renderGolden();
+  })
+  .catch(function(){
+    hideSplash();
+    if(!wxData)document.getElementById('dash').innerHTML=
+      '<div class="err">No internet connection and no cached data available.<br><br>'+
+      '<button onclick="fetchAll()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
+  });
 }
 
 function hideSplash(){var s=document.getElementById('splash');if(s){s.classList.add('hidden');setTimeout(function(){s.style.display='none';},300);}}
 
-function fetchKp(){
-  fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var latest=d[d.length-1],kp=parseFloat(latest.kp_index||latest.Kp||0);
-      currentKp=kp;
-      if(wxData)renderDash();
-      var lvl,label,emoji,desc;
-      if(kp<2){lvl='green';label='Quiet';emoji='🟢';desc='Calm conditions. No impact on GPS or compass.';}
-      else if(kp<4){lvl='green';label='Unsettled';emoji='🟢';desc='Minor activity. Negligible impact on drone systems.';}
-      else if(kp<5){lvl='amber';label='Active';emoji='🟡';desc='Possible minor compass drift — fly with care.';}
-      else if(kp<6){lvl='amber';label='Minor Storm (G1)';emoji='🟡';desc='G1 storm. GPS accuracy may be reduced.';}
-      else if(kp<7){lvl='red';label='Moderate Storm (G2)';emoji='🔴';desc='GPS and compass unreliable. Avoid GPS-dependent modes.';}
-      else{lvl='red';label='Severe Storm (G3+)';emoji='🔴';desc='Do not fly — high risk of GPS failure and flyaway.';}
-      var col=lvl==='green'?'var(--green)':lvl==='amber'?'var(--amber)':'var(--red)';
-      var bar=Math.min(Math.round((kp/9)*100),100);
-      var card=document.getElementById('kp-card');if(!card)return;
-      card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div class="kp-row"><div class="kp-num" style="color:'+col+';">'+kp.toFixed(1)+'</div><div><div class="kp-lbl" style="color:'+col+';">'+emoji+' '+label+'</div><div class="kp-desc">'+desc+'</div></div></div><div class="kp-bar-bg"><div class="kp-bar" style="width:'+bar+'%;background:'+col+';"></div></div><div class="kp-scale"><span>0 — Quiet</span><span>4 — Storm</span><span>9 — Extreme</span></div>';
-    }).catch(function(){var card=document.getElementById('kp-card');if(card)card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div style="font-size:12px;color:var(--muted);">Could not load KP data.</div>';});
+function renderKpCard(){
+  var kp=currentKp;
+  var lvl,label,emoji,desc;
+  if(kp<2){lvl='green';label='Quiet';emoji='🟢';desc='Calm conditions. No impact on GPS or compass.';}
+  else if(kp<4){lvl='green';label='Unsettled';emoji='🟢';desc='Minor activity. Negligible impact on drone systems.';}
+  else if(kp<5){lvl='amber';label='Active';emoji='🟡';desc='Possible minor compass drift — fly with care.';}
+  else if(kp<6){lvl='amber';label='Minor Storm (G1)';emoji='🟡';desc='G1 storm. GPS accuracy may be reduced.';}
+  else if(kp<7){lvl='red';label='Moderate Storm (G2)';emoji='🔴';desc='GPS and compass unreliable. Avoid GPS-dependent modes.';}
+  else{lvl='red';label='Severe Storm (G3+)';emoji='🔴';desc='Do not fly — high risk of GPS failure and flyaway.';}
+  var col=lvl==='green'?'var(--green)':lvl==='amber'?'var(--amber)':'var(--red)';
+  var bar=Math.min(Math.round((kp/9)*100),100);
+  var card=document.getElementById('kp-card');if(!card)return;
+  card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div class="kp-row"><div class="kp-num" style="color:'+col+';">'+kp.toFixed(1)+'</div><div><div class="kp-lbl" style="color:'+col+';">'+emoji+' '+label+'</div><div class="kp-desc">'+desc+'</div></div></div><div class="kp-bar-bg"><div class="kp-bar" style="width:'+bar+'%;background:'+col+';"></div></div><div class="kp-scale"><span>0 — Quiet</span><span>4 — Storm</span><span>9 — Extreme</span></div>';
 }
 
 function tileWind(v){var d=getDrone();return v>=d.windRed?'red':v>=d.windAmber?'amber':'green';}
@@ -529,24 +682,21 @@ function renderDash(){
   var info=wmoInfo(wmo),cond=flyRating(wind,gust,vis,wmo);
   var temp=Math.round(c.temperature_2m),feels=Math.round(c.apparent_temperature),cloud=c.cloud_cover||0,hum=c.relative_humidity_2m,pres=Math.round(c.surface_pressure||0);
   var rWind=tileWind(wind),rGust=tileGust(gust),rVis=tileVis(vis),rCloud=tileCloud(cloud),rHum=tileHum(hum),rPres=tilePres(pres);
+  var vDisp=visDisp(vis);
+  var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Just updated';
+  var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div></div>'+
-    '<div class="card" id="kp-card"><div class="card-ttl">Geomagnetic Activity — KP Index</div><div class="skel" style="height:60px;margin-top:4px;"></div></div>'+
-    '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+temp+'°C</div><div class="wx-desc">'+info.desc+' &middot; feels '+feels+'°C</div></div></div>'+
+    '<div class="card" id="kp-card"></div>'+
+    '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tmp(temp)+tmpU()+'</div><div class="wx-desc">'+info.desc+' &middot; feels '+tmp(feels)+tmpU()+'</div></div></div>'+
     '<div class="wx-grid">'+
-    '<div class="wx-tile '+rWind+'"><div class="wx-lbl">Wind</div><div class="wx-val wx-val-'+rWind+'">'+Math.round(wind)+' <span style="font-size:13px;font-weight:400;">km/h</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div></div>'+
-    '<div class="wx-tile '+rGust+'"><div class="wx-lbl">Gusts</div><div class="wx-val wx-val-'+rGust+'">'+Math.round(gust)+' <span style="font-size:13px;font-weight:400;">km/h</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div></div>'+
-    '<div class="wx-tile '+rVis+'"><div class="wx-lbl">Visibility</div><div class="wx-val wx-val-'+rVis+'">'+(vis>=1000?(vis/1000).toFixed(0):vis)+' <span style="font-size:13px;font-weight:400;">'+(vis>=1000?'km':'m')+'</span></div><div class="wx-sub">'+(vis>=5000?'Good VLOS':'Reduced VLOS')+'</div></div>'+
+    '<div class="wx-tile '+rWind+'"><div class="wx-lbl">Wind</div><div class="wx-val wx-val-'+rWind+'">'+spd(wind)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div></div>'+
+    '<div class="wx-tile '+rGust+'"><div class="wx-lbl">Gusts</div><div class="wx-val wx-val-'+rGust+'">'+spd(gust)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div></div>'+
+    '<div class="wx-tile '+rVis+'"><div class="wx-lbl">Visibility</div><div class="wx-val wx-val-'+rVis+'">'+vDisp.val+' <span style="font-size:13px;font-weight:400;">'+vDisp.unit+'</span></div><div class="wx-sub">'+(vis>=5000?'Good VLOS':'Reduced VLOS')+'</div></div>'+
     '<div class="wx-tile '+rCloud+'"><div class="wx-lbl">Cloud Cover</div><div class="wx-val wx-val-'+rCloud+'">'+cloud+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(cloud<30?'Clear':cloud<70?'Partial':'Overcast')+'</div></div>'+
     '<div class="wx-tile '+rHum+'"><div class="wx-lbl">Humidity</div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div></div>'+
     '<div class="wx-tile '+rPres+'"><div class="wx-lbl">Pressure</div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div></div>'+
     '</div></div>'+
-    '<div class="card"><div class="card-ttl">UK CAA Rules — Quick Guide</div>'+
-    '<div class="rule"><div class="rule-ico">📏</div><div><div class="rule-ttl">Max altitude 120m (400ft)</div><div class="rule-body">Do not fly above 120m AGL without special authorisation.</div></div></div>'+
-    '<div class="rule"><div class="rule-ico">👁️</div><div><div class="rule-ttl">Visual line of sight always</div><div class="rule-body">Keep your drone in sight at all times. Max ~500m recommended.</div></div></div>'+
-    '<div class="rule"><div class="rule-ico">✈️</div><div><div class="rule-ttl">5km from airports</div><div class="rule-body">Never fly within the FRZ. Check NATS Drone Assist before every flight.</div></div></div>'+
-    '<div class="rule"><div class="rule-ico">🪪</div><div><div class="rule-ttl">CAA registration required</div><div class="rule-body">Drones over 100g with a camera need an Operator ID (£12.34/year). A free Flyer ID is also required for drones over 100g.</div></div></div>'+
-    '</div>'+
     '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank">Open →</a></div></div>'+
     '<div style="margin:20px 12px 0;padding:16px;border-top:1px solid var(--border);text-align:center;">'+
     (!isIOS?'<a href="https://play.google.com/store/apps/details?id=uk.co.dronechecker.twa" target="_blank" style="display:inline-block;margin-bottom:16px;"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height:48px;"/></a>':'')+
@@ -569,27 +719,30 @@ function renderDash(){
     '<span style="font-size:12px;color:var(--border);">|</span>'+
     '<a href="mailto:bbridgewater.dev@gmail.com" style="font-size:12px;color:var(--muted);text-decoration:none;">Contact</a>'+
     '</div></div><div style="height:14px;"></div>';
+  renderKpCard();
+}
+
+function timeSince(date){
+  var mins=Math.floor((new Date()-date)/60000);
+  if(mins<1)return'just now';
+  if(mins<60)return mins+' min'+(mins!==1?'s':'')+' ago';
+  var hrs=Math.floor(mins/60);return hrs+' hr'+(hrs!==1?'s':'')+' ago';
 }
 
 function renderFc(){
   if(!wxData||!wxData.hourly)return;
   var hours=wxData.hourly,now=new Date(),rows='',count=0;
-  for(var i=0;i<hours.time.length&&count<8;i++){
+  for(var i=0;i<hours.time.length&&count<24;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
     var wmo=hours.weather_code[i],info=wmoInfo(wmo),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
-    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C</div><div class="fc-desc">'+info.desc+'</div><div class="fc-wind">'+Math.round(wind)+' km/h</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo)+'"></div></div>';
+    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+tmp(temp)+tmpU()+'</div><div class="fc-desc">'+info.desc+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo)+'"></div></div>';
     count++;
-  }
-  var daily=wxData.daily,dayRows='';
-  for(var j=1;j<Math.min(daily.time.length,6);j++){
-    var date=new Date(daily.time[j]),dayLbl=date.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
-    var dWmo=daily.weather_code[j],dInfo=wmoInfo(dWmo),dMax=Math.round(daily.temperature_2m_max[j]),dMin=Math.round(daily.temperature_2m_min[j]);
-    dayRows+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);"><div style="width:90px;font-size:13px;font-weight:600;">'+dayLbl+'</div><div style="font-size:20px;width:26px;text-align:center;">'+dInfo.emoji+'</div><div style="flex:1;font-size:12px;color:var(--muted);">'+dMin+'° / '+dMax+'°C</div><div class="fc-dot '+fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo)+'" style="width:11px;height:11px;"></div></div>';
   }
   document.getElementById('fc-body').innerHTML=
     '<div class="card"><div class="card-ttl">Next 24 Hours</div>'+rows+
     '<div style="display:flex;gap:16px;margin-top:10px;font-size:12px;"><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot green" style="display:inline-block;"></div><span style="color:var(--muted);">Good</span></div><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot amber" style="display:inline-block;"></div><span style="color:var(--muted);">Caution</span></div><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot red" style="display:inline-block;"></div><span style="color:var(--muted);">Avoid</span></div></div></div>'+
-    '<div class="card"><div class="card-ttl">5-Day Overview</div><div style="padding:0 4px;">'+dayRows+'</div></div><div style="height:14px;"></div>';
+    renderWeekPlanner(wxData.daily)+
+    '<div style="height:14px;"></div>';
 }
 
 function initWindMap(){
@@ -600,23 +753,24 @@ function initWindMap(){
     return;
   }
   var c=wxData.current;
-  var wind=Math.round(c.wind_speed_10m||0);
-  var gust=Math.round(c.wind_gusts_10m||0);
+  var wind=spd(c.wind_speed_10m||0);
+  var gust=spd(c.wind_gusts_10m||0);
   var deg=c.wind_direction_10m||0;
   var d=getDrone();
-  var col=wind>=d.windRed?'var(--red)':wind>=d.windAmber?'var(--amber)':'var(--green)';
-  var label=wind>=d.windRed?'Too Strong':wind>=d.windAmber?'Caution':'Flyable';
+  var rawWind=c.wind_speed_10m||0;
+  var col=rawWind>=d.windRed?'var(--red)':rawWind>=d.windAmber?'var(--amber)':'var(--green)';
+  var label=rawWind>=d.windRed?'Too Strong':rawWind>=d.windAmber?'Caution':'Flyable';
   var dirStr=dirLabel(deg);
   var hours=wxData.hourly,now=new Date(),fcRows='',count=0;
   for(var i=0;i<hours.time.length&&count<8;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
-    var hw=Math.round(hours.wind_speed_10m[i]||0);
-    var hg=Math.round(hours.wind_gusts_10m[i]||0);
-    var hr=fcRating(hw,hg,10000,0);
+    var hw=spd(hours.wind_speed_10m[i]||0);
+    var hg=spd(hours.wind_gusts_10m[i]||0);
+    var hr=fcRating(hours.wind_speed_10m[i]||0,hours.wind_gusts_10m[i]||0,10000,0);
     var hcol=hr==='red'?'var(--red)':hr==='amber'?'var(--amber)':'var(--green)';
     fcRows+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">'+
       '<div style="width:46px;font-size:13px;font-weight:600;">'+pad(t.getHours())+':00</div>'+
-      '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:'+hcol+';">'+hw+' km/h</div><div style="font-size:11px;color:var(--muted);">Gusts '+hg+' km/h</div></div>'+
+      '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:'+hcol+';">'+hw+' '+spdU()+'</div><div style="font-size:11px;color:var(--muted);">Gusts '+hg+' '+spdU()+'</div></div>'+
       '<div style="width:10px;height:10px;border-radius:50%;background:'+hcol+';flex-shrink:0;"></div>'+
     '</div>';
     count++;
@@ -642,14 +796,14 @@ function initWindMap(){
         '</svg>'+
       '</div>'+
       '<div style="font-size:52px;font-weight:700;color:'+col+';line-height:1;">'+wind+'</div>'+
-      '<div style="font-size:14px;color:var(--muted);margin-bottom:6px;">km/h</div>'+
+      '<div style="font-size:14px;color:var(--muted);margin-bottom:6px;">'+spdU()+'</div>'+
       '<div style="font-size:20px;font-weight:600;color:'+col+';margin-bottom:4px;">'+label+'</div>'+
       '<div style="font-size:13px;color:var(--muted);">From the '+dirStr+' &middot; '+deg+'°</div>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 12px 12px;">'+
-      '<div class="wx-tile"><div class="wx-lbl">Wind</div><div class="wx-val" style="font-size:20px;">'+wind+'</div><div class="wx-sub">km/h</div></div>'+
-      '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val" style="font-size:20px;">'+gust+'</div><div class="wx-sub">km/h</div></div>'+
-      '<div class="wx-tile"><div class="wx-lbl">Knots</div><div class="wx-val" style="font-size:20px;">'+(wind*0.54).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Wind</div><div class="wx-val" style="font-size:20px;">'+wind+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val" style="font-size:20px;">'+gust+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Knots</div><div class="wx-val" style="font-size:20px;">'+(spd(rawWind)*0.54/0.621).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
     '</div>'+
     '<div class="card"><div class="card-ttl">Hourly Wind Forecast</div>'+fcRows+'</div>'+
     '<div style="height:14px;"></div>';
@@ -706,7 +860,7 @@ function goTab(id,btn){
 }
 
 window.addEventListener('load',function(){
-  loadDrone();loadChecklist();
+  loadDrone();loadChecklist();loadUnits();renderFavBar();
   var cached=loadWxCache();
   if(cached){wxData=cached.data;renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}
   getLoc();

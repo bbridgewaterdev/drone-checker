@@ -870,7 +870,8 @@ function getLoc(){
   if(!navigator.geolocation){setLoc(51.5074,-0.1278,'London (default)');return;}
   navigator.geolocation.getCurrentPosition(
     function(p){uLat=p.coords.latitude;uLng=p.coords.longitude;fetchAll();revGeo();},
-    function(){setLoc(51.5074,-0.1278,'London (default)');}
+    function(){setLoc(51.5074,-0.1278,'London (default)');},
+    {timeout:10000,maximumAge:300000}
   );
 }
 function setLoc(lat,lng,name){uLat=lat;uLng=lng;document.getElementById('loc-name').textContent=name;renderFavBar();fetchAll();}
@@ -1163,9 +1164,11 @@ window.addEventListener('load',function(){
   checkDisclaimer();
   loadDrone();loadChecklist();loadUnits();renderFavBar();
   var cached=loadWxCache();
-  if(cached){wxData=cached.data;renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}
+  if(cached){wxData=cached.data;hideSplash();renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}
   getLoc();
   startIntervals();
+  // Safety net — force hide splash after 12 seconds no matter what
+  setTimeout(function(){hideSplash();},5000);
 });
 </script>
 <script>

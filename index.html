@@ -220,43 +220,6 @@
   </style>
 </head>
 <body>
-<!-- WHAT'S NEW MODAL -->
-<div class="disclaimer-overlay" id="whatsnew-overlay" style="display:none;">
-  <div class="disclaimer-sheet">
-    <div class="disclaimer-icon">
-      <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
-        <rect width="100" height="100" rx="20" fill="#0f172a"/>
-        <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
-        <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
-        <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
-        <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
-        <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
-        <circle cx="50" cy="50" r="11" fill="white"/>
-        <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
-      </svg>
-    </div>
-    <div class="disclaimer-title">What's new in v<span id="wn-version"></span></div>
-    <div class="disclaimer-sub">Here's what we've added and improved</div>
-    <div class="disclaimer-box" style="text-align:left;">
-      🟢 <strong>Fly rating</strong> — wind, weather, KP geomagnetic index all factored in<br><br>
-      📅 <strong>7-day planner</strong> — see the best day to fly this week<br><br>
-      🌅 <strong>Golden hour</strong> — precise calculator with live countdowns<br><br>
-      ⭐ <strong>Favourite locations</strong> — save your regular flying spots<br><br>
-      ✈️ <strong>Flight logger</strong> — log flights and export to Excel<br><br>
-      🔄 <strong>Imperial units</strong> — toggle between km/h and mph<br><br>
-      📤 <strong>Share conditions</strong> — share flying conditions with other pilots
-    </div>
-    <button class="disclaimer-btn ready" onclick="dismissWhatsNew()">Let's fly 🚁</button>
-  </div>
-</div>
   <div class="disclaimer-sheet">
     <div class="disclaimer-icon">
       <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
@@ -860,25 +823,7 @@ function acceptDisclaimer(){
   setTimeout(function(){
     overlay.style.display='none';
     overlay.style.opacity='1';
-    checkWhatsNew();
   },350);
-}
-
-// ---- WHAT'S NEW ----
-function checkWhatsNew(){
-  try{if(localStorage.getItem('dc_seen_version')===APP_VERSION)return;}catch(e){return;}
-  setTimeout(function(){
-    var el=document.getElementById('wn-version');if(el)el.textContent=APP_VERSION;
-    var overlay=document.getElementById('whatsnew-overlay');
-    if(overlay)overlay.style.display='flex';
-  },600);
-}
-function dismissWhatsNew(){
-  try{localStorage.setItem('dc_seen_version',APP_VERSION);}catch(e){}
-  var overlay=document.getElementById('whatsnew-overlay');
-  if(!overlay)return;
-  overlay.style.opacity='0';overlay.style.transition='opacity .3s';
-  setTimeout(function(){overlay.style.display='none';},300);
 }
 
 // ---- SHARE CONDITIONS ----
@@ -1203,7 +1148,6 @@ window.addEventListener('load',function(){
   if(cached){wxData=cached.data;renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}
   getLoc();
   startIntervals();
-  try{if(localStorage.getItem('dc_disclaimer')==='accepted')checkWhatsNew();}catch(e){}
 });
 </script>
 <script>

@@ -30,7 +30,7 @@
       --radius:14px;--radius-sm:9px;
     }
     #app{height:100svh;display:flex;flex-direction:column;background:var(--bg);}
-    #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity .3s;}
+    #splash{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity .3s;}
     #splash.hidden{opacity:0;pointer-events:none;}
     #splash svg{animation:pulse 1.5s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
@@ -40,7 +40,7 @@
     .h-loc{margin-left:auto;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:flex-end;overflow:hidden;}
     .body-area{flex:1;overflow:hidden;display:flex;flex-direction:column;}
     .tabs{flex:1;overflow:hidden;position:relative;}
-    .tab{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:8px;}
+    .tab{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:8px;}
     .tab.on{display:block;}
     .nav{height:58px;background:var(--bg2);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
     .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--muted);font-size:9.5px;cursor:pointer;font-family:inherit;padding:0 2px;}
@@ -158,7 +158,18 @@
     .log-empty{text-align:center;padding:48px 20px;color:var(--muted);}
     .log-empty-icon{font-size:36px;margin-bottom:12px;}
     .log-count{font-size:12px;color:var(--muted);padding:8px 12px 0;}
-    .rule{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start;}
+    .disclaimer-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.75);z-index:10000;display:flex;align-items:flex-end;justify-content:center;padding:0;}
+    .disclaimer-sheet{background:var(--bg1);border-radius:20px 20px 0 0;padding:28px 20px 40px;width:100%;max-width:480px;border-top:1px solid var(--border);}
+    .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
+    .disclaimer-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;}
+    .disclaimer-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.5;}
+    .disclaimer-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px;font-size:12px;color:var(--muted);line-height:1.7;}
+    .disclaimer-box strong{color:var(--text);}
+    .disclaimer-check{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;cursor:pointer;}
+    .disclaimer-check input{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent);margin-top:1px;cursor:pointer;}
+    .disclaimer-check-lbl{font-size:13px;color:var(--text);line-height:1.5;}
+    .disclaimer-btn{width:100%;background:var(--bg3);border:none;border-radius:var(--radius-sm);padding:14px;color:var(--muted);font-size:15px;font-weight:600;cursor:not-allowed;font-family:inherit;transition:all .2s;}
+    .disclaimer-btn.ready{background:var(--accent);color:#fff;cursor:pointer;}
     .rule:last-child{margin-bottom:0;}
     .rule-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
     .rule-ttl{font-size:13px;font-weight:600;margin-bottom:3px;}
@@ -209,6 +220,43 @@
   </style>
 </head>
 <body>
+<!-- DISCLAIMER MODAL -->
+<div class="disclaimer-overlay" id="disclaimer-overlay" style="display:none;">
+  <div class="disclaimer-sheet">
+    <div class="disclaimer-icon">
+      <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
+        <rect width="100" height="100" rx="20" fill="#0f172a"/>
+        <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
+        <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
+        <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
+        <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
+        <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
+        <circle cx="50" cy="50" r="11" fill="white"/>
+        <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
+      </svg>
+    </div>
+    <div class="disclaimer-title">Before you fly</div>
+    <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
+    <div class="disclaimer-box">
+      <strong>Advisory use only.</strong> DroneChecker provides weather, wind and condition information to assist your pre-flight planning. All ratings and recommendations are <strong>advisory only</strong> and do not constitute official aviation guidance.<br><br>
+      <strong>You are responsible.</strong> The pilot in command is solely and legally responsible for safe and lawful drone operations at all times. Always verify conditions, airspace and restrictions independently before flying.<br><br>
+      <strong>No liability.</strong> DroneChecker and its developers accept no liability for loss, damage, injury or legal consequence arising from reliance on information provided by this app.
+    </div>
+    <label class="disclaimer-check" onclick="toggleDisclaimerCheck()">
+      <input type="checkbox" id="disclaimer-cb"/>
+      <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
+    </label>
+    <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled>Enter DroneChecker</button>
+  </div>
+</div>
 
 <div id="splash">
   <svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -750,6 +798,26 @@ function exportFlights(){
   showToast('📊 Exported to CSV');
 }
 
+// ---- DISCLAIMER ----
+function checkDisclaimer(){
+  try{if(localStorage.getItem('dc_disclaimer')==='accepted')return;}catch(e){}
+  document.getElementById('disclaimer-overlay').style.display='flex';
+}
+function toggleDisclaimerCheck(){
+  var cb=document.getElementById('disclaimer-cb');
+  var btn=document.getElementById('disclaimer-btn');
+  cb.checked=!cb.checked;
+  btn.disabled=!cb.checked;
+  btn.classList.toggle('ready',cb.checked);
+}
+function acceptDisclaimer(){
+  try{localStorage.setItem('dc_disclaimer','accepted');}catch(e){}
+  var overlay=document.getElementById('disclaimer-overlay');
+  overlay.style.opacity='0';
+  overlay.style.transition='opacity .3s';
+  setTimeout(function(){overlay.style.display='none';},300);
+}
+
 function getLoc(){
   if(!navigator.geolocation){setLoc(51.5074,-0.1278,'London (default)');return;}
   navigator.geolocation.getCurrentPosition(
@@ -1027,6 +1095,7 @@ function goTab(id,btn){
 }
 
 window.addEventListener('load',function(){
+  checkDisclaimer();
   loadDrone();loadChecklist();loadUnits();renderFavBar();
   var cached=loadWxCache();
   if(cached){wxData=cached.data;renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}

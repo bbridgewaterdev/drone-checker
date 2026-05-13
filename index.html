@@ -158,8 +158,8 @@
     .log-empty{text-align:center;padding:48px 20px;color:var(--muted);}
     .log-empty-icon{font-size:36px;margin-bottom:12px;}
     .log-count{font-size:12px;color:var(--muted);padding:8px 12px 0;}
-    .disclaimer-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.85);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;}
-    .disclaimer-sheet{background:var(--bg1);border-radius:16px;padding:28px 20px 28px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);}
+    .disclaimer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overscroll-behavior:none;}
+    .disclaimer-sheet{background:var(--bg1);border-radius:16px;padding:28px 20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);}
     .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
     .disclaimer-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;}
     .disclaimer-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.5;}
@@ -835,22 +835,33 @@ function exportFlights(){
 }
 
 // ---- DISCLAIMER ----
+var disclaimerAccepted=false;
 function checkDisclaimer(){
-  try{if(localStorage.getItem('dc_disclaimer')==='accepted')return;}catch(e){}
+  if(disclaimerAccepted)return;
+  try{if(localStorage.getItem('dc_disclaimer')==='accepted'){disclaimerAccepted=true;return;}}catch(e){}
   document.getElementById('disclaimer-overlay').style.display='flex';
+  document.body.style.overflow='hidden';
 }
 function updateDisclaimerBtn(){
   var cb=document.getElementById('disclaimer-cb');
   var btn=document.getElementById('disclaimer-btn');
+  if(!cb||!btn)return;
   btn.disabled=!cb.checked;
   btn.classList.toggle('ready',cb.checked);
 }
 function acceptDisclaimer(){
+  disclaimerAccepted=true;
+  document.body.style.overflow='';
   try{localStorage.setItem('dc_disclaimer','accepted');}catch(e){}
   var overlay=document.getElementById('disclaimer-overlay');
+  if(!overlay)return;
   overlay.style.opacity='0';
   overlay.style.transition='opacity .3s';
-  setTimeout(function(){overlay.style.display='none';checkWhatsNew();},300);
+  setTimeout(function(){
+    overlay.style.display='none';
+    overlay.style.opacity='1';
+    checkWhatsNew();
+  },350);
 }
 
 // ---- WHAT'S NEW ----
@@ -1008,7 +1019,8 @@ function renderDash(){
   var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Just updated';
   var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
   document.getElementById('dash').innerHTML=
-    '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:none;border:none;cursor:pointer;padding:4px;font-size:20px;flex-shrink:0;" title="Share conditions">📤</button></div>'+
+    '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div></div>'+
+    '<button onclick="shareConditions()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 24px);margin:8px 12px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">📤 Share flying conditions</button>'+
     '<div class="card" id="kp-card"></div>'+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tmp(temp)+tmpU()+'</div><div class="wx-desc">'+info.desc+' &middot; feels '+tmp(feels)+tmpU()+'</div></div></div>'+
     '<div class="wx-grid">'+

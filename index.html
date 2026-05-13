@@ -968,8 +968,7 @@ function renderDash(){
   var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Just updated';
   var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
   document.getElementById('dash').innerHTML=
-    '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div></div>'+
-    '<button onclick="shareConditions()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 24px);margin:8px 12px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">📤 Share flying conditions</button>'+
+    '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">🔗 Share</button></div>'+
     '<div class="card" id="kp-card"></div>'+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tmp(temp)+tmpU()+'</div><div class="wx-desc">'+info.desc+' &middot; feels '+tmp(feels)+tmpU()+'</div></div></div>'+
     '<div class="wx-grid">'+

@@ -250,8 +250,8 @@
       <strong>You are responsible.</strong> The pilot in command is solely and legally responsible for safe and lawful drone operations at all times. Always verify conditions, airspace and restrictions independently before flying.<br><br>
       <strong>No liability.</strong> DroneChecker and its developers accept no liability for loss, damage, injury or legal consequence arising from reliance on information provided by this app.
     </div>
-    <label class="disclaimer-check" onclick="toggleDisclaimerCheck()">
-      <input type="checkbox" id="disclaimer-cb"/>
+    <label class="disclaimer-check">
+      <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
       <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
     </label>
     <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled>Enter DroneChecker</button>
@@ -803,10 +803,9 @@ function checkDisclaimer(){
   try{if(localStorage.getItem('dc_disclaimer')==='accepted')return;}catch(e){}
   document.getElementById('disclaimer-overlay').style.display='flex';
 }
-function toggleDisclaimerCheck(){
+function updateDisclaimerBtn(){
   var cb=document.getElementById('disclaimer-cb');
   var btn=document.getElementById('disclaimer-btn');
-  cb.checked=!cb.checked;
   btn.disabled=!cb.checked;
   btn.classList.toggle('ready',cb.checked);
 }

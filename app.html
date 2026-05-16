@@ -12,9 +12,9 @@
   <!-- end Google Analytics -->
   <link rel="icon" type="image/png" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+
+
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="mobile-web-app-capable" content="yes">
@@ -31,7 +31,7 @@
       --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
       --accent:#3B82F6;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
       --radius:14px;--radius-sm:9px;
-      --font-head:'Syne',sans-serif;
+      
     }
     #app{height:100svh;display:flex;flex-direction:column;background:var(--bg);}
     #splash{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity .3s;}
@@ -40,7 +40,7 @@
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
     #splash p{font-size:14px;color:var(--muted);}
     .header{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;}
-    .h-title{font-size:17px;font-weight:700;font-family:var(--font-head);letter-spacing:-.3px;}
+    .h-title{font-size:17px;font-weight:700;}
     .h-loc{margin-left:auto;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:flex-end;overflow:hidden;}
     .body-area{flex:1;overflow:hidden;display:flex;flex-direction:column;}
     .tabs{flex:1;overflow:hidden;position:relative;}
@@ -71,7 +71,7 @@
     .cond-ring.green{background:rgba(34,197,94,.2);border:2px solid var(--green);}
     .cond-ring.amber{background:rgba(245,158,11,.2);border:2px solid var(--amber);}
     .cond-ring.red{background:rgba(239,68,68,.2);border:2px solid var(--red);}
-    .cond-lbl{font-size:20px;font-weight:700;margin-bottom:4px;font-family:var(--font-head);letter-spacing:-.3px;}
+    .cond-lbl{font-size:20px;font-weight:700;margin-bottom:4px;}
     .cond-lbl.green{color:var(--green);}
     .cond-lbl.amber{color:var(--amber);}
     .cond-lbl.red{color:var(--red);}
@@ -89,7 +89,7 @@
     .wx-sub{font-size:11px;color:var(--muted);margin-top:2px;}
     .wx-hero{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px;padding:4px 0;}
     .wx-icon{font-size:52px;line-height:1;}
-    .wx-temp{font-size:56px;font-weight:800;line-height:1;letter-spacing:-2px;font-family:var(--font-head);}
+    .wx-temp{font-size:56px;font-weight:800;line-height:1;letter-spacing:-2px;}
     .wx-desc{font-size:13px;color:var(--muted);margin-top:4px;padding-bottom:6px;}
     .kp-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
     .kp-num{font-size:36px;font-weight:700;line-height:1;}
@@ -165,7 +165,7 @@
     .disclaimer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overscroll-behavior:none;}
     .disclaimer-sheet{background:var(--bg1);border-radius:16px;padding:28px 20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);}
     .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
-    .disclaimer-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;font-family:var(--font-head);}
+    .disclaimer-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;}
     .disclaimer-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.5;}
     .disclaimer-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px;font-size:12px;color:var(--muted);line-height:1.7;}
     .disclaimer-box strong{color:var(--text);}
@@ -229,7 +229,7 @@
     .onboard-slide{display:none;}
     .onboard-slide.on{display:block;}
     .onboard-icon{font-size:56px;margin-bottom:20px;line-height:1;}
-    .onboard-title{font-size:21px;font-weight:700;margin-bottom:10px;color:var(--text);font-family:var(--font-head);}
+    .onboard-title{font-size:21px;font-weight:700;margin-bottom:10px;color:var(--text);}
     .onboard-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
     .onboard-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
     .onboard-dot{width:8px;height:8px;border-radius:4px;background:var(--bg3);transition:all .25s;}
@@ -1135,7 +1135,7 @@ function renderDash(){
     '<div class="wx-tile '+rHum+'"><div class="wx-lbl">Humidity</div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div></div>'+
     '<div class="wx-tile '+rPres+'"><div class="wx-lbl">Pressure</div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div></div>'+
     '</div></div>'+
-    '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+getChecklistSummary().total-getChecklistSummary().done+' remaining</span>')+'</div></div>'+
+    '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+
     '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank">Open →</a></div></div>'+
     '<div style="margin:20px 12px 0;padding:16px;border-top:1px solid var(--border);text-align:center;">'+
     (!isIOS&&!isStandalone?'<a href="https://play.google.com/store/apps/details?id=uk.co.dronechecker.twa" target="_blank" style="display:inline-block;margin-bottom:16px;"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height:48px;"/></a>':'')+

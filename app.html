@@ -522,11 +522,11 @@ var APP_VERSION='1.0.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,useImperial=false,lastUpdated=null;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,unitMode='kmh',lastUpdated=null;
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
 function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])selectedDrone=s;}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;updateDroneLimits();}
 function saveDrone(){var sel=document.getElementById('drone-sel');if(!sel)return;selectedDrone=sel.value;try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}updateDroneLimits();if(wxData)renderDash();}
-function updateDroneLimits(){var el=document.getElementById('drone-limits');if(el)el.textContent='Max '+getDrone().windRed+' km/h';}
+function updateDroneLimits(){var el=document.getElementById('drone-limits');if(el)el.textContent='Max '+spd(getDrone().windRed)+' '+spdU();}
 
 function saveWxCache(data){try{localStorage.setItem('dc_wx',JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
 function loadWxCache(){try{var s=localStorage.getItem('dc_wx');if(s)return JSON.parse(s);}catch(e){}return null;}
@@ -673,15 +673,15 @@ function fmtTime(d){return pad(d.getHours())+':'+pad(d.getMinutes());}
 var DRONE_SVG='<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>';
 
 // ---- UNITS ----
-function loadUnits(){try{useImperial=localStorage.getItem('dc_units')==='imperial';}catch(e){}updateUnitToggle();}
-function saveUnits(){try{localStorage.setItem('dc_units',useImperial?'imperial':'metric');}catch(e){}}
-function toggleUnits(){useImperial=!useImperial;saveUnits();updateUnitToggle();if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))initWindMap();}}
-function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;btn.textContent=useImperial?'mph ⇄':'km/h ⇄';btn.title=useImperial?'Switch to metric':'Switch to imperial';}
-function spd(v){return useImperial?Math.round(v*0.621):Math.round(v);}
-function spdU(){return useImperial?'mph':'km/h';}
-function tmp(v){return useImperial?Math.round(v*9/5+32):Math.round(v);}
-function tmpU(){return useImperial?'°F':'°C';}
-function visDisp(v){if(useImperial){if(v>=1609)return{val:(v/1609.34).toFixed(1),unit:'mi'};return{val:Math.round(v*3.281),unit:'ft'};}if(v>=1000)return{val:(v/1000).toFixed(0),unit:'km'};return{val:v,unit:'m'};}
+function loadUnits(){try{var s=localStorage.getItem('dc_units');if(s==='imperial')unitMode='mph';else if(s==='ms')unitMode='ms';else unitMode='kmh';}catch(e){}updateUnitToggle();}
+function saveUnits(){try{localStorage.setItem('dc_units',unitMode==='mph'?'imperial':unitMode==='ms'?'ms':'metric');}catch(e){}}
+function toggleUnits(){unitMode=unitMode==='kmh'?'mph':unitMode==='mph'?'ms':'kmh';saveUnits();updateUnitToggle();updateDroneLimits();if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))initWindMap();}}
+function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;var labels={kmh:'km/h ⇄',mph:'mph ⇄',ms:'m/s ⇄'};var next={kmh:'mph',mph:'m/s',ms:'km/h'};btn.textContent=labels[unitMode]||'km/h ⇄';btn.title='Switch to '+next[unitMode];}
+function spd(v){if(unitMode==='mph')return Math.round(v*0.621);if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));return Math.round(v);}
+function spdU(){return unitMode==='mph'?'mph':unitMode==='ms'?'m/s':'km/h';}
+function tmp(v){return unitMode==='mph'?Math.round(v*9/5+32):Math.round(v);}
+function tmpU(){return unitMode==='mph'?'°F':'°C';}
+function visDisp(v){if(unitMode==='mph'){if(v>=1609)return{val:(v/1609.34).toFixed(1),unit:'mi'};return{val:Math.round(v*3.281),unit:'ft'};}if(v>=1000)return{val:(v/1000).toFixed(0),unit:'km'};return{val:v,unit:'m'};}
 
 // ---- TOAST ----
 function showToast(msg){

@@ -519,7 +519,7 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.0.0';
+var APP_VERSION='1.1.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -567,6 +567,7 @@ function hideOfflineBanner(){var bar=document.getElementById('offline-bar');if(b
 
 var CHECKLIST=[
   {section:'Pilot & Registration'},{id:'reg',label:'Operator ID displayed on drone'},{id:'flyer',label:'Flyer ID carried or accessible'},
+  {id:'remoteid',label:'Remote ID active (required for drones over 100g from Jan 2026)'},
   {id:'notam',label:'Checked CAA airspace restrictions and NOTAMs'},{id:'rules',label:'Airspace checked — no restrictions at location'},{id:'insure',label:'Insurance valid (if required)'},
   {section:'Drone Hardware'},{id:'props',label:'Propellers secure and undamaged'},{id:'arms',label:'Arms fully unfolded and locked'},
   {id:'gimbal',label:'Gimbal guard removed'},{id:'body',label:'Drone body free of damage or cracks'},{id:'lens',label:'Camera lens clean and clear'},

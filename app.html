@@ -243,7 +243,7 @@
   </style>
 </head>
 <body>
-<div id="disclaimer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
+<div id="disclaimer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
   <div class="disclaimer-sheet">
     <div class="disclaimer-icon">
       <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
@@ -1078,6 +1078,8 @@ function renderKpCard(){
   var card=document.getElementById('kp-card');if(!card)return;
   card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div class="kp-row"><div class="kp-num" style="color:'+col+';">'+kp.toFixed(1)+'</div><div><div class="kp-lbl" style="color:'+col+';">'+emoji+' '+label+'</div><div class="kp-desc">'+desc+'</div></div></div><div class="kp-bar-bg"><div class="kp-bar" style="width:'+bar+'%;background:'+col+';"></div></div><div class="kp-scale"><span>0 — Quiet</span><span>4 — Storm</span><span>9 — Extreme</span></div>';
 }
+
+function fetchAll(){
   var url='https://api.open-meteo.com/v1/forecast?latitude='+uLat+'&longitude='+uLng+
     '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,surface_pressure,visibility,cloud_cover'+
     '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility'+

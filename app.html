@@ -1157,7 +1157,7 @@ function flyRating(wind,gust,vis,wmo,kp,temp,wind80,wind120){
   // Temperature
   var t=temp!==undefined?temp:15;
   if(t<-10){issues.push('Extreme cold ('+Math.round(t)+'°C) — do not fly');lvl='red';}
-  else if(t<0){issues.push('Below freezing ('+Math.round(t)+'°C) — LiPo and icing risk');if(lvl!=='red')lvl='amber';}
+  else if(t<0){issues.push('Below freezing ('+Math.round(t)+'°C) — battery and icing risk');if(lvl!=='red')lvl='amber';}
   else if(t>40){issues.push('Extreme heat ('+Math.round(t)+'°C) — overheating risk');if(lvl!=='red')lvl='amber';}
   else if(t>35){issues.push('High temperature ('+Math.round(t)+'°C) — monitor for overheating');if(lvl!=='red')lvl='amber';}
   // Wind & gusts
@@ -1200,7 +1200,7 @@ function renderDash(){
   var vDisp=visDisp(vis);
   var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Just updated';
   var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
-  var lipoWarn=rawTemp<10?'<div style="grid-column:span 2;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🔋</span><div style="font-size:12px;color:var(--amber);line-height:1.4;">'+(rawTemp<0?'<strong>Below freezing</strong> — LiPo batteries at serious risk. Warm indoors before flight and keep warm until takeoff.':'<strong>Cold conditions</strong> — LiPo batteries lose capacity below 10°C. Warm before flight and expect reduced flight time.')+'</div></div>':'';
+  var lipoWarn=rawTemp<10?'<div style="grid-column:span 2;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🔋</span><div style="font-size:12px;color:var(--amber);line-height:1.4;">'+(rawTemp<0?'<strong>Below freezing</strong> — drone batteries at serious risk. Warm indoors before flight and keep warm until takeoff.':'<strong>Cold conditions</strong> — drone battery capacity reduces significantly below 10°C. Warm before flight and expect reduced flight time.')+'</div></div>':'';
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">🔗 Share</button></div>'+
     '<div class="card" id="kp-card"></div>'+

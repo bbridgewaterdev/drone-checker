@@ -788,7 +788,7 @@ function renderLog(){
   var drone=getDrone().name;
   var autoCond='Good to Fly';
   var autoWind='',autoTemp='',autoVis='',autoWxSummary='';
-  if(wxData&&wxData.current){var c=wxData.current;var r=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15);autoCond=r.label;
+  if(wxData&&wxData.current){var c=wxData.current;var r=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15,c.wind_speed_80m||0,c.wind_speed_120m||0);autoCond=r.label;
     autoWind=spd(c.wind_speed_10m||0)+' '+spdU();
     autoTemp=Math.round(c.temperature_2m||0)+'°C';
     var vd=visDisp(c.visibility||10000);autoVis=vd.val+' '+vd.unit;
@@ -952,7 +952,7 @@ function acceptDisclaimer(){
 function shareConditions(){
   if(!wxData||!wxData.current){showToast('No data to share yet');return;}
   var c=wxData.current;
-  var cond=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15);
+  var cond=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15,c.wind_speed_80m||0,c.wind_speed_120m||0);
   var loc=document.getElementById('loc-name').textContent;
   var emoji=cond.lvl==='green'?'🟢':cond.lvl==='amber'?'🟡':'🔴';
   var info=wmoInfo(c.weather_code||0);
@@ -1075,7 +1075,7 @@ function updateCondBanner(){
   if(!wxData||!wxData.current)return;
   var c=wxData.current;
   var wind=c.wind_speed_10m||0,gust=c.wind_gusts_10m||0,vis=c.visibility||10000,wmo=c.weather_code||0;
-  var cond=flyRating(wind,gust,vis,wmo,currentKp,wxData.current.temperature_2m||15);
+  var cond=flyRating(wind,gust,vis,wmo,currentKp,wxData.current.temperature_2m||15,wxData.current.wind_speed_80m||0,wxData.current.wind_speed_120m||0);
   var condEl=document.querySelector('.cond');
   if(!condEl)return;
   condEl.className='cond '+cond.lvl;
@@ -1117,8 +1117,8 @@ function renderKpCard(){
 
 function fetchAll(){
   var url='https://api.open-meteo.com/v1/forecast?latitude='+uLat+'&longitude='+uLng+
-    '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,surface_pressure,visibility,cloud_cover'+
-    '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility,precipitation_probability'+
+    '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,surface_pressure,visibility,cloud_cover,wind_speed_80m,wind_speed_120m'+
+    '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility,precipitation_probability,wind_speed_80m,wind_speed_120m'+
     '&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max'+
     '&wind_speed_unit=kmh&timezone=auto&forecast_days=8';
   var cached=loadWxCache();
@@ -1152,7 +1152,7 @@ function tilePres(v){return v<980?'red':v<1000?'amber':'green';}
 function tileTemp(v){return v<-10||v>40?'red':v<0||v>35?'amber':'green';}
 function tileCol(r){return r==='green'?'var(--green)':r==='amber'?'var(--amber)':'var(--red)';}
 
-function flyRating(wind,gust,vis,wmo,kp,temp){
+function flyRating(wind,gust,vis,wmo,kp,temp,wind80,wind120){
   var d=getDrone(),lvl='green',issues=[];
   // Temperature
   var t=temp!==undefined?temp:15;
@@ -1165,6 +1165,11 @@ function flyRating(wind,gust,vis,wmo,kp,temp){
   else if(gust>=d.gustAmber){issues.push('Strong gusts ('+Math.round(gust)+' km/h)');if(lvl!=='red')lvl='amber';}
   if(wind>=d.windRed){issues.push('Wind too strong ('+Math.round(wind)+' km/h)');lvl='red';}
   else if(wind>=d.windAmber){issues.push('Moderate wind ('+Math.round(wind)+' km/h)');if(lvl!=='red')lvl='amber';}
+  // Altitude winds
+  if(wind120!==undefined&&wind120>=d.windRed){issues.push('Wind at 120m too strong ('+Math.round(wind120)+' km/h)');lvl='red';}
+  else if(wind120!==undefined&&wind120>=d.windAmber){issues.push('Strong wind at 120m ('+Math.round(wind120)+' km/h)');if(lvl!=='red')lvl='amber';}
+  else if(wind80!==undefined&&wind80>=d.windRed){issues.push('Wind at 80m too strong ('+Math.round(wind80)+' km/h)');lvl='red';}
+  else if(wind80!==undefined&&wind80>=d.windAmber){issues.push('Strong wind at 80m ('+Math.round(wind80)+' km/h)');if(lvl!=='red')lvl='amber';}
   // Visibility
   if(vis<1000){issues.push('Very poor visibility');lvl='red';}
   else if(vis<5000){issues.push('Reduced visibility');if(lvl!=='red')lvl='amber';}
@@ -1187,8 +1192,9 @@ function flyRating(wind,gust,vis,wmo,kp,temp){
 }
 function renderDash(){
   var c=wxData.current,wind=c.wind_speed_10m||0,gust=c.wind_gusts_10m||0,vis=c.visibility||10000,wmo=c.weather_code||0;
-  var rawTemp=c.temperature_2m||15;
-  var info=wmoInfo(wmo),cond=flyRating(wind,gust,vis,wmo,currentKp,rawTemp);
+  var rawTemp=c.temperature_2m||15,rawWind=c.wind_speed_10m||0,rawGust=c.wind_gusts_10m||0;
+  var wind80=c.wind_speed_80m||0,wind120=c.wind_speed_120m||0;
+  var info=wmoInfo(wmo),cond=flyRating(wind,gust,vis,wmo,currentKp,rawTemp,wind80,wind120);
   var temp=Math.round(rawTemp),feels=Math.round(c.apparent_temperature),cloud=c.cloud_cover||0,hum=c.relative_humidity_2m,pres=Math.round(c.surface_pressure||0);
   var rWind=tileWind(wind),rGust=tileGust(gust),rVis=tileVis(vis),rCloud=tileCloud(cloud),rHum=tileHum(hum),rPres=tilePres(pres),rTemp=tileTemp(rawTemp);
   var vDisp=visDisp(vis);
@@ -1206,7 +1212,10 @@ function renderDash(){
     '<div class="wx-tile '+rCloud+'"><div class="wx-lbl">Cloud Cover</div><div class="wx-val wx-val-'+rCloud+'">'+cloud+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(cloud<30?'Clear':cloud<70?'Partial':'Overcast')+'</div></div>'+
     '<div class="wx-tile '+rHum+'"><div class="wx-lbl">Humidity</div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div></div>'+
     '<div class="wx-tile '+rPres+'"><div class="wx-lbl">Pressure</div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div></div>'+
-    '<div class="wx-tile '+rTemp+'" style="grid-column:span 2;"><div class="wx-lbl">Temperature</div><div style="display:flex;align-items:baseline;gap:10px;"><div class="wx-val wx-val-'+rTemp+'">'+temp+'°C / '+Math.round(temp*9/5+32)+'°F</div></div><div class="wx-sub">'+(rawTemp<-10?'Extreme cold — do not fly':rawTemp<0?'Below freezing — LiPo risk':rawTemp<10?'Cold — warm batteries first':rawTemp>40?'Extreme heat — overheating risk':rawTemp>35?'High temp — monitor drone':'Normal operating range')+'</div></div>'+
+    '<div class="wx-tile '+rTemp+'"><div class="wx-lbl">Dew Point</div><div class="wx-val wx-val-'+rTemp+'">'+Math.round(rawTemp-((100-hum)/5))+'°C</div><div class="wx-sub">'+(rawTemp-Math.round(rawTemp-((100-hum)/5))<2?'Condensation risk':rawTemp-Math.round(rawTemp-((100-hum)/5))<4?'Watch for dew':'Low condensation risk')+'</div></div>'+
+    (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.5?'red':ratio>=0.2?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.5?'Turbulent':ratio>=0.2?'Choppy':'Smooth';var desc=ratio>=0.5?'Large gust spikes — difficult to control':ratio>=0.2?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile '+r+'"><div class="wx-lbl">Air Smoothness</div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div></div>';})()+
+    '<div class="wx-tile" style="grid-column:span 2;"><div class="wx-lbl">Wind at Altitude</div><div style="display:flex;flex-direction:column;gap:7px;margin-top:8px;">'+
+    (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);var lbl=r==='red'?'✕ Too Strong':r==='amber'?'⚠ Caution':'✓ OK';rows+='<div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="width:54px;font-size:13px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+spd(l.v)+' '+spdU()+'</div><div style="width:70px;font-size:11px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+lbl+'</div></div>';});return rows;})()+'</div></div>'+
     lipoWarn+
     '</div></div>'+
     '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+

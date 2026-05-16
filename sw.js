@@ -1,7 +1,7 @@
-const CACHE = 'dronechecker-v49';
+const CACHE = 'dronechecker-v53';
 
 const STATIC = [
-  '/index.html',
+  '/app.html',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -36,7 +36,7 @@ self.addEventListener('activate', e => {
 
 // Fetch strategy:
 // - API calls: always network, never cache
-// - index.html: network first, fall back to cache
+// - app.html: network first, fall back to cache
 // - Everything else: cache first, update in background
 self.addEventListener('fetch', e => {
   const url = e.request.url;
@@ -54,8 +54,8 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // index.html: network first so updates deploy immediately
-  if (url.endsWith('/') || url.endsWith('index.html') || url.endsWith('dronechecker.co.uk/')) {
+  // app.html: network first so updates deploy immediately
+  if (url.endsWith('/app.html') || url.endsWith('/app') || url.endsWith('dronechecker.co.uk/app.html')) {
     e.respondWith(
       fetch(e.request)
         .then(res => {
@@ -63,7 +63,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(e.request, clone));
           return res;
         })
-        .catch(() => caches.match(e.request))
+        .catch(() => caches.match('/app.html'))
     );
     return;
   }

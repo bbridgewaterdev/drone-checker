@@ -1,160 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Terms of Service — DroneChecker</title>
+  <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9;padding:24px 16px 60px;}
-    .wrap{max-width:680px;margin:0 auto;}
-    .header{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid #334155;}
-    .header-text h1{font-size:20px;font-weight:600;}
-    .header-text p{font-size:13px;color:#94a3b8;margin-top:3px;}
-    h2{font-size:16px;font-weight:600;margin:0 0 10px;color:#f1f5f9;}
-    p{font-size:14px;color:#cbd5e1;line-height:1.7;margin-bottom:10px;}
-    p:last-child{margin-bottom:0;}
-    ul{font-size:14px;color:#cbd5e1;line-height:1.7;margin:8px 0 10px 20px;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{--bg:#0f172a;--bg2:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--border:rgba(255,255,255,0.08);--accent:#3b82f6;--radius:8px;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;padding:0;}
+    a{color:var(--accent);}
+    .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;}
+    .back{color:var(--muted);font-size:14px;text-decoration:none;}
+    .back:hover{color:var(--text);}
+    .doc{max-width:720px;margin:0 auto;padding:40px 24px 80px;}
+    h1{font-size:28px;font-weight:700;margin-bottom:6px;}
+    .updated{font-size:13px;color:var(--muted);margin-bottom:40px;}
+    h2{font-size:18px;font-weight:600;margin:36px 0 12px;color:var(--text);}
+    p{color:var(--muted);margin-bottom:12px;}
+    p strong{color:var(--text);}
+    ul{color:var(--muted);padding-left:20px;margin-bottom:12px;}
     li{margin-bottom:6px;}
-    .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px;}
-    .warn{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:20px;margin-bottom:16px;}
-    .warn h2{color:#ef4444;}
-    .warn p,.warn li{color:#fca5a5;}
-    .back{display:inline-flex;align-items:center;gap:6px;color:#3B82F6;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:24px;}
-    .footer{margin-top:40px;padding-top:20px;border-top:1px solid #334155;font-size:12px;color:#64748b;text-align:center;}
-    .footer a{color:#3B82F6;text-decoration:none;}
-    a{color:#3B82F6;text-decoration:none;}
+    li strong{color:var(--text);}
+    .disclaimer-box{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius);padding:20px;margin:16px 0;}
+    .disclaimer-box p{color:#fcd34d;margin-bottom:8px;}
+    .disclaimer-box p:last-child{margin-bottom:0;}
+    .disclaimer-box ul{color:#fcd34d;}
+    .footer{border-top:1px solid var(--border);padding:24px;text-align:center;font-size:13px;color:var(--muted);}
+    .footer a{color:var(--muted);margin:0 8px;}
   </style>
 </head>
 <body>
-<div class="wrap">
 
-  <a class="back" href="/">← Back to DroneChecker</a>
+<div class="header">
+  <a href="/" class="back">← Back to DroneChecker</a>
+</div>
 
-  <div class="header">
-    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" rx="20" fill="#0f172a"/>
-      <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
-      <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
-      <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
-      <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
-      <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
-      <circle cx="50" cy="50" r="11" fill="white"/>
-      <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
-    </svg>
-    <div class="header-text">
-      <h1>Terms of Service</h1>
-      <p>DroneChecker &mdash; Last updated: May 2026</p>
-    </div>
-  </div>
+<div class="doc">
+  <h1>Terms of Service</h1>
+  <div class="updated">DroneChecker — Last updated: May 2026</div>
 
-  <div class="card">
-    <h2>1. Acceptance of Terms</h2>
-    <p>By accessing or using DroneChecker at dronechecker.co.uk or via the Google Play Store, you agree to be bound by these Terms of Service. If you do not agree, please do not use the App.</p>
-  </div>
+  <h2>1. Acceptance of Terms</h2>
+  <p>By accessing or using DroneChecker at dronechecker.co.uk or via the Google Play Store, you agree to be bound by these Terms of Service. If you do not agree, please do not use the App.</p>
 
-  <div class="card">
-    <h2>2. Description of Service</h2>
-    <p>DroneChecker is an informational application providing:</p>
-    <ul>
-      <li>Live weather conditions and flying condition ratings tailored to your drone model</li>
-      <li>24-hour and 5-day weather forecasts with per-slot flying condition ratings</li>
-      <li>Wind direction map showing current wind bearing and speed at your location</li>
-      <li>Geomagnetic activity (KP index) information from NOAA</li>
-      <li>Golden hour and blue hour calculations for aerial photography</li>
-      <li>Pre-flight checklist for drone pilots</li>
-      <li>General UK CAA regulatory guidance</li>
-      <li>Links to official airspace information tools</li>
-      <li>Offline mode showing last known conditions when no internet connection is available</li>
-    </ul>
-  </div>
+  <h2>2. Description of Service</h2>
+  <p>DroneChecker is an informational application providing:</p>
+  <ul>
+    <li>Live weather conditions and flying condition ratings tailored to your drone model</li>
+    <li>24-hour hourly weather forecast and 7-day best day to fly planner with per-slot flying condition ratings</li>
+    <li>Wind direction compass showing current wind bearing, speed and gusts at your location</li>
+    <li>Geomagnetic activity (KP index) information from NOAA, integrated into the fly rating</li>
+    <li>Golden hour and blue hour calculations for aerial photography</li>
+    <li>Pre-flight checklist for drone pilots</li>
+    <li>Flight logging with CSV export for personal records</li>
+    <li>General UK CAA regulatory guidance</li>
+    <li>Links to official airspace information resources</li>
+    <li>Offline mode showing last known conditions when no internet connection is available</li>
+    <li>Favourite location saving for frequently visited flying sites</li>
+  </ul>
 
-  <div class="warn">
-    <h2>⚠️ 3. Important Safety Disclaimer</h2>
+  <h2>⚠️ 3. Important Safety Disclaimer</h2>
+  <div class="disclaimer-box">
     <p>DroneChecker is provided for <strong>guidance and informational purposes only</strong>. It is <strong>not</strong> a substitute for official pre-flight checks, regulatory compliance, or professional aviation advice.</p>
     <p>By using DroneChecker, you acknowledge and agree that:</p>
     <ul>
       <li>Flying conditions data is not guaranteed to be accurate, complete, or current.</li>
-      <li>You are solely responsible for ensuring your drone flight complies with all applicable UK laws and CAA regulations.</li>
+      <li>You are solely responsible for ensuring your drone flight complies with all applicable laws and regulations.</li>
       <li>You must always check official sources before flying, including the CAA Drone Safety page at <a href="https://www.caa.co.uk/drones" target="_blank">caa.co.uk/drones</a>.</li>
       <li>DroneChecker does not provide real-time NOTAM data. Temporary flight restrictions may exist that are not reflected in the App.</li>
+      <li>DroneChecker does not provide airspace restriction mapping. You must verify airspace restrictions independently before every flight.</li>
       <li>Flying condition ratings are algorithmically generated estimates based on your selected drone profile and do not constitute official aviation advice.</li>
-      <li>Wind direction data is sourced from Open-Meteo weather forecasts and represents conditions at 10m above ground level, which may differ from conditions at flying altitude.</li>
+      <li>Wind data is sourced from Open-Meteo weather forecasts and represents conditions at 10m above ground level, which may differ from conditions at flying altitude.</li>
       <li>Offline cached weather data may be outdated and should not be relied upon as current conditions.</li>
       <li>You fly your drone entirely at your own risk. DroneChecker, its developers, and operators accept no liability for any incident, accident, injury, damage, regulatory penalty, or loss arising from reliance on this App.</li>
     </ul>
   </div>
 
-  <div class="card">
-    <h2>4. Regulatory Compliance</h2>
-    <p>It is your responsibility to comply with all applicable regulations including:</p>
-    <ul>
-      <li>UK Civil Aviation Authority (CAA) drone regulations</li>
-      <li>CAA Operator ID registration — required for drones over 100g with a camera (£12.34/year)</li>
-      <li>CAA Flyer ID — required for drones over 100g (free)</li>
-      <li>The Air Navigation Order 2016 (as amended)</li>
-      <li>Any local bylaws or restrictions at your flying location</li>
-    </ul>
-    <p>Regulations are subject to change. Always refer to <a href="https://www.caa.co.uk/drones" target="_blank">caa.co.uk/drones</a> for the most current requirements.</p>
-  </div>
+  <h2>4. Regulatory Compliance</h2>
+  <p>It is your responsibility to comply with all applicable regulations including:</p>
+  <ul>
+    <li>UK Civil Aviation Authority (CAA) drone regulations</li>
+    <li>CAA Operator ID registration — required for drones over 100g with a camera (£12.34/year)</li>
+    <li>CAA Flyer ID — required for drones over 100g (free)</li>
+    <li>The Air Navigation Order 2016 (as amended)</li>
+    <li>Any local bylaws or restrictions at your flying location</li>
+    <li>The regulations of any country you are flying in, if outside the United Kingdom</li>
+  </ul>
+  <p>Regulations are subject to change. Always refer to <a href="https://www.caa.co.uk/drones" target="_blank">caa.co.uk/drones</a> for the most current requirements.</p>
 
-  <div class="card">
-    <h2>5. Accuracy of Information</h2>
-    <p>We make reasonable efforts to ensure accuracy, however:</p>
-    <ul>
-      <li>Weather data is sourced from Open-Meteo and may not reflect hyperlocal conditions</li>
-      <li>KP index data is sourced from NOAA and may be subject to delays</li>
-      <li>Wind direction and speed data is sourced from Open-Meteo at 10m above ground level and may differ from conditions at drone flying altitude</li>
-      <li>Golden hour calculations are mathematical estimates and may vary slightly from observed conditions</li>
-      <li>Drone wind limit thresholds are based on manufacturer specifications and may differ from real-world performance</li>
-      <li>Offline cached data reflects conditions at the time of last successful data fetch and may be significantly outdated</li>
-      <li>CAA rules displayed are subject to change — always refer to <a href="https://www.caa.co.uk" target="_blank">caa.co.uk</a> for current regulations</li>
-    </ul>
-  </div>
+  <h2>5. Accuracy of Information</h2>
+  <p>We make reasonable efforts to ensure accuracy, however:</p>
+  <ul>
+    <li>Weather data is sourced from Open-Meteo and may not reflect hyperlocal conditions</li>
+    <li>KP index data is sourced from NOAA and may be subject to delays or temporary unavailability</li>
+    <li>Wind direction and speed data is sourced from Open-Meteo at 10m above ground level and may differ from conditions at drone flying altitude</li>
+    <li>Golden hour calculations are mathematical estimates and may vary slightly from observed conditions</li>
+    <li>Drone wind limit thresholds are based on manufacturer specifications and may differ from real-world performance</li>
+    <li>Offline cached data reflects conditions at the time of last successful data fetch and may be significantly outdated</li>
+    <li>CAA rules displayed are subject to change — always refer to <a href="https://www.caa.co.uk" target="_blank">caa.co.uk</a> for current regulations</li>
+    <li>The 7-day best day to fly recommendation is based on forecast data which becomes less reliable further into the future</li>
+  </ul>
 
-  <div class="card">
-    <h2>6. Intellectual Property</h2>
-    <p>All content within DroneChecker, including the app design, logo, code, and text, is the intellectual property of DroneChecker and is protected by applicable copyright and intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.</p>
-  </div>
+  <h2>6. Flight Log</h2>
+  <p>DroneChecker provides a flight logging feature for personal record-keeping purposes only. Flight log data is stored locally on your device and is not transmitted to DroneChecker or any third party. DroneChecker does not guarantee the accuracy, completeness, or legal sufficiency of flight log records for any regulatory, insurance, or legal purpose. You are solely responsible for maintaining accurate and compliant flight records as required by applicable regulations.</p>
 
-  <div class="card">
-    <h2>7. Limitation of Liability</h2>
-    <p>To the fullest extent permitted by applicable law, DroneChecker and its operators shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages arising from your use of the App, any inaccuracy in data provided, any drone incident or regulatory infringement, or any third-party claims arising from your use of the App.</p>
-  </div>
+  <h2>7. Intellectual Property</h2>
+  <p>All content within DroneChecker, including the app design, logo, code, and text, is the intellectual property of DroneChecker and is protected by applicable copyright and intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.</p>
 
-  <div class="card">
-    <h2>8. Third-Party Links and Services</h2>
-    <p>DroneChecker integrates data from and contains links to third-party services including the CAA, Open-Meteo, NOAA, OpenStreetMap, and Postcodes.io. These are provided for convenience and functionality only. We are not responsible for the content, accuracy, availability, or practices of any third-party services. Each third-party service is subject to its own terms and privacy policy.</p>
-  </div>
+  <h2>8. Limitation of Liability</h2>
+  <p>To the fullest extent permitted by applicable law, DroneChecker and its operators shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages arising from your use of the App, any inaccuracy in data provided, any drone incident or regulatory infringement, or any third-party claims arising from your use of the App.</p>
 
-  <div class="card">
-    <h2>9. Governing Law</h2>
-    <p>These Terms of Service shall be governed by and construed in accordance with the laws of England and Wales. Any disputes shall be subject to the exclusive jurisdiction of the courts of England and Wales.</p>
-  </div>
+  <h2>9. Third-Party Links and Services</h2>
+  <p>DroneChecker integrates data from and contains links to third-party services including the CAA, Open-Meteo, NOAA, OpenStreetMap Nominatim, Postcodes.io, Google Analytics and GitHub Pages. These are provided for convenience and functionality only. We are not responsible for the content, accuracy, availability, or practices of any third-party services. Each third-party service is subject to its own terms and privacy policy.</p>
 
-  <div class="card">
-    <h2>10. Changes to Terms</h2>
-    <p>We may update these Terms from time to time and will indicate the date of the most recent revision at the top of this page. Continued use of the App following changes constitutes your acceptance of the revised terms.</p>
-  </div>
+  <h2>10. Governing Law</h2>
+  <p>These Terms of Service shall be governed by and construed in accordance with the laws of England and Wales. Any disputes shall be subject to the exclusive jurisdiction of the courts of England and Wales.</p>
 
-  <div class="card">
-    <h2>11. Contact Us</h2>
-    <p>Email: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a><br>
-    Website: <a href="https://dronechecker.co.uk">dronechecker.co.uk</a></p>
-  </div>
+  <h2>11. Changes to Terms</h2>
+  <p>We may update these Terms from time to time and will indicate the date of the most recent revision at the top of this page. Continued use of the App following changes constitutes your acceptance of the revised terms.</p>
 
-  <div class="footer">
-    <p>&copy; 2026 DroneChecker &mdash; <a href="/">Home</a> &mdash; <a href="/privacy.html">Privacy Policy</a> &mdash; <a href="mailto:bbridgewater.dev@gmail.com">Contact</a></p>
-  </div>
-
+  <h2>12. Contact Us</h2>
+  <p>Email: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a><br/>
+  Website: <a href="https://dronechecker.co.uk">dronechecker.co.uk</a></p>
 </div>
+
+<div class="footer">
+  <a href="/">Home</a>
+  <a href="/privacy.html">Privacy Policy</a>
+  <a href="mailto:bbridgewater.dev@gmail.com">Contact</a>
+  <br/><br/>© 2026 DroneChecker
+</div>
+
 </body>
 </html>

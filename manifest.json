@@ -3,7 +3,7 @@
   "name": "DroneChecker",
   "short_name": "DroneChecker",
   "description": "UK drone flying companion — live weather, restriction zones, flying conditions and golden hour calculator.",
-  "start_url": "/",
+  "start_url": "/app.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

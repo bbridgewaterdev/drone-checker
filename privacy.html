@@ -1,149 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Privacy Policy — DroneChecker</title>
+  <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9;padding:24px 16px 60px;}
-    .wrap{max-width:680px;margin:0 auto;}
-    .header{display:flex;align-items:center;gap:12px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid #334155;}
-    .header-text h1{font-size:20px;font-weight:600;}
-    .header-text p{font-size:13px;color:#94a3b8;margin-top:3px;}
-    h2{font-size:16px;font-weight:600;margin:28px 0 10px;color:#f1f5f9;}
-    p{font-size:14px;color:#cbd5e1;line-height:1.7;margin-bottom:10px;}
-    ul{font-size:14px;color:#cbd5e1;line-height:1.7;margin:8px 0 10px 20px;}
-    li{margin-bottom:4px;}
-    table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px;}
-    th{text-align:left;padding:10px 12px;background:#1e293b;color:#94a3b8;font-weight:600;border-bottom:1px solid #334155;}
-    td{padding:10px 12px;border-bottom:1px solid #1e293b;color:#cbd5e1;vertical-align:top;}
-    td a{color:#3B82F6;text-decoration:none;}
-    .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:20px;}
-    .back{display:inline-flex;align-items:center;gap:6px;color:#3B82F6;text-decoration:none;font-size:14px;font-weight:600;margin-bottom:24px;}
-    .footer{margin-top:40px;padding-top:20px;border-top:1px solid #334155;font-size:12px;color:#64748b;text-align:center;}
-    .footer a{color:#3B82F6;text-decoration:none;}
-    a{color:#3B82F6;text-decoration:none;}
-    .sub-h{font-size:14px;margin-top:16px;margin-bottom:6px;color:#94a3b8;font-weight:600;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{--bg:#0f172a;--bg2:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--border:rgba(255,255,255,0.08);--accent:#3b82f6;--radius:8px;}
+    body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.7;padding:0;}
+    a{color:var(--accent);}
+    .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;}
+    .back{color:var(--muted);font-size:14px;text-decoration:none;}
+    .back:hover{color:var(--text);}
+    .doc{max-width:720px;margin:0 auto;padding:40px 24px 80px;}
+    h1{font-size:28px;font-weight:700;margin-bottom:6px;}
+    .updated{font-size:13px;color:var(--muted);margin-bottom:40px;}
+    h2{font-size:18px;font-weight:600;margin:36px 0 12px;color:var(--text);}
+    p{color:var(--muted);margin-bottom:12px;}
+    p strong{color:var(--text);}
+    ul{color:var(--muted);padding-left:20px;margin-bottom:12px;}
+    li{margin-bottom:6px;}
+    li strong{color:var(--text);}
+    table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;}
+    th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--text);font-weight:600;border-bottom:1px solid var(--border);}
+    td{padding:10px 12px;color:var(--muted);border-bottom:1px solid var(--border);vertical-align:top;}
+    td a{color:var(--accent);}
+    .footer{border-top:1px solid var(--border);padding:24px;text-align:center;font-size:13px;color:var(--muted);}
+    .footer a{color:var(--muted);margin:0 8px;}
   </style>
 </head>
 <body>
-<div class="wrap">
 
-  <a class="back" href="/">← Back to DroneChecker</a>
-
-  <div class="header">
-    <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" rx="20" fill="#0f172a"/>
-      <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
-      <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-      <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-      <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
-      <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
-      <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
-      <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
-      <circle cx="50" cy="50" r="11" fill="white"/>
-      <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
-    </svg>
-    <div class="header-text">
-      <h1>Privacy Policy</h1>
-      <p>DroneChecker &mdash; Last updated: May 2026</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>1. Introduction</h2>
-    <p>Welcome to DroneChecker. This Privacy Policy explains how we collect, use, and protect your information when you use our application available at dronechecker.co.uk and on the Google Play Store.</p>
-    <p>By using DroneChecker, you agree to the collection and use of information in accordance with this policy.</p>
-  </div>
-
-  <div class="card">
-    <h2>2. Who We Are</h2>
-    <p>DroneChecker is an independent application providing drone flying condition information for users in the United Kingdom.</p>
-    <p>For any privacy-related queries, please contact us at: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a></p>
-  </div>
-
-  <div class="card">
-    <h2>3. Information We Collect</h2>
-
-    <p class="sub-h">3.1 Location Data</p>
-    <p>DroneChecker requests access to your device's location (GPS) to display local weather conditions, calculate golden hour and blue hour times, centre the wind direction map, and provide localised flying condition ratings.</p>
-    <p><strong>We do not store your location data.</strong> Location is used only in real time and is never transmitted to our servers or stored permanently. Your coordinates are passed to third-party weather and mapping services (listed in Section 4) solely to retrieve relevant data.</p>
-
-    <p class="sub-h">3.2 Search Queries</p>
-    <p>If you use the postcode or town search feature, your query is sent to Postcodes.io (for postcodes) or the Open-Meteo Geocoding API (for town and city names) solely to retrieve location coordinates. We do not store any search queries.</p>
-
-    <p class="sub-h">3.3 Notification Permissions</p>
-    <p>If you enable daily fly condition alerts, your notification preference is stored locally on your device only and is never transmitted to us or any third party. Notifications are scheduled entirely on-device.</p>
-
-    <p class="sub-h">3.4 No Accounts Required</p>
-    <p>DroneChecker does not require you to create an account. We do not collect your name, email address, or any other personal identifiers.</p>
-
-    <p class="sub-h">3.5 Device Preferences</p>
-    <p>To improve your experience, the following preferences are saved locally on your device using browser local storage. None of this data is transmitted to us or any third party:</p>
-    <ul>
-      <li><strong>Drone profile</strong> — your selected drone model, used to personalise wind limit thresholds.</li>
-      <li><strong>Pre-flight checklist state</strong> — which checklist items you have ticked, so your progress is preserved between sessions.</li>
-      <li><strong>Cached weather data</strong> — the most recently loaded weather conditions, stored with a timestamp to allow the app to display last known data when you have no internet connection at a flying site. This data contains weather readings only and no personal information.</li>
-    </ul>
-    <p>You can clear this data at any time by clearing your browser or app cache.</p>
-  </div>
-
-  <div class="card">
-    <h2>4. Third-Party Services</h2>
-    <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data. When you use features such as weather, wind map, or location search, your coordinates or search query may be sent to the relevant service. No personal identifying information is included in these requests.</p>
-    <table>
-      <tr><th>Service</th><th>Purpose</th><th>Privacy Policy</th></tr>
-      <tr><td>Open-Meteo</td><td>Live weather, forecast data and town/city geocoding</td><td><a href="https://open-meteo.com/en/terms" target="_blank">View</a></td></tr>
-      <tr><td>OpenStreetMap</td><td>Map tiles for wind direction map</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">View</a></td></tr>
-      <tr><td>Postcodes.io</td><td>UK postcode lookup</td><td><a href="https://postcodes.io" target="_blank">View</a></td></tr>
-      <tr><td>OpenStreetMap Nominatim</td><td>Reverse geocoding (place names from coordinates)</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">View</a></td></tr>
-      <tr><td>NOAA Space Weather</td><td>KP geomagnetic index data</td><td><a href="https://www.noaa.gov/privacy" target="_blank">View</a></td></tr>
-      <tr><td>GitHub Pages</td><td>App hosting and delivery</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank">View</a></td></tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <h2>5. Local Storage and Offline Mode</h2>
-    <p>DroneChecker uses your device's local storage in two ways:</p>
-    <ul>
-      <li><strong>Service worker cache</strong> — app files (HTML, CSS, scripts) are cached locally so the app loads quickly and works offline.</li>
-      <li><strong>User preferences and weather cache</strong> — your drone profile, checklist state, and the most recent weather data are stored locally to improve your experience and enable offline use (see Section 3.5).</li>
-    </ul>
-    <p>No personal data is stored in local storage. All stored data remains on your device and is never transmitted to DroneChecker's servers.</p>
-  </div>
-
-  <div class="card">
-    <h2>6. Children's Privacy</h2>
-    <p>DroneChecker is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a>.</p>
-  </div>
-
-  <div class="card">
-    <h2>7. Your Rights (UK GDPR)</h2>
-    <p>Under UK GDPR, you have the right to access, correct, or delete any personal data we hold, and to lodge a complaint with the <a href="https://ico.org.uk" target="_blank">Information Commissioner's Office (ICO)</a>. As DroneChecker does not collect or store personal data on our servers, most of these rights are satisfied by the nature of the app itself. Any locally stored preferences can be cleared by clearing your browser or app cache.</p>
-  </div>
-
-  <div class="card">
-    <h2>8. Changes to This Policy</h2>
-    <p>We may update this Privacy Policy from time to time and will indicate the date of revision at the top of this page. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
-  </div>
-
-  <div class="card">
-    <h2>9. Contact Us</h2>
-    <p>Email: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a><br>
-    Website: <a href="https://dronechecker.co.uk">dronechecker.co.uk</a></p>
-  </div>
-
-  <div class="footer">
-    <p>&copy; 2026 DroneChecker &mdash; <a href="/">Home</a> &mdash; <a href="/terms.html">Terms of Service</a> &mdash; <a href="mailto:bbridgewater.dev@gmail.com">Contact</a></p>
-  </div>
-
+<div class="header">
+  <a href="/" class="back">← Back to DroneChecker</a>
 </div>
+
+<div class="doc">
+  <h1>Privacy Policy</h1>
+  <div class="updated">DroneChecker — Last updated: May 2026</div>
+
+  <h2>1. Introduction</h2>
+  <p>Welcome to DroneChecker. This Privacy Policy explains how we collect, use, and protect your information when you use our application available at dronechecker.co.uk and on the Google Play Store.</p>
+  <p>By using DroneChecker, you agree to the collection and use of information in accordance with this policy.</p>
+
+  <h2>2. Who We Are</h2>
+  <p>DroneChecker is an independent application providing drone flying condition information for users worldwide, with a focus on the United Kingdom.</p>
+  <p>For any privacy-related queries, please contact us at: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a></p>
+
+  <h2>3. Information We Collect</h2>
+  <p>DroneChecker is designed to collect as little information as possible. The sections below describe what data is used and why.</p>
+
+  <h2>3.1 Location Data</h2>
+  <p>DroneChecker requests access to your device's location (GPS) to display local weather conditions, calculate golden hour and blue hour times, and provide localised flying condition ratings.</p>
+  <p><strong>We do not store your location data.</strong> Location is used only in real time and is never transmitted to our servers or stored permanently. Your coordinates are passed to third-party weather services (listed in Section 4) solely to retrieve relevant data.</p>
+
+  <h2>3.2 Search Queries</h2>
+  <p>If you use the postcode or town search feature, your query is sent to Postcodes.io (for postcodes) or the Open-Meteo Geocoding API (for town and city names) solely to retrieve location coordinates. We do not store any search queries.</p>
+
+  <h2>3.3 Analytics Data</h2>
+  <p>DroneChecker uses Google Analytics 4 to collect anonymous usage data. This helps us understand how the app is used so we can improve it. Google Analytics collects:</p>
+  <ul>
+    <li>Pages and features visited within the app</li>
+    <li>Session duration and frequency of use</li>
+    <li>Device type, operating system and browser</li>
+    <li>Approximate geographic location (city or region level — not precise GPS coordinates)</li>
+    <li>How you arrived at the app (direct, search, referral)</li>
+  </ul>
+  <p><strong>No personally identifiable information is collected through Google Analytics.</strong> Google Analytics sets cookies on your device to distinguish users and sessions. We do not share this data with any third parties beyond Google's own analytics processing. You can learn more about how Google handles this data at <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a>.</p>
+
+  <h2>3.4 No Accounts Required</h2>
+  <p>DroneChecker does not require you to create an account. We do not collect your name, email address, or any other personal identifiers.</p>
+
+  <h2>3.5 Device Preferences and Local Data</h2>
+  <p>To improve your experience, the following data is saved locally on your device using browser local storage. None of this data is transmitted to us or any third party:</p>
+  <ul>
+    <li><strong>Drone profile</strong> — your selected drone model, used to personalise wind limit thresholds.</li>
+    <li><strong>Unit preference</strong> — whether you have selected metric (km/h, °C) or imperial (mph, °F) units.</li>
+    <li><strong>Pre-flight checklist state</strong> — which checklist items you have ticked, so your progress is preserved between sessions.</li>
+    <li><strong>Disclaimer acceptance</strong> — a flag confirming you have read and accepted the advisory disclaimer, so it is not shown on every visit.</li>
+    <li><strong>Onboarding state</strong> — a flag confirming you have completed the introductory onboarding screens.</li>
+    <li><strong>Favourite locations</strong> — location names and GPS coordinates for any flying spots you have saved as favourites. This data remains on your device only.</li>
+    <li><strong>Flight log entries</strong> — if you use the flight logger, your entries (including dates, location names, drone model, flight duration, conditions and any notes you add) are stored locally on your device. This data is never transmitted to us. You can export it as a CSV file and delete it at any time within the app.</li>
+    <li><strong>Cached weather data</strong> — the most recently loaded weather conditions, stored with a timestamp to allow the app to display last known data when offline. This contains weather readings only and no personal information.</li>
+  </ul>
+  <p>You can clear all locally stored data at any time by clearing your browser or app cache, or by uninstalling the app.</p>
+
+  <h2>4. Third-Party Services</h2>
+  <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data. When you use features such as weather or location search, your coordinates or search query may be sent to the relevant service. No personal identifying information is included in these requests.</p>
+
+  <table>
+    <tr><th>Service</th><th>Purpose</th><th>Privacy Policy</th></tr>
+    <tr><td>Open-Meteo</td><td>Live weather, forecast data and town/city geocoding</td><td><a href="https://open-meteo.com/en/terms" target="_blank">View</a></td></tr>
+    <tr><td>Postcodes.io</td><td>UK postcode lookup</td><td><a href="https://postcodes.io" target="_blank">View</a></td></tr>
+    <tr><td>OpenStreetMap Nominatim</td><td>Reverse geocoding (place names from coordinates)</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank">View</a></td></tr>
+    <tr><td>NOAA Space Weather</td><td>KP geomagnetic index data</td><td><a href="https://www.noaa.gov/privacy" target="_blank">View</a></td></tr>
+    <tr><td>Google Analytics 4</td><td>Anonymous usage analytics to improve the app</td><td><a href="https://policies.google.com/privacy" target="_blank">View</a></td></tr>
+    <tr><td>GitHub Pages</td><td>App hosting and delivery</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank">View</a></td></tr>
+  </table>
+
+  <h2>5. Local Storage and Offline Mode</h2>
+  <p>DroneChecker uses your device's local storage in two ways:</p>
+  <ul>
+    <li><strong>Service worker cache</strong> — app files (HTML, CSS, scripts) are cached locally so the app loads quickly and works offline.</li>
+    <li><strong>User preferences and data</strong> — your drone profile, unit preference, checklist state, favourite locations, flight log entries, and the most recent weather data are stored locally to improve your experience and enable offline use (see Section 3.5).</li>
+  </ul>
+  <p>No personal data is transmitted to DroneChecker's servers. All stored data remains on your device.</p>
+
+  <h2>6. Children's Privacy</h2>
+  <p>DroneChecker is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a>.</p>
+
+  <h2>7. Your Rights (UK GDPR)</h2>
+  <p>Under UK GDPR, you have the right to access, correct, or delete any personal data we hold, and to lodge a complaint with the <a href="https://ico.org.uk" target="_blank">Information Commissioner's Office (ICO)</a>. As DroneChecker does not collect or store personal data on our servers, most of these rights are satisfied by the nature of the app itself.</p>
+  <p>For analytics data processed by Google, you may opt out using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank">Google Analytics opt-out browser add-on</a>.</p>
+  <p>Any locally stored preferences and flight log data can be cleared by clearing your browser or app cache, or by using the delete functions within the app.</p>
+
+  <h2>8. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time and will indicate the date of revision at the top of this page. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+
+  <h2>9. Contact Us</h2>
+  <p>Email: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a><br/>
+  Website: <a href="https://dronechecker.co.uk">dronechecker.co.uk</a></p>
+</div>
+
+<div class="footer">
+  <a href="/">Home</a>
+  <a href="/terms.html">Terms of Service</a>
+  <a href="mailto:bbridgewater.dev@gmail.com">Contact</a>
+  <br/><br/>© 2026 DroneChecker
+</div>
+
 </body>
 </html>

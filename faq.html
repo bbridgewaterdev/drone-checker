@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>FAQ — DroneChecker</title>
+  <meta name="description" content="Frequently asked questions about DroneChecker, the UK drone flying companion app."/>
+  <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;
+      --text:#f1f5f9;--muted:#94a3b8;--border:rgba(255,255,255,0.08);
+      --accent:#3b82f6;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --radius:12px;--radius-sm:8px;
+    }
+    html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;}
+    a{color:var(--accent);text-decoration:none;}
+    a:hover{text-decoration:underline;}
+
+    /* Header */
+    .site-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+    .logo-title{font-size:17px;font-weight:600;color:var(--text);}
+    .back-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;color:var(--muted);font-size:13px;font-weight:600;text-decoration:none;transition:color .15s;}
+    .back-btn:hover{color:var(--text);text-decoration:none;}
+
+    /* Hero */
+    .hero{padding:48px 20px 32px;text-align:center;max-width:600px;margin:0 auto;}
+    .hero h1{font-size:28px;font-weight:700;margin-bottom:8px;letter-spacing:-.5px;}
+    .hero p{font-size:15px;color:var(--muted);line-height:1.6;}
+
+    /* Search */
+    .search-wrap{max-width:560px;margin:0 auto 40px;padding:0 20px;}
+    .search-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;color:var(--text);font-size:15px;outline:none;font-family:inherit;transition:border-color .15s;}
+    .search-input:focus{border-color:var(--accent);}
+    .search-input::placeholder{color:var(--muted);}
+
+    /* FAQ sections */
+    .faq-wrap{max-width:640px;margin:0 auto;padding:0 20px 60px;}
+    .faq-section{margin-bottom:32px;}
+    .faq-section-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-left:4px;}
+
+    /* FAQ items */
+    .faq-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;transition:border-color .15s;}
+    .faq-item.open{border-color:rgba(59,130,246,.3);}
+    .faq-q{display:flex;align-items:center;justify-content:space-between;padding:16px;cursor:pointer;gap:12px;user-select:none;}
+    .faq-q-text{font-size:14px;font-weight:600;color:var(--text);line-height:1.4;}
+    .faq-icon{width:20px;height:20px;flex-shrink:0;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;transition:transform .2s,background .15s;}
+    .faq-item.open .faq-icon{transform:rotate(45deg);background:var(--accent);}
+    .faq-icon svg{width:10px;height:10px;stroke:var(--muted);stroke-width:2.5;fill:none;transition:stroke .15s;}
+    .faq-item.open .faq-icon svg{stroke:#fff;}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+    .faq-a-inner{padding:0 16px 16px;font-size:13px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border);}
+    .faq-a-inner p{margin-bottom:8px;}
+    .faq-a-inner p:last-child{margin-bottom:0;}
+    .faq-a-inner strong{color:var(--text);}
+    .faq-a-inner .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:600;margin-right:4px;}
+    .tag.green{background:rgba(34,197,94,.15);color:var(--green);}
+    .tag.amber{background:rgba(245,158,11,.15);color:var(--amber);}
+    .tag.red{background:rgba(239,68,68,.15);color:var(--red);}
+
+    /* No results */
+    .no-results{text-align:center;padding:40px 20px;color:var(--muted);display:none;}
+
+    /* Footer */
+    .site-footer{border-top:1px solid var(--border);padding:24px 20px;text-align:center;font-size:12px;color:var(--muted);}
+    .site-footer a{color:var(--muted);}
+    .site-footer a:hover{color:var(--text);}
+
+    @media(max-width:480px){
+      .hero h1{font-size:22px;}
+      .back-btn span{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">
+    <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="16" fill="#0f172a"/>
+      <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
+      <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+      <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+      <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+      <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+      <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+      <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+      <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+      <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
+      <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
+      <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
+      <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
+      <circle cx="50" cy="50" r="11" fill="white"/>
+      <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
+    </svg>
+    <span class="logo-title">DroneChecker</span>
+  </a>
+  <a href="/" class="back-btn">← <span>Back to app</span></a>
+</header>
+
+<div class="hero">
+  <h1>Frequently Asked Questions</h1>
+  <p>Everything you need to know about DroneChecker</p>
+</div>
+
+<div class="search-wrap">
+  <input class="search-input" type="text" id="faq-search" placeholder="Search questions..." oninput="filterFaq(this.value)"/>
+</div>
+
+<div class="faq-wrap" id="faq-wrap">
+
+  <div class="faq-section" data-section="Flying conditions">
+    <div class="faq-section-title">Flying conditions</div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">How accurate is the fly rating?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>The fly rating is advisory only and based on live weather data combined with your drone's published wind resistance specifications. It checks wind speed, gusts, visibility, precipitation type and geomagnetic activity.</p>
+        <p><strong>Ratings:</strong> <span class="tag green">Good to Fly</span> conditions are within safe limits for your drone. <span class="tag amber">Fly with Caution</span> means one or more factors are marginal. <span class="tag red">Do Not Fly</span> means conditions exceed your drone's safe operating limits.</p>
+        <p>Always use your own judgement and verify conditions on the ground before flying. The pilot in command is solely responsible for safe operations at all times.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Why does light drizzle show as caution rather than good to fly?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Most consumer drones — including all DJI Mini and Mavic models — have no water resistance rating. Even light drizzle can cause water ingress into motors, ESCs and camera gimbals, potentially causing permanent damage or a flyaway.</p>
+        <p>We flag drizzle as caution rather than good to fly because the risk is real, even if the drone doesn't immediately fail. Fly in drizzle at your own risk.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">What does the KP index mean and why does it matter?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>The KP index measures geomagnetic activity caused by solar wind interacting with Earth's magnetic field. For drone pilots this matters because high KP levels can cause compass errors and GPS inaccuracies, increasing the risk of flyaways.</p>
+        <p><strong>KP 0–3:</strong> No impact on drone systems.<br/>
+        <strong>KP 4–5:</strong> Possible minor compass drift — fly carefully and stay close.<br/>
+        <strong>KP 6+:</strong> GPS may be unreliable. DroneChecker will show a Do Not Fly rating at KP 6 or above.</p>
+        <p>Data is sourced live from NOAA's Space Weather Prediction Center.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">How do I change wind speed thresholds for my drone?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>DroneChecker uses the manufacturer's published wind resistance specifications for each drone model. Use the drone selector at the top of the dashboard to switch between models — the fly rating thresholds update automatically.</p>
+        <p>If your drone isn't listed, choose the closest matching generic profile (Light drone under 250g or Heavy drone over 250g).</p>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="faq-section" data-section="Weather & data">
+    <div class="faq-section-title">Weather & data</div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Where does the weather data come from?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Weather data is provided by <strong>Open-Meteo</strong>, which uses ECMWF (European Centre for Medium-Range Weather Forecasts) model data — the same high-quality forecast model used by professional meteorologists. It's updated hourly.</p>
+        <p>KP geomagnetic index data is sourced live from <strong>NOAA's Space Weather Prediction Center</strong>.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">How often does the weather update?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>DroneChecker fetches fresh weather data every time you open the app and then automatically refreshes in the background every 30 minutes while the app is active. You can also tap <strong>↻ Refresh</strong> in the header at any time to force an immediate update.</p>
+        <p>The header shows "Updated X mins ago" so you always know how current the data is.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Does it work offline?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Yes — DroneChecker caches the last known weather data on your device. If you lose signal at a flying site, you'll still see the most recently loaded conditions with a banner indicating it's offline data.</p>
+        <p>The golden hour calculator works entirely offline as it's calculated astronomically from your location coordinates, with no internet required.</p>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="faq-section" data-section="Location">
+    <div class="faq-section-title">Location</div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Why does the app show London when I first open it?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>On first launch, DroneChecker shows London conditions immediately so you're never looking at a blank screen. Within a few seconds it should update automatically to your actual location once GPS or network location resolves.</p>
+        <p>If it stays on London, tap the <strong>📍 button</strong> next to the search bar to manually request your location, or type your postcode or town into the search bar.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">How do I save a favourite location?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Search for or navigate to a location, then tap the <strong>☆ star button</strong> next to the search bar. The location is saved to your device and appears as a pill below the search bar for one-tap access. You can save up to 8 favourite locations.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Can I use DroneChecker outside the UK?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Yes — the weather, fly rating, golden hour and KP index all work globally. Weather data covers the entire world via Open-Meteo.</p>
+        <p>The CAA rules and guidance in the Checklist tab are UK-specific. If you're flying outside the UK, always check your local aviation authority's regulations — drone rules vary significantly between countries.</p>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="faq-section" data-section="App & account">
+    <div class="faq-section-title">App & account</div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Is DroneChecker free?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Yes — DroneChecker is completely free with no adverts, no account required and no data collected. All features are available to all users.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Is DroneChecker available on iPhone?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>DroneChecker isn't currently on the Apple App Store, but you can install it directly from Safari on iPhone or iPad:</p>
+        <p>1. Open <strong>dronechecker.co.uk</strong> in Safari<br/>
+        2. Tap the <strong>Share button ⎋</strong> at the bottom<br/>
+        3. Tap <strong>Add to Home Screen</strong><br/>
+        4. Tap <strong>Add</strong></p>
+        <p>The app will appear on your home screen and behave just like a native app.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Is my flight log data saved? What happens if I uninstall the app?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Your flight log is saved locally on your device and persists across app restarts and phone reboots. It will <strong>not</strong> be lost if you simply close the app.</p>
+        <p>However, uninstalling the app or clearing the app's storage in your phone settings will erase your flight log. We strongly recommend using the <strong>Export to CSV</strong> button regularly to save a backup — the CSV file opens in Excel and can be stored in your photos or cloud storage.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">Does DroneChecker collect any personal data?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>No. DroneChecker does not collect, store or share any personal data. No account is required. Your location is only used to fetch weather data and is never transmitted to our servers. All data — favourites, flight log, settings — is stored locally on your device only.</p>
+        <p>We use Google Analytics to understand anonymous usage patterns (which tabs are used, general location region). No personally identifiable information is ever collected.</p>
+      </div></div>
+    </div>
+
+    <div class="faq-item" onclick="toggle(this)">
+      <div class="faq-q">
+        <div class="faq-q-text">How do I report a bug or give feedback?</div>
+        <div class="faq-icon"><svg viewBox="0 0 10 10"><line x1="5" y1="1" x2="5" y2="9"/><line x1="1" y1="5" x2="9" y2="5"/></svg></div>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <p>Tap <strong>Send Feedback</strong> in the app footer on the Dashboard tab, or email us directly at <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a>. Please include your device model, browser or app version, and a description of the issue.</p>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="no-results" id="no-results">
+    No questions found matching your search.<br/>
+    <a href="mailto:bbridgewater.dev@gmail.com" style="color:var(--accent);margin-top:8px;display:inline-block;">Ask us directly →</a>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;">
+    <a href="/">Back to app</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="mailto:bbridgewater.dev@gmail.com">Contact</a>
+  </div>
+  <div style="color:var(--border);">© 2026 DroneChecker · Bridgewater Dev</div>
+</footer>
+
+<script>
+function toggle(item){
+  var isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(function(el){
+    el.classList.remove('open');
+    el.querySelector('.faq-a').style.maxHeight='0';
+  });
+  if(!isOpen){
+    item.classList.add('open');
+    var ans=item.querySelector('.faq-a');
+    ans.style.maxHeight=ans.scrollHeight+'px';
+  }
+}
+
+function filterFaq(query){
+  var q=query.toLowerCase().trim();
+  var items=document.querySelectorAll('.faq-item');
+  var sections=document.querySelectorAll('.faq-section');
+  var anyVisible=false;
+  sections.forEach(function(section){
+    var sectionItems=section.querySelectorAll('.faq-item');
+    var sectionVisible=false;
+    sectionItems.forEach(function(item){
+      var text=item.textContent.toLowerCase();
+      var show=!q||text.includes(q);
+      item.style.display=show?'':'none';
+      if(show)sectionVisible=true;
+    });
+    section.style.display=sectionVisible?'':'none';
+    if(sectionVisible)anyVisible=true;
+  });
+  document.getElementById('no-results').style.display=anyVisible?'none':'block';
+  if(q){
+    document.querySelectorAll('.faq-item').forEach(function(item){
+      if(item.style.display!=='none'&&!item.classList.contains('open')){
+        item.classList.add('open');
+        var ans=item.querySelector('.faq-a');
+        ans.style.maxHeight=ans.scrollHeight+'px';
+      }
+    });
+  }
+}
+</script>
+</body>
+</html>

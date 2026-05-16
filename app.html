@@ -101,7 +101,7 @@
     .fc-item{background:var(--bg3);border-radius:var(--radius-sm);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px;}
     .fc-time{font-size:13px;font-weight:600;width:46px;flex-shrink:0;}
     .fc-icon{font-size:20px;width:26px;text-align:center;flex-shrink:0;}
-    .fc-temp{font-size:13px;font-weight:600;width:36px;}
+    .fc-temp{font-size:13px;font-weight:600;width:52px;}
     .fc-desc{flex:1;font-size:12px;color:var(--muted);}
     .fc-wind{font-size:12px;color:var(--muted);width:54px;text-align:right;}
     .fc-dot{width:11px;height:11px;flex-shrink:0;display:inline-block;}
@@ -418,7 +418,7 @@
           <button class="unit-toggle" id="unit-toggle" onclick="toggleUnits()">mph</button>
         </div>
         <div class="search">
-          <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. LS1 or Leeds" onkeydown="if(event.key==='Enter')doSearch()"/>
+          <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. SW1 or London" onkeydown="if(event.key==='Enter')doSearch()"/>
           <button onclick="doSearch()">Search</button>
           <button class="myloc-btn" onclick="useMyLocation()" title="Use my location">📍</button>
           <button onclick="toggleFavCurrent()" id="fav-btn" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0;">☆</button>
@@ -755,7 +755,7 @@ function renderWeekPlanner(daily){
     var date=new Date(daily.time[j]);
     var dayLbl=date.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
     var dWmo=daily.weather_code[j],dInfo=wmoInfo(dWmo);
-    var dMax=tmp(Math.round(daily.temperature_2m_max[j])),dMin=tmp(Math.round(daily.temperature_2m_min[j]));
+    var dMax=Math.round(daily.temperature_2m_max[j]),dMin=Math.round(daily.temperature_2m_min[j]);
     var dWind=spd(daily.wind_speed_10m_max[j]||0),dGust=spd(daily.wind_gusts_10m_max[j]||0);
     var dr=fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo);
     var dotCol=dr==='green'?'var(--green)':dr==='amber'?'var(--amber)':'var(--red)';
@@ -763,7 +763,7 @@ function renderWeekPlanner(daily){
     rows+='<div class="week-row'+(isBest?' best-day':'')+'">'+
       '<div class="week-day">'+dayLbl.split(' ')[0]+'<div style="font-size:10px;color:var(--muted);font-weight:400;">'+dayLbl.split(' ').slice(1).join(' ')+'</div></div>'+
       '<div class="week-emoji">'+dInfo.emoji+'</div>'+
-      '<div class="week-info">'+dMin+tmpU()+' / '+dMax+tmpU()+'<div style="color:var(--muted);">'+dInfo.desc+'</div></div>'+
+      '<div class="week-info">'+dMin+'–'+dMax+'°C · '+Math.round(dMin*9/5+32)+'–'+Math.round(dMax*9/5+32)+'°F<div style="color:var(--muted);">'+dInfo.desc+'</div></div>'+
       '<div class="week-wind">'+dWind+' '+spdU()+'<div style="font-size:11px;">gust '+dGust+'</div></div>'+
       '<div class="week-dot" style="background:'+dotCol+';">'+(isBest?'':'')+'</div>'+
       (isBest?'<div style="font-size:10px;font-weight:600;color:var(--green);flex-shrink:0;">BEST</div>':'')+'</div>';
@@ -944,7 +944,7 @@ function shareConditions(){
     emoji+' '+cond.label+' in '+loc+'\n\n'+
     '🌤️ '+info.desc+'\n'+
     '💨 Wind: '+spd(c.wind_speed_10m||0)+' '+spdU()+' · Gusts: '+spd(c.wind_gusts_10m||0)+' '+spdU()+'\n'+
-    '🌡️ '+tmp(Math.round(c.temperature_2m||0))+tmpU()+'\n\n'+
+    '🌡️ '+Math.round(c.temperature_2m||0)+'°C / '+Math.round((c.temperature_2m||0)*9/5+32)+'°F\n\n'+
     '🔗 dronechecker.co.uk';
   if(navigator.share){
     navigator.share({text:text}).catch(function(){});
@@ -1145,7 +1145,7 @@ function renderDash(){
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">🔗 Share</button></div>'+
     '<div class="card" id="kp-card"></div>'+
-    '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tmp(temp)+tmpU()+'</div><div class="wx-desc">'+info.desc+' &middot; feels '+tmp(feels)+tmpU()+'</div></div></div>'+
+    '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+Math.round(temp)+'°C <span style="font-size:28px;font-weight:600;color:var(--muted);">/ '+Math.round(temp*9/5+32)+'°F</span></div><div class="wx-desc">'+info.desc+' &middot; feels '+Math.round(feels)+'°C / '+Math.round(feels*9/5+32)+'°F</div></div></div>'+
     '<div class="wx-grid">'+
     '<div class="wx-tile '+rWind+'"><div class="wx-lbl">Wind</div><div class="wx-val wx-val-'+rWind+'">'+spd(wind)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div></div>'+
     '<div class="wx-tile '+rGust+'"><div class="wx-lbl">Gusts</div><div class="wx-val wx-val-'+rGust+'">'+spd(gust)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div></div>'+
@@ -1197,7 +1197,7 @@ function renderFc(){
   for(var i=0;i<hours.time.length&&count<24;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
     var wmo=hours.weather_code[i],info=wmoInfo(wmo),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
-    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+tmp(temp)+tmpU()+'</div><div class="fc-desc">'+info.desc+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo)+'"></div></div>';
+    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C<br><span style="font-size:11px;color:var(--muted);">'+Math.round(temp*9/5+32)+'°F</span></div><div class="fc-desc">'+info.desc+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo)+'"></div></div>';
     count++;
   }
   document.getElementById('fc-body').innerHTML=

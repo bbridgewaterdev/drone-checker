@@ -567,8 +567,27 @@ function getChecklistSummary(){
   return{done:done,total:total,pct:pct};
 }
 
-function loadChecklist(){try{var s=localStorage.getItem('dc_checklist');if(s)clState=JSON.parse(s);}catch(e){}}
-function saveChecklist(){try{localStorage.setItem('dc_checklist',JSON.stringify(clState));}catch(e){}}
+function loadChecklist(){
+  try{
+    var s=localStorage.getItem('dc_checklist');
+    if(s){
+      var parsed=JSON.parse(s);
+      var today=new Date().toISOString().split('T')[0];
+      if(parsed.date===today){
+        clState=parsed.state||{};
+      } else {
+        clState={};
+        saveChecklist();
+      }
+    }
+  }catch(e){}
+}
+function saveChecklist(){
+  try{
+    var today=new Date().toISOString().split('T')[0];
+    localStorage.setItem('dc_checklist',JSON.stringify({date:today,state:clState}));
+  }catch(e){}
+}
 function toggleCheck(id){
   clState[id]=!clState[id];saveChecklist();renderChecklist();
   // Update progress card on dashboard if visible

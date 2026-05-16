@@ -22,6 +22,7 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="description" content="UK drone flying conditions, weather &amp; golden hour calculator.">
   <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <title>DroneChecker</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -522,7 +523,7 @@ var APP_VERSION='1.0.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,unitMode='kmh',lastUpdated=null;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,unitMode='kmh',lastUpdated=null,windMap=null;
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
 function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])selectedDrone=s;}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;updateDroneLimits();}
 function saveDrone(){var sel=document.getElementById('drone-sel');if(!sel)return;selectedDrone=sel.value;try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}updateDroneLimits();if(wxData)renderDash();}
@@ -1215,19 +1216,19 @@ function initWindMap(){
     return;
   }
   var c=wxData.current;
-  var wind=spd(c.wind_speed_10m||0);
-  var gust=spd(c.wind_gusts_10m||0);
+  var rawWind=c.wind_speed_10m||0,rawGust=c.wind_gusts_10m||0;
+  var wind=spd(rawWind),gust=spd(rawGust);
   var deg=c.wind_direction_10m||0;
   var d=getDrone();
-  var rawWind=c.wind_speed_10m||0;
+  var colHex=rawWind>=d.windRed?'#ef4444':rawWind>=d.windAmber?'#f59e0b':'#22c55e';
   var col=rawWind>=d.windRed?'var(--red)':rawWind>=d.windAmber?'var(--amber)':'var(--green)';
   var label=rawWind>=d.windRed?'Too Strong':rawWind>=d.windAmber?'Caution':'Flyable';
   var dirStr=dirLabel(deg);
+  var lat=uLat||51.5074,lng=uLng||(-0.1278);
   var hours=wxData.hourly,now=new Date(),fcRows='',count=0;
   for(var i=0;i<hours.time.length&&count<8;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
-    var hw=spd(hours.wind_speed_10m[i]||0);
-    var hg=spd(hours.wind_gusts_10m[i]||0);
+    var hw=spd(hours.wind_speed_10m[i]||0),hg=spd(hours.wind_gusts_10m[i]||0);
     var hr=fcRating(hours.wind_speed_10m[i]||0,hours.wind_gusts_10m[i]||0,10000,0);
     var hcol=hr==='red'?'var(--red)':hr==='amber'?'var(--amber)':'var(--green)';
     fcRows+='<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">'+
@@ -1238,37 +1239,57 @@ function initWindMap(){
     count++;
   }
   windEl.innerHTML=
-    '<div style="display:flex;flex-direction:column;align-items:center;padding:28px 16px 16px;">'+
-      '<div style="position:relative;width:200px;height:200px;margin-bottom:20px;">'+
-        '<svg width="200" height="200" viewBox="0 0 200 200">'+
-          '<circle cx="100" cy="100" r="96" fill="var(--bg2)" stroke="var(--border)" stroke-width="2"/>'+
-          '<text x="100" y="18" text-anchor="middle" fill="var(--muted)" font-size="13" font-weight="600" font-family="system-ui">N</text>'+
-          '<text x="186" y="104" text-anchor="middle" fill="var(--muted)" font-size="13" font-weight="600" font-family="system-ui">E</text>'+
-          '<text x="100" y="194" text-anchor="middle" fill="var(--muted)" font-size="13" font-weight="600" font-family="system-ui">S</text>'+
-          '<text x="14" y="104" text-anchor="middle" fill="var(--muted)" font-size="13" font-weight="600" font-family="system-ui">W</text>'+
-          '<line x1="100" y1="8" x2="100" y2="20" stroke="var(--border)" stroke-width="1.5"/>'+
-          '<line x1="192" y1="100" x2="180" y2="100" stroke="var(--border)" stroke-width="1.5"/>'+
-          '<line x1="100" y1="192" x2="100" y2="180" stroke="var(--border)" stroke-width="1.5"/>'+
-          '<line x1="8" y1="100" x2="20" y2="100" stroke="var(--border)" stroke-width="1.5"/>'+
-          '<g transform="rotate('+deg+', 100, 100)">'+
-            '<polygon points="100,28 110,115 100,100 90,115" fill="'+col+'" opacity="0.9"/>'+
-            '<polygon points="100,172 110,85 100,100 90,85" fill="'+col+'" opacity="0.25"/>'+
-          '</g>'+
-          '<circle cx="100" cy="100" r="8" fill="'+col+'"/>'+
-        '</svg>'+
+    '<div style="position:relative;">'+
+      '<div id="wind-map-el" style="height:300px;width:100%;"></div>'+
+      '<div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:8px 16px;display:flex;align-items:center;gap:10px;pointer-events:none;white-space:nowrap;">'+
+        '<div style="width:9px;height:9px;border-radius:50%;background:'+colHex+';box-shadow:0 0 6px '+colHex+';flex-shrink:0;"></div>'+
+        '<div style="font-size:15px;font-weight:700;color:'+colHex+';">'+wind+' '+spdU()+'</div>'+
+        '<div style="font-size:12px;color:rgba(241,245,249,.55);">From the '+dirStr+' &middot; '+deg+'°</div>'+
       '</div>'+
-      '<div style="font-size:52px;font-weight:700;color:'+col+';line-height:1;">'+wind+'</div>'+
-      '<div style="font-size:14px;color:var(--muted);margin-bottom:6px;">'+spdU()+'</div>'+
-      '<div style="font-size:20px;font-weight:600;color:'+col+';margin-bottom:4px;">'+label+'</div>'+
-      '<div style="font-size:13px;color:var(--muted);">From the '+dirStr+' &middot; '+deg+'°</div>'+
+      '<div style="position:absolute;bottom:24px;left:12px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 12px;pointer-events:none;">'+
+        '<div style="font-size:13px;font-weight:700;color:'+colHex+';">'+label+'</div>'+
+        '<div style="font-size:11px;color:rgba(241,245,249,.5);margin-top:1px;">Gusts '+gust+' '+spdU()+'</div>'+
+      '</div>'+
     '</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 12px 12px;">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+
       '<div class="wx-tile"><div class="wx-lbl">Wind</div><div class="wx-val" style="font-size:20px;">'+wind+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
       '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val" style="font-size:20px;">'+gust+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
-      '<div class="wx-tile"><div class="wx-lbl">Knots</div><div class="wx-val" style="font-size:20px;">'+(spd(rawWind)*0.54/0.621).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Knots</div><div class="wx-val" style="font-size:20px;">'+(rawWind*0.539957).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
     '</div>'+
     '<div class="card"><div class="card-ttl">Hourly Wind Forecast</div>'+fcRows+'</div>'+
     '<div style="height:14px;"></div>';
+
+  if(windMap){windMap.remove();windMap=null;}
+  windMap=L.map('wind-map-el',{center:[lat,lng],zoom:11,zoomControl:false,attributionControl:true});
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright" style="color:#94a3b8;">OSM</a> © <a href="https://carto.com/attributions" style="color:#94a3b8;">CARTO</a>',
+    maxZoom:19
+  }).addTo(windMap);
+  L.control.zoom({position:'bottomright'}).addTo(windMap);
+
+  // Subtle range circle
+  L.circle([lat,lng],{radius:800,color:colHex,fillColor:colHex,fillOpacity:0.05,weight:1,opacity:0.3}).addTo(windMap);
+
+  // Wind direction arrow marker
+  var arrowHtml=
+    '<div style="width:56px;height:76px;transform:rotate('+deg+'deg);transform-origin:28px 40px;">'+
+      '<svg viewBox="0 0 56 76" width="56" height="76" xmlns="http://www.w3.org/2000/svg">'+
+        '<defs><filter id="wglow" x="-50%" y="-50%" width="200%" height="200%">'+
+          '<feGaussianBlur stdDeviation="2.5" result="blur"/>'+
+          '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>'+
+        '</filter></defs>'+
+        '<polygon points="28,3 38,48 28,38 18,48" fill="'+colHex+'" filter="url(#wglow)" opacity="0.95"/>'+
+        '<polygon points="28,73 38,30 28,38 18,30" fill="'+colHex+'" opacity="0.2"/>'+
+        '<circle cx="28" cy="40" r="7" fill="'+colHex+'" opacity="0.9"/>'+
+        '<circle cx="28" cy="40" r="3.5" fill="#0f172a"/>'+
+      '</svg>'+
+    '</div>';
+  L.marker([lat,lng],{
+    icon:L.divIcon({html:arrowHtml,iconSize:[56,76],iconAnchor:[28,40],className:''}),
+    interactive:false
+  }).addTo(windMap);
+
+  setTimeout(function(){if(windMap)windMap.invalidateSize();},150);
 }
 
 function calcSunTimes(lat,lng,date){
@@ -1343,5 +1364,6 @@ window.addEventListener('load',function(){
     window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});
   }
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>

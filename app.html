@@ -566,8 +566,10 @@ function showOfflineBanner(ts){var bar=document.getElementById('offline-bar'),ag
 function hideOfflineBanner(){var bar=document.getElementById('offline-bar');if(bar)bar.style.display='none';}
 
 var CHECKLIST=[
-  {section:'Pilot & Registration'},{id:'reg',label:'Operator ID displayed on drone'},{id:'flyer',label:'Flyer ID carried or accessible'},
-  {id:'remoteid',label:'Remote ID active (required for drones over 100g from Jan 2026)'},
+  {section:'Pilot & Registration'},{id:'reg',label:'Operator ID displayed on drone (required for drones 100g+ with camera)'},
+  {id:'flyer',label:'Flyer ID carried or accessible (required for all drones 100g+)'},
+  {id:'remoteid',label:'Remote ID switched on (mandatory for class-marked drones; recommended for all)'},
+  {id:'greenlight',label:'Green flashing light fitted and active (required for all night flights)'},
   {id:'notam',label:'Checked CAA airspace restrictions and NOTAMs'},{id:'rules',label:'Airspace checked — no restrictions at location'},{id:'insure',label:'Insurance valid (if required)'},
   {section:'Drone Hardware'},{id:'props',label:'Propellers secure and undamaged'},{id:'arms',label:'Arms fully unfolded and locked'},
   {id:'gimbal',label:'Gimbal guard removed'},{id:'body',label:'Drone body free of damage or cracks'},{id:'lens',label:'Camera lens clean and clear'},

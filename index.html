@@ -9,9 +9,7 @@
   <meta property="og:description" content="Live fly ratings, wind analysis, golden hour and KP index for UK drone pilots. Free, no account required."/>
   <meta property="og:image" content="/screenshots/screenshot-dashboard.png"/>
   <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
-  <link rel="manifest" href="/manifest.json"/>
   <script>
-    // Returning users go straight to the app
     try{if(localStorage.getItem('dc_disclaimer')==='accepted')window.location.replace('/app.html');}catch(e){}
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -22,7 +20,7 @@
     :root{
       --bg:#080e1a;--bg2:#0f172a;--bg3:#1e293b;--bg4:#334155;
       --text:#f1f5f9;--muted:#64748b;--muted2:#94a3b8;
-      --accent:#3b82f6;--sky:#38bdf8;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --accent:#06b6d4;--sky:#22d3ee;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
       --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
       --radius:14px;--radius-sm:8px;--radius-lg:20px;
       --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
@@ -31,7 +29,6 @@
     body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;line-height:1.6;overflow-x:hidden;}
     a{color:var(--accent);text-decoration:none;}
 
-    /* ---- NOISE TEXTURE ---- */
     body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
 
     /* ---- NAV ---- */
@@ -45,8 +42,8 @@
 
     /* ---- HERO ---- */
     .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px 80px;text-align:center;overflow:hidden;}
-    .hero-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse at center,rgba(59,130,246,.15) 0%,transparent 70%);pointer-events:none;}
-    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);}
+    .hero-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse at center,rgba(6,182,212,.15) 0%,transparent 70%);pointer-events:none;}
+    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(6,182,212,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);}
     .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--green);font-weight:500;margin-bottom:28px;animation:fadeUp .6s ease both;}
     .hero-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
@@ -61,9 +58,9 @@
     .hero-note{margin-top:16px;font-size:13px;color:var(--muted);animation:fadeUp .6s .4s ease both;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 
-    /* ---- STATUS STRIP ---- */
+    /* ---- STATUS STRIP — purely informational, no hover ---- */
     .status-strip{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:60px;animation:fadeUp .6s .5s ease both;}
-    .status-chip{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:13px;color:var(--muted2);}
+    .status-chip{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:13px;color:var(--muted2);pointer-events:none;user-select:none;}
     .status-chip strong{color:var(--text);}
     .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
     .dot.g{background:var(--green);}
@@ -81,9 +78,9 @@
     .feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:48px;}
     .feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:border-color .2s,transform .2s;}
     .feature-card:hover{border-color:var(--border2);transform:translateY(-2px);}
-    .feature-icon{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
-    .feature-icon.blue{background:rgba(59,130,246,.15);}
+    .feature-icon{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
     .feature-icon.green{background:rgba(34,197,94,.15);}
+    .feature-icon.blue{background:rgba(6,182,212,.15);}
     .feature-icon.amber{background:rgba(245,158,11,.15);}
     .feature-icon.sky{background:rgba(56,189,248,.15);}
     .feature-icon.purple{background:rgba(139,92,246,.15);}
@@ -96,7 +93,7 @@
     .rating-demo{display:flex;flex-direction:column;gap:10px;}
     .rating-row{display:flex;align-items:center;gap:14px;background:var(--bg3);border-radius:var(--radius-sm);padding:14px 16px;border:1px solid var(--border);}
     .rating-row.active-row{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06);}
-    .rating-circle{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+    .rating-circle{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .rating-circle.g{background:rgba(34,197,94,.2);border:2px solid var(--green);}
     .rating-circle.a{background:rgba(245,158,11,.2);border:2px solid var(--amber);}
     .rating-circle.r{background:rgba(239,68,68,.2);border:2px solid var(--red);}
@@ -116,7 +113,7 @@
     .platforms{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:48px;}
     .platform-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px;text-align:center;transition:border-color .2s;}
     .platform-card:hover{border-color:var(--border2);}
-    .platform-logo{font-size:40px;margin-bottom:16px;}
+    .platform-logo{display:flex;justify-content:center;align-items:center;margin-bottom:16px;}
     .platform-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:8px;}
     .platform-desc{font-size:14px;color:var(--muted2);margin-bottom:20px;line-height:1.5;}
     .platform-btn{display:inline-block;background:var(--accent);color:#fff;padding:11px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;transition:opacity .15s;}
@@ -196,12 +193,15 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Open the app
       </a>
-      <a href="https://play.google.com/store/apps/details?id=uk.co.dronechecker.twa" class="btn-secondary" target="_blank">
+      <a class="btn-secondary" style="opacity:.5;cursor:default;pointer-events:none;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-17c0-.83 1.01-1.3 1.7-.8l14 8.5c.63.38.63 1.32 0 1.7l-14 8.5c-.69.5-1.7.03-1.7-.8z"/></svg>
-        Google Play
+        Google Play — Coming Soon
       </a>
     </div>
     <p class="hero-note">Also available on iPhone — no App Store needed</p>
+    <p class="hero-note" style="margin-top:6px;">Built for UK pilots — but the weather checker, wind ratings and golden hour calculator work anywhere in the world.</p>
+
+    <!-- Status strip — pointer-events:none makes it clearly non-interactive -->
     <div class="status-strip">
       <div class="status-chip"><div class="dot g"></div><strong>Good to Fly</strong> · Clear skies</div>
       <div class="status-chip"><div class="dot a"></div><strong>Caution</strong> · Light drizzle</div>
@@ -220,36 +220,91 @@
     <p class="section-sub">DroneChecker brings together the data that matters into a single pre-flight check. No faff, no subscriptions, no nonsense.</p>
 
     <div class="feature-grid">
+
+      <!-- Fly Rating — checkmark SVG -->
       <div class="feature-card">
-        <div class="feature-icon green">🟢</div>
+        <div class="feature-icon green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
         <div class="feature-title">Intelligent Fly Rating</div>
         <div class="feature-desc">Green, amber or red — calibrated to your specific drone model. Checks wind speed, gusts, visibility, precipitation, fog and geomagnetic activity simultaneously.</div>
       </div>
+
+      <!-- Wind — wind lines SVG -->
       <div class="feature-card">
-        <div class="feature-icon blue">💨</div>
+        <div class="feature-icon blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.59 4.59A2 2 0 1111 8H2"/>
+            <path d="M12.59 19.41A2 2 0 1114 16H2"/>
+            <path d="M6.59 11.59A2 2 0 108 15H2"/>
+          </svg>
+        </div>
         <div class="feature-title">Wind Analysis</div>
         <div class="feature-desc">Live wind speed, direction and gusts in km/h or mph, with a colour-coded compass and 24-hour hourly wind forecast so you can see exactly when conditions improve.</div>
       </div>
+
+      <!-- Golden Hour — sun SVG -->
       <div class="feature-card">
-        <div class="feature-icon amber">🌅</div>
+        <div class="feature-icon amber">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        </div>
         <div class="feature-title">Golden Hour Calculator</div>
         <div class="feature-desc">Astronomically precise golden hour, blue hour, sunrise and sunset times for your exact location. Live countdowns and a "LIVE NOW" indicator — no internet required.</div>
       </div>
+
+      <!-- KP Index — activity waveform SVG -->
       <div class="feature-card">
-        <div class="feature-icon sky">🛰️</div>
+        <div class="feature-icon sky">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
         <div class="feature-title">KP Geomagnetic Index</div>
         <div class="feature-desc">Live KP data from NOAA's Space Weather Prediction Center. High geomagnetic activity can cause GPS inaccuracy and compass drift — DroneChecker factors this into your fly rating automatically.</div>
       </div>
+
+      <!-- Flight Logger — edit/pen SVG -->
       <div class="feature-card">
-        <div class="feature-icon purple">✈️</div>
+        <div class="feature-icon purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </div>
         <div class="feature-title">Flight Logger</div>
-        <div class="feature-desc">Log every flight with date, location, drone, duration, conditions and notes. Export to Excel CSV for insurance records, compliance documentation or personal reference.</div>
+        <div class="feature-desc">Log every flight with date, location, drone, duration, conditions and notes. Export to CSV for insurance records, compliance documentation or personal reference.</div>
       </div>
+
+      <!-- 7-Day Planner — calendar SVG -->
       <div class="feature-card">
-        <div class="feature-icon pink">📅</div>
+        <div class="feature-icon pink">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <line x1="8" y1="14" x2="8.01" y2="14"/>
+            <line x1="12" y1="14" x2="12.01" y2="14"/>
+            <line x1="16" y1="14" x2="16.01" y2="14"/>
+          </svg>
+        </div>
         <div class="feature-title">7-Day Best Day Planner</div>
         <div class="feature-desc">Can't fly today? See the best day to fly across the next week at a glance. DroneChecker analyses the full forecast and highlights the optimal window for your drone.</div>
       </div>
+
     </div>
   </div>
 </section>
@@ -268,21 +323,27 @@
       </div>
       <div class="rating-demo">
         <div class="rating-row active-row">
-          <div class="rating-circle g">🚁</div>
+          <div class="rating-circle g">
+            <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>
+          </div>
           <div>
             <div class="rating-label g">Good to Fly</div>
             <div class="rating-sub">All conditions within safe limits for your drone</div>
           </div>
         </div>
         <div class="rating-row">
-          <div class="rating-circle a">🚁</div>
+          <div class="rating-circle a">
+            <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>
+          </div>
           <div>
             <div class="rating-label a">Fly with Caution</div>
             <div class="rating-sub">One or more factors are marginal — take care</div>
           </div>
         </div>
         <div class="rating-row">
-          <div class="rating-circle r">🚁</div>
+          <div class="rating-circle r">
+            <svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>
+          </div>
           <div>
             <div class="rating-label r">Do Not Fly</div>
             <div class="rating-sub">Conditions exceed safe limits for your drone</div>
@@ -330,15 +391,41 @@
     <h2 class="section-title">Available on Android and iPhone</h2>
     <p class="section-sub">Free on every platform. No account, no subscription, no data collected.</p>
     <div class="platforms">
+
+      <!-- Android — Google Play wordmark style SVG -->
       <div class="platform-card">
-        <div class="platform-logo">🤖</div>
+        <div class="platform-logo">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="52" height="52" rx="12" fill="#1e293b"/>
+            <!-- Android robot head simplified -->
+            <rect x="14" y="22" width="24" height="16" rx="3" fill="#34a853"/>
+            <rect x="18" y="16" width="16" height="10" rx="5" fill="#34a853"/>
+            <circle cx="21" cy="20" r="2" fill="white"/>
+            <circle cx="31" cy="20" r="2" fill="white"/>
+            <line x1="19" y1="14" x2="16" y2="11" stroke="#34a853" stroke-width="2" stroke-linecap="round"/>
+            <line x1="33" y1="14" x2="36" y2="11" stroke="#34a853" stroke-width="2" stroke-linecap="round"/>
+            <rect x="10" y="24" width="4" height="10" rx="2" fill="#34a853"/>
+            <rect x="38" y="24" width="4" height="10" rx="2" fill="#34a853"/>
+            <rect x="19" y="38" width="4" height="7" rx="2" fill="#34a853"/>
+            <rect x="29" y="38" width="4" height="7" rx="2" fill="#34a853"/>
+          </svg>
+        </div>
         <div class="platform-title">Android</div>
         <div class="platform-desc">Install from Google Play for the full app experience, or open in any Android browser.</div>
-        <a href="https://play.google.com/store/apps/details?id=uk.co.dronechecker.twa" class="platform-btn" target="_blank">Get it on Google Play</a>
+        <a class="platform-btn secondary" style="opacity:.5;cursor:default;pointer-events:none;">Coming Soon on Google Play</a>
       </div>
+
+      <!-- iPhone — Apple logo style SVG -->
       <div class="platform-card">
-        <div class="platform-logo">🍎</div>
-        <div class="platform-title">iPhone & iPad</div>
+        <div class="platform-logo">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="52" height="52" rx="12" fill="#1e293b"/>
+            <!-- Apple logo shape -->
+            <path d="M33.5 27.5c-.1-3.8 3.1-5.6 3.2-5.7-1.7-2.5-4.4-2.9-5.4-2.9-2.3-.2-4.5 1.4-5.6 1.4-1.2 0-3-1.3-4.9-1.3-2.5 0-4.8 1.5-6.1 3.7-2.6 4.5-.7 11.2 1.9 14.9 1.2 1.8 2.7 3.8 4.6 3.7 1.8-.1 2.5-1.2 4.7-1.2 2.2 0 2.8 1.2 4.7 1.1 2-.1 3.2-1.8 4.5-3.6 1.4-2 1.9-4 2-4.1-.1 0-3.5-1.4-3.6-5z" fill="white"/>
+            <path d="M29.8 16.8c1-1.2 1.7-2.9 1.5-4.6-1.5.1-3.2 1-4.3 2.2-.9 1.1-1.8 2.8-1.5 4.4 1.6.1 3.3-.8 4.3-2z" fill="white"/>
+          </svg>
+        </div>
+        <div class="platform-title">iPhone &amp; iPad</div>
         <div class="platform-desc">No App Store needed — install directly from Safari in three taps.</div>
         <div class="platform-steps">
           <div class="platform-step"><div class="step-num">1</div><span>Open <strong style="color:var(--text);">dronechecker.co.uk</strong> in Safari</span></div>
@@ -346,6 +433,7 @@
           <div class="platform-step"><div class="step-num">3</div><span>Tap <strong style="color:var(--text);">Add to Home Screen</strong> → Add</span></div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -372,11 +460,10 @@
     <a href="/terms.html">Terms of Service</a>
     <a href="mailto:bbridgewater.dev@gmail.com">Contact</a>
   </div>
-  <div>© 2026 DroneChecker · Bridgewater Dev · Built for UK drone pilots</div>
+  <div>© 2026 DroneChecker · Bridgewater Studio · Built for UK drone pilots</div>
 </footer>
 
 <script>
-// Scroll reveal
 var observer=new IntersectionObserver(function(entries){
   entries.forEach(function(e){
     if(e.isIntersecting){

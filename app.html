@@ -1303,9 +1303,9 @@ function switchWindAlt(alt){
     var btn=document.getElementById('walt-'+a);
     if(!btn)return;
     var on=(a===alt);
-    btn.style.background=on?'rgba(255,255,255,.18)':'rgba(15,23,42,.7)';
-    btn.style.color=on?'rgba(241,245,249,1)':'rgba(241,245,249,.45)';
-    btn.style.borderColor=on?'rgba(255,255,255,.3)':'rgba(255,255,255,.08)';
+    btn.style.background=on?'#06b6d4':'#fff';
+    btn.style.color=on?'#fff':'#334155';
+    btn.style.borderColor=on?'#06b6d4':'rgba(0,0,0,.12)';
   });
   var ad=window._wAlt.data[alt];
   var dot=document.getElementById('wmap-dot');if(dot){dot.style.background=ad.hex;dot.style.boxShadow='0 0 6px '+ad.hex;}
@@ -1384,9 +1384,9 @@ function initWindMap(){
       '</div>'+
       // Altitude switcher top right
       '<div style="position:absolute;top:12px;right:12px;z-index:1000;display:flex;gap:4px;">'+
-        '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" style="background:rgba(255,255,255,.18);color:rgba(241,245,249,1);border:1px solid rgba(255,255,255,.3);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">10m</button>'+
-        '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" style="background:rgba(15,23,42,.7);color:rgba(241,245,249,.45);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">80m</button>'+
-        '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" style="background:rgba(15,23,42,.7);color:rgba(241,245,249,.45);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">120m</button>'+
+        '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" style="background:#06b6d4;color:#fff;border:1px solid #06b6d4;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.25);">10m</button>'+
+        '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" style="background:#fff;color:#334155;border:1px solid rgba(0,0,0,.12);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.15);">80m</button>'+
+        '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" style="background:#fff;color:#334155;border:1px solid rgba(0,0,0,.12);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.15);">120m</button>'+
       '</div>'+
       // Altitude profile bottom left
       '<div style="position:absolute;bottom:24px;left:12px;z-index:1000;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 11px;pointer-events:none;min-width:148px;">'+

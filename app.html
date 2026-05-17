@@ -1425,7 +1425,7 @@ function initWindMap(){
   if(windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
   if(windMap){windMap.remove();windMap=null;}
   windMap=L.map('wind-map-el',{center:[lat,lng],zoom:11,zoomControl:false,attributionControl:true});
-  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=YOUR_STADIA_KEY',{
+  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=f83000a7-38e7-4a5b-88f4-3c696f0a8322',{
     attribution:'© <a href="https://stadiamaps.com/" style="color:#94a3b8;">Stadia Maps</a> © <a href="https://openstreetmap.org/copyright" style="color:#94a3b8;">OSM</a>',
     maxZoom:20
   }).addTo(windMap);

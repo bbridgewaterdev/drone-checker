@@ -9,6 +9,7 @@
   <meta property="og:description" content="Live fly ratings, wind analysis, golden hour and KP index for UK drone pilots. Free, no account required."/>
   <meta property="og:image" content="/screenshots/screenshot-dashboard.png"/>
   <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
+  <link rel="manifest" href="/manifest.json"/>
   <script>
     // Returning users go straight to the app
     try{if(localStorage.getItem('dc_disclaimer')==='accepted')window.location.replace('/app.html');}catch(e){}
@@ -21,7 +22,7 @@
     :root{
       --bg:#080e1a;--bg2:#0f172a;--bg3:#1e293b;--bg4:#334155;
       --text:#f1f5f9;--muted:#64748b;--muted2:#94a3b8;
-      --accent:#06b6d4;--sky:#22d3ee;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+      --accent:#3b82f6;--sky:#38bdf8;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
       --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
       --radius:14px;--radius-sm:8px;--radius-lg:20px;
       --font-head:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;
@@ -44,8 +45,8 @@
 
     /* ---- HERO ---- */
     .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px 80px;text-align:center;overflow:hidden;}
-    .hero-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse at center,rgba(6,182,212,.15) 0%,transparent 70%);pointer-events:none;}
-    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(6,182,212,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);}
+    .hero-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse at center,rgba(59,130,246,.15) 0%,transparent 70%);pointer-events:none;}
+    .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%);}
     .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:6px 14px;font-size:13px;color:var(--green);font-weight:500;margin-bottom:28px;animation:fadeUp .6s ease both;}
     .hero-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
@@ -81,7 +82,7 @@
     .feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:border-color .2s,transform .2s;}
     .feature-card:hover{border-color:var(--border2);transform:translateY(-2px);}
     .feature-icon{width:44px;height:44px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
-    .feature-icon.blue{background:rgba(6,182,212,.15);}
+    .feature-icon.blue{background:rgba(59,130,246,.15);}
     .feature-icon.green{background:rgba(34,197,94,.15);}
     .feature-icon.amber{background:rgba(245,158,11,.15);}
     .feature-icon.sky{background:rgba(56,189,248,.15);}
@@ -115,7 +116,7 @@
     .platforms{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:48px;}
     .platform-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px;text-align:center;transition:border-color .2s;}
     .platform-card:hover{border-color:var(--border2);}
-    .platform-logo{display:flex;justify-content:center;align-items:center;margin-bottom:16px;}
+    .platform-logo{font-size:40px;margin-bottom:16px;}
     .platform-title{font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:8px;}
     .platform-desc{font-size:14px;color:var(--muted2);margin-bottom:20px;line-height:1.5;}
     .platform-btn{display:inline-block;background:var(--accent);color:#fff;padding:11px 24px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;transition:opacity .15s;}
@@ -195,13 +196,12 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Open the app
       </a>
-      <a class="btn-secondary" style="opacity:.5;cursor:default;pointer-events:none;">
+      <a href="https://play.google.com/store/apps/details?id=uk.co.dronechecker.twa" class="btn-secondary" target="_blank">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 20.5v-17c0-.83 1.01-1.3 1.7-.8l14 8.5c.63.38.63 1.32 0 1.7l-14 8.5c-.69.5-1.7.03-1.7-.8z"/></svg>
-        Google Play — Coming Soon
+        Google Play
       </a>
     </div>
     <p class="hero-note">Also available on iPhone — no App Store needed</p>
-    <p class="hero-note" style="margin-top:6px;">Built for UK pilots — but the weather checker, wind ratings and golden hour calculator work anywhere in the world.</p>
     <div class="status-strip">
       <div class="status-chip"><div class="dot g"></div><strong>Good to Fly</strong> · Clear skies</div>
       <div class="status-chip"><div class="dot a"></div><strong>Caution</strong> · Light drizzle</div>
@@ -268,21 +268,21 @@
       </div>
       <div class="rating-demo">
         <div class="rating-row active-row">
-          <div class="rating-circle g"><svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div class="rating-circle g">🚁</div>
           <div>
             <div class="rating-label g">Good to Fly</div>
             <div class="rating-sub">All conditions within safe limits for your drone</div>
           </div>
         </div>
         <div class="rating-row">
-          <div class="rating-circle a"><svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div class="rating-circle a">🚁</div>
           <div>
             <div class="rating-label a">Fly with Caution</div>
             <div class="rating-sub">One or more factors are marginal — take care</div>
           </div>
         </div>
         <div class="rating-row">
-          <div class="rating-circle r"><svg width="26" height="26" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div class="rating-circle r">🚁</div>
           <div>
             <div class="rating-label r">Do Not Fly</div>
             <div class="rating-sub">Conditions exceed safe limits for your drone</div>
@@ -331,13 +331,13 @@
     <p class="section-sub">Free on every platform. No account, no subscription, no data collected.</p>
     <div class="platforms">
       <div class="platform-card">
-        <div class="platform-logo"><svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+        <div class="platform-logo">🤖</div>
         <div class="platform-title">Android</div>
         <div class="platform-desc">Install from Google Play for the full app experience, or open in any Android browser.</div>
-        <a class="platform-btn secondary" style="opacity:.5;cursor:default;pointer-events:none;">Coming Soon on Google Play</a>
+        <a href="https://play.google.com/store/apps/details?id=uk.co.dronechecker.twa" class="platform-btn" target="_blank">Get it on Google Play</a>
       </div>
       <div class="platform-card">
-        <div class="platform-logo"><svg width="48" height="48" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+        <div class="platform-logo">🍎</div>
         <div class="platform-title">iPhone & iPad</div>
         <div class="platform-desc">No App Store needed — install directly from Safari in three taps.</div>
         <div class="platform-steps">

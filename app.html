@@ -668,10 +668,12 @@ function wmoInfo(code){
     95:{desc:'Thunderstorm',emoji:'⛈️'},96:{desc:'Thunderstorm w/ hail',emoji:'⛈️'},99:{desc:'Thunderstorm w/ heavy hail',emoji:'⛈️'}};
   return map[code]||{desc:'Unknown',emoji:'🌡️'};
 }
-function fcRating(wind,gust,vis,wmo){
+function fcRating(wind,gust,vis,wmo,precip){
   var d=getDrone();
   if(gust>=d.gustRed||wmo>=95||vis<1000||wmo===65||wmo===67||wmo===75||wmo===82||wmo===86||wmo===56||wmo===57||wmo===66||wmo===63||wmo===73||wmo===81)return'red';
+  if((precip||0)>=60)return'red';
   if(wind>=d.windAmber||wmo===55||wmo===51||wmo===53||wmo===61||wmo===80||wmo===71||wmo===77||wmo===85||wmo===45||wmo===48||vis<5000)return'amber';
+  if((precip||0)>=30)return'amber';
   return'green';
 }
 function dirLabel(deg){return['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];}
@@ -1265,8 +1267,8 @@ function renderFc(){
     var t=new Date(hours.time[i]);if(t<now)continue;
     var wmo=hours.weather_code[i],info=wmoInfo(wmo),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
     var precip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
-    var precipBadge='<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':precip>=10?'var(--muted)':'var(--border)')+';">💧'+precip+'%</span>';
-    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C<br><span style="font-size:11px;color:var(--muted);">'+Math.round(temp*9/5+32)+'°F</span></div><div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo)+'"></div></div>';
+    var precipBadge='<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':precip>=10?'var(--muted)':'rgba(148,163,184,.5)')+';">💧'+precip+'%</span>';
+    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C<br><span style="font-size:11px;color:var(--muted);">'+Math.round(temp*9/5+32)+'°F</span></div><div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo,precip)+'"></div></div>';
     count++;
   }
   document.getElementById('fc-body').innerHTML=

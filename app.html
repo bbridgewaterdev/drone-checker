@@ -1369,9 +1369,9 @@ function initWindMap(){
 
   if(windMap){windMap.remove();windMap=null;}
   windMap=L.map('wind-map-el',{center:[lat,lng],zoom:11,zoomControl:false,attributionControl:true});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-    attribution:'© <a href="https://www.openstreetmap.org/copyright" style="color:#94a3b8;">OSM</a> © <a href="https://carto.com/attributions" style="color:#94a3b8;">CARTO</a>',
-    maxZoom:19
+  L.tileLayer('https://tiles.openfreemap.org/styles/liberty/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openfreemap.org" style="color:#94a3b8;">OpenFreeMap</a> © <a href="https://www.openmaptiles.org" style="color:#94a3b8;">OpenMapTiles</a> © <a href="https://openstreetmap.org/copyright" style="color:#94a3b8;">OSM</a>',
+    maxZoom:20
   }).addTo(windMap);
   L.control.zoom({position:'bottomright'}).addTo(windMap);
 

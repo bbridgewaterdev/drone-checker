@@ -1303,13 +1303,16 @@ function switchWindAlt(alt){
     var btn=document.getElementById('walt-'+a);
     if(!btn)return;
     var on=(a===alt);
-    btn.style.background=on?'#06b6d4':'#fff';
-    btn.style.color=on?'#fff':'#334155';
-    btn.style.borderColor=on?'#06b6d4':'rgba(0,0,0,.12)';
+    btn.style.background=on?'#06b6d4':'';
+    btn.style.color=on?'#fff':'';
+    btn.style.borderColor=on?'#06b6d4':'';
   });
   var ad=window._wAlt.data[alt];
   var dot=document.getElementById('wmap-dot');if(dot){dot.style.background=ad.hex;dot.style.boxShadow='0 0 6px '+ad.hex;}
   var sv=document.getElementById('wmap-spd');if(sv){sv.textContent=ad.label;sv.style.color=ad.hex;}
+  var ts=document.getElementById('wtile-spd');if(ts&&window._wAlt.spdFn)ts.textContent=window._wAlt.spdFn(ad.spd);
+  var tu=document.getElementById('wtile-unit');if(tu&&window._wAlt.spdUFn)tu.textContent=window._wAlt.spdUFn();
+  var tk=document.getElementById('wtile-kt');if(tk)tk.textContent=(ad.spd*0.539957).toFixed(1);
   if(window._wAlt.relaunch)window._wAlt.relaunch();
 }
 function initWindMap(){
@@ -1373,6 +1376,12 @@ function initWindMap(){
 
   airspaceVisible=false;airspaceLayer=null;
   windEl.innerHTML=
+    '<div style="display:flex;gap:6px;padding:10px 12px 6px;align-items:center;">'+
+      '<div style="font-size:11px;color:var(--muted);font-weight:600;margin-right:2px;">ALTITUDE</div>'+
+      '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" style="background:#06b6d4;color:#fff;border:1px solid #06b6d4;border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">10m</button>'+
+      '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">80m</button>'+
+      '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">120m</button>'+
+    '</div>'+
     '<div style="position:relative;">'+
       '<div id="wind-map-el" style="height:300px;width:100%;"></div>'+
       // Speed + direction pill
@@ -1381,12 +1390,6 @@ function initWindMap(){
         '<div id="wmap-spd" style="font-size:15px;font-weight:700;color:'+colHex+';">'+wind+' '+spdU()+'</div>'+
         '<div style="font-size:12px;color:rgba(241,245,249,.55);">From the '+dirStr+' &middot; '+deg+'°</div>'+
         '<div style="font-size:12px;font-weight:600;color:'+trendCol+';">'+trendTxt+'</div>'+
-      '</div>'+
-      // Altitude switcher top right
-      '<div style="position:absolute;top:12px;right:12px;z-index:1000;display:flex;gap:4px;">'+
-        '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" style="background:#06b6d4;color:#fff;border:1px solid #06b6d4;border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.25);">10m</button>'+
-        '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" style="background:#fff;color:#334155;border:1px solid rgba(0,0,0,.12);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.15);">80m</button>'+
-        '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" style="background:#fff;color:#334155;border:1px solid rgba(0,0,0,.12);border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 1px 4px rgba(0,0,0,.15);">120m</button>'+
       '</div>'+
       // Altitude profile bottom left
       '<div style="position:absolute;bottom:24px;left:12px;z-index:1000;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 11px;pointer-events:none;min-width:148px;">'+
@@ -1415,9 +1418,9 @@ function initWindMap(){
     '</div>'+
     '<div style="font-size:10px;color:var(--muted);padding:5px 12px 0;line-height:1.4;">⚠ Airspace zones are indicative only. Always verify with the <a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">CAA</a> before flying.</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+
-      '<div class="wx-tile"><div class="wx-lbl">Wind</div><div class="wx-val" style="font-size:20px;">'+wind+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
-      '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val" style="font-size:20px;">'+gust+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
-      '<div class="wx-tile"><div class="wx-lbl">Knots</div><div class="wx-val" style="font-size:20px;">'+(rawWind*0.539957).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Wind</div><div id="wtile-spd" class="wx-val" style="font-size:20px;">'+wind+'</div><div id="wtile-unit" class="wx-sub">'+spdU()+'</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Gusts <span style="font-size:9px;color:var(--muted);font-weight:400;">(10m only)</span></div><div class="wx-val" style="font-size:20px;">'+gust+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Knots</div><div id="wtile-kt" class="wx-val" style="font-size:20px;">'+(rawWind*0.539957).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
     '</div>'+
     '<div class="card"><div class="card-ttl">Hourly Wind Forecast</div>'+fcRows+'</div>'+
     '<div style="height:14px;"></div>';
@@ -1442,6 +1445,8 @@ function initWindMap(){
       '80m':{spd:raw80,hex:col80,label:spd(raw80)+' '+spdU()},
       '120m':{spd:raw120,hex:col120,label:spd(raw120)+' '+spdU()}
     },
+    spdFn:spd,
+    spdUFn:spdU,
     relaunch:null
   };
 

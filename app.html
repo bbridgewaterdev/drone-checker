@@ -523,7 +523,7 @@ var APP_VERSION='1.1.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,unitMode='kmh',lastUpdated=null,windMap=null,airspaceLayer=null,airspaceVisible=false;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,unitMode='kmh',lastUpdated=null,windMap=null,windAnimFrame=null,airspaceLayer=null,airspaceVisible=false;
 var UK_FRZS=[
   {n:'Heathrow',i:'EGLL',lat:51.4775,lng:-0.4614,r:5000},
   {n:'Gatwick',i:'EGKK',lat:51.1537,lng:-0.1821,r:5000},
@@ -1367,6 +1367,7 @@ function initWindMap(){
     '<div class="card"><div class="card-ttl">Hourly Wind Forecast</div>'+fcRows+'</div>'+
     '<div style="height:14px;"></div>';
 
+  if(windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
   if(windMap){windMap.remove();windMap=null;}
   windMap=L.map('wind-map-el',{center:[lat,lng],zoom:11,zoomControl:false,attributionControl:true});
   L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=f83000a7-38e7-4a5b-88f4-3c696f0a8322',{
@@ -1375,27 +1376,65 @@ function initWindMap(){
   }).addTo(windMap);
   L.control.zoom({position:'bottomright'}).addTo(windMap);
 
-  L.circle([lat,lng],{radius:800,color:colHex,fillColor:colHex,fillOpacity:0.05,weight:1,opacity:0.3}).addTo(windMap);
+  // Location dot
+  L.circleMarker([lat,lng],{radius:6,color:colHex,fillColor:colHex,fillOpacity:1,weight:2,opacity:0.9,interactive:false}).addTo(windMap);
 
-  var arrowHtml=
-    '<div style="width:56px;height:76px;transform:rotate('+deg+'deg);transform-origin:28px 40px;">'+
-      '<svg viewBox="0 0 56 76" width="56" height="76" xmlns="http://www.w3.org/2000/svg">'+
-        '<defs><filter id="wglow" x="-50%" y="-50%" width="200%" height="200%">'+
-          '<feGaussianBlur stdDeviation="2.5" result="blur"/>'+
-          '<feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>'+
-        '</filter></defs>'+
-        '<polygon points="28,3 38,48 28,38 18,48" fill="'+colHex+'" filter="url(#wglow)" opacity="0.95"/>'+
-        '<polygon points="28,73 38,30 28,38 18,30" fill="'+colHex+'" opacity="0.2"/>'+
-        '<circle cx="28" cy="40" r="7" fill="'+colHex+'" opacity="0.9"/>'+
-        '<circle cx="28" cy="40" r="3.5" fill="#0f172a"/>'+
-      '</svg>'+
-    '</div>';
-  L.marker([lat,lng],{
-    icon:L.divIcon({html:arrowHtml,iconSize:[56,76],iconAnchor:[28,40],className:''}),
-    interactive:false
-  }).addTo(windMap);
-
-  setTimeout(function(){if(windMap)windMap.invalidateSize();},150);
+  // Canvas particle animation
+  setTimeout(function(){
+    if(!windMap)return;
+    windMap.invalidateSize();
+    var mapEl=document.getElementById('wind-map-el');
+    if(!mapEl)return;
+    var windCanvas=document.createElement('canvas');
+    windCanvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;';
+    mapEl.appendChild(windCanvas);
+    var W=mapEl.offsetWidth,H=mapEl.offsetHeight;
+    windCanvas.width=W;windCanvas.height=H;
+    var wctx=windCanvas.getContext('2d');
+    var cr=parseInt(colHex.slice(1,3),16),cg=parseInt(colHex.slice(3,5),16),cb=parseInt(colHex.slice(5,7),16);
+    // deg is direction wind comes FROM — particles travel the opposite way
+    var moveRad=((deg+180)%360)*Math.PI/180;
+    var pdx=Math.sin(moveRad),pdy=-Math.cos(moveRad);
+    var speedPx=Math.max(1.2,Math.min(rawWind,80)/80*4)+0.6;
+    var NPART=120;
+    function mkPart(born){
+      return{x:Math.random()*W,y:Math.random()*H,
+             age:born?0:Math.random()*90,maxAge:80+Math.random()*60,
+             speed:speedPx*(0.55+Math.random()*0.9),
+             sz:1.1+Math.random()*1.5,trail:[]};
+    }
+    var parts=[];
+    for(var pi=0;pi<NPART;pi++)parts.push(mkPart(false));
+    function wanimate(){
+      wctx.clearRect(0,0,W,H);
+      parts.forEach(function(p){
+        p.trail.push({x:p.x,y:p.y});
+        if(p.trail.length>16)p.trail.shift();
+        p.x+=pdx*p.speed;p.y+=pdy*p.speed;p.age++;
+        if(p.age>p.maxAge||p.x<-40||p.x>W+40||p.y<-40||p.y>H+40){
+          Object.assign(p,mkPart(true));return;
+        }
+        var a=Math.min(p.age/18,1)*(1-p.age/p.maxAge)*0.9;
+        if(p.trail.length>1){
+          for(var t=1;t<p.trail.length;t++){
+            var ta=a*(t/p.trail.length)*0.65;
+            wctx.beginPath();
+            wctx.moveTo(p.trail[t-1].x,p.trail[t-1].y);
+            wctx.lineTo(p.trail[t].x,p.trail[t].y);
+            wctx.strokeStyle='rgba('+cr+','+cg+','+cb+','+ta.toFixed(3)+')';
+            wctx.lineWidth=p.sz*(t/p.trail.length);
+            wctx.stroke();
+          }
+        }
+        wctx.beginPath();
+        wctx.arc(p.x,p.y,p.sz,0,Math.PI*2);
+        wctx.fillStyle='rgba('+cr+','+cg+','+cb+','+a.toFixed(3)+')';
+        wctx.fill();
+      });
+      windAnimFrame=requestAnimationFrame(wanimate);
+    }
+    wanimate();
+  },150);
 }
 
 function calcSunTimes(lat,lng,date){

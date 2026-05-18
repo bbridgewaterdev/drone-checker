@@ -2,13 +2,13 @@
   "id": "uk.co.dronechecker",
   "name": "DroneChecker",
   "short_name": "DroneChecker",
-  "description": "UK drone flying companion — live weather, restriction zones, flying conditions and golden hour calculator.",
+  "description": "UK drone flying companion — live weather, wind analysis, fly ratings, golden hour calculator and flight logging. Advisory only; not a substitute for official airspace checks.",
   "start_url": "/app.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f172a",
-  "theme_color": "#3B82F6",
+  "theme_color": "#0f172a",
   "lang": "en-GB",
   "categories": ["utilities", "weather"],
   "icons": [
@@ -70,6 +70,44 @@
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Golden Hour Calculator"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Forecast",
+      "short_name": "Forecast",
+      "description": "Open the 24-hour forecast and 7-day best day planner",
+      "url": "/app.html?tab=fc",
+      "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Wind",
+      "short_name": "Wind",
+      "description": "View live wind direction, speed and gusts",
+      "url": "/app.html?tab=radar",
+      "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Golden Hour",
+      "short_name": "Golden",
+      "description": "Sunrise, sunset and golden hour times for photography",
+      "url": "/app.html?tab=gh",
+      "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Flight Log",
+      "short_name": "Log",
+      "description": "Record a new flight or review your flight history",
+      "url": "/app.html?tab=log",
+      "icons": [
+        { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
     }
   ]
 }

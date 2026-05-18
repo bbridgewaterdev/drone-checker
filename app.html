@@ -35,7 +35,7 @@
   <meta name="theme-color" content="#0f172a">
   <meta name="description" content="UK drone flying conditions, weather &amp; golden hour calculator.">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous"/>
   <title>DroneChecker</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -1044,6 +1044,8 @@ function acceptDisclaimer(){
   // Now that consent is recorded, initialise analytics
   if(typeof initAnalytics==='function')initAnalytics();
   checkOnboarding();
+  // Apply any deep link after disclaimer is dismissed
+  setTimeout(applyDeepLink,300);
 }
 
 // ---- SHARE CONDITIONS ----
@@ -1711,6 +1713,26 @@ function goTab(id,btn){
   if(id==='log')renderLog();
 }
 
+// ---- DEEP LINK HANDLER for PWA shortcuts (e.g. /app.html?tab=fc) ----
+function applyDeepLink(){
+  try{
+    var params=new URLSearchParams(window.location.search);
+    var tab=params.get('tab');
+    if(!tab)return;
+    var validTabs={'dash':1,'fc':1,'radar':1,'gh':1,'log':1};
+    if(!validTabs[tab])return;
+    var btn=document.getElementById('nb-'+tab);
+    if(btn){
+      goTab(tab,btn);
+      // Strip the param from the URL bar so a manual refresh doesn't re-trigger,
+      // and so the user doesn't see ?tab=fc lingering in their share menu.
+      if(window.history&&window.history.replaceState){
+        window.history.replaceState({},'','/app.html');
+      }
+    }
+  }catch(e){}
+}
+
 window.addEventListener('load',function(){
   checkDisclaimer();
   loadDrone();loadChecklist();loadUnits();renderFavBar();
@@ -1721,6 +1743,9 @@ window.addEventListener('load',function(){
   startIntervals();
   // Safety net — force hide splash after 5 seconds no matter what
   setTimeout(function(){hideSplash();},5000);
+  // Apply PWA shortcut deep link (?tab=X) once the app is mounted.
+  // Delayed so disclaimer/onboarding overlays still take precedence on first run.
+  setTimeout(applyDeepLink,600);
 });
 </script>
 <script>
@@ -1728,6 +1753,6 @@ window.addEventListener('load',function(){
     window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});
   }
 </script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 </body>
 </html>

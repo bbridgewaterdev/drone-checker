@@ -10,12 +10,16 @@
   <meta property="og:image" content="/screenshots/screenshot-dashboard.png"/>
   <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
   <script>
-    // Only auto-redirect when launched as installed PWA (standalone display mode),
-    // not when users intentionally navigate back to the marketing site.
+    // Returning users (disclaimer accepted) get sent straight to /app.html.
+    // Exception: explicit ?home=1 in the URL (used by the "Home" link in the
+    // app footer) bypasses the redirect so the landing page stays reachable.
+    // Search engine crawlers don't have localStorage, so they always index this page.
+    // Any other query params (e.g. ?tab=fc from PWA shortcuts) are preserved.
     try {
-      var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      if (isStandalone && localStorage.getItem('dc_disclaimer') === 'accepted') {
-        window.location.replace('/app.html');
+      var params = new URLSearchParams(window.location.search);
+      var bypass = params.has('home');
+      if (!bypass && localStorage.getItem('dc_disclaimer') === 'accepted') {
+        window.location.replace('/app.html' + window.location.search);
       }
     } catch (e) {}
   </script>

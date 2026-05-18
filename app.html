@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VQTQPMQZY4"></script>
+  <!-- Google Analytics — only loaded after user accepts disclaimer (see initAnalytics() below) -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-VQTQPMQZY4');
+    function initAnalytics(){
+      if(window._gaLoaded)return;
+      window._gaLoaded=true;
+      var s=document.createElement('script');
+      s.async=true;
+      s.src='https://www.googletagmanager.com/gtag/js?id=G-VQTQPMQZY4';
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', 'G-VQTQPMQZY4', {anonymize_ip: true});
+    }
+    // If user has previously accepted, fire analytics on load
+    try{
+      if(localStorage.getItem('dc_disclaimer')==='accepted'){
+        window.addEventListener('load', initAnalytics);
+      }
+    }catch(e){}
   </script>
   <!-- end Google Analytics -->
   <link rel="icon" type="image/png" href="/icons/icon-192.png">
@@ -164,7 +177,7 @@
     .log-empty-icon{font-size:36px;margin-bottom:12px;}
     .log-count{font-size:12px;color:var(--muted);padding:8px 12px 0;}
     .disclaimer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overscroll-behavior:none;}
-    .disclaimer-sheet{background:var(--bg1);border-radius:16px;padding:28px 20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);}
+    .disclaimer-sheet{background:var(--bg2);border-radius:16px;padding:28px 20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);}
     .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
     .disclaimer-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;}
     .disclaimer-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.5;}
@@ -226,7 +239,7 @@
     }
     @media(min-width:1024px){.nav{width:220px;}.gh-tmrw{grid-template-columns:repeat(6,1fr);}}
     .onboard-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.95);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
-    .onboard-sheet{background:var(--bg1);border-radius:20px;padding:32px 24px 24px;width:100%;max-width:380px;border:1px solid var(--border);text-align:center;}
+    .onboard-sheet{background:var(--bg2);border-radius:20px;padding:32px 24px 24px;width:100%;max-width:380px;border:1px solid var(--border);text-align:center;}
     .onboard-slide{display:none;}
     .onboard-slide.on{display:block;}
     .onboard-icon{font-size:56px;margin-bottom:20px;line-height:1;}
@@ -241,6 +254,13 @@
     .rating-chip.g{background:rgba(34,197,94,.15);color:var(--green);}
     .rating-chip.a{background:rgba(245,158,11,.15);color:var(--amber);}
     .rating-chip.r{background:rgba(239,68,68,.15);color:var(--red);}
+
+    /* Accessible focus styles — visible only on keyboard navigation, not mouse clicks */
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -271,7 +291,8 @@
     <div class="disclaimer-box">
       <strong>Advisory use only.</strong> DroneChecker provides weather, wind and condition information to assist your pre-flight planning. All ratings and recommendations are <strong>advisory only</strong> and do not constitute official aviation guidance.<br><br>
       <strong>You are responsible.</strong> The pilot in command is solely and legally responsible for safe and lawful drone operations at all times. Always verify conditions, airspace and restrictions independently before flying.<br><br>
-      <strong>No liability.</strong> DroneChecker and its developers accept no liability for loss, damage, injury or legal consequence arising from reliance on information provided by this app.
+      <strong>No liability.</strong> DroneChecker and its developers accept no liability for loss, damage, injury or legal consequence arising from reliance on information provided by this app.<br><br>
+      <strong>Analytics.</strong> By accepting, you also consent to anonymous usage analytics (Google Analytics with IP anonymisation) that help us improve the app. No personal data is collected. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> for details.
     </div>
     <label class="disclaimer-check">
       <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
@@ -282,7 +303,28 @@
 </div>
 
 <div id="splash">
-<!-- ONBOARDING -->
+  <svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" rx="20" fill="#0f172a"/>
+    <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
+    <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+    <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
+    <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
+    <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
+    <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
+    <circle cx="50" cy="50" r="11" fill="white"/>
+    <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
+  </svg>
+  <p>Loading DroneChecker...</p>
+</div>
+
+<!-- ONBOARDING (sibling of #splash, so it can show after splash is hidden) -->
 <div class="onboard-overlay" id="onboard-overlay">
   <div class="onboard-sheet">
     <div class="onboard-dots" id="onboard-dots">
@@ -319,26 +361,6 @@
     <button class="onboard-skip" onclick="finishOnboarding()">Skip</button>
   </div>
 </div>
-  <svg width="64" height="64" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100" height="100" rx="20" fill="#0f172a"/>
-    <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
-    <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-    <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-    <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-    <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-    <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-    <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-    <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-    <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-    <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
-    <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
-    <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
-    <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
-    <circle cx="50" cy="50" r="11" fill="white"/>
-    <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
-  </svg>
-  <p>Loading DroneChecker...</p>
-</div>
 
 <div id="app">
   <div class="header">
@@ -368,7 +390,7 @@
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:1px;">
         <span id="updated-txt" style="font-size:10px;color:var(--muted);">—</span>
-        <button onclick="fetchAll()" style="background:none;border:none;color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;line-height:1;">↻ Refresh</button>
+        <button id="refresh-btn" onclick="manualRefresh()" aria-label="Refresh weather data" style="background:none;border:none;color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;line-height:1;">↻ Refresh</button>
       </div>
     </span>
   </div>
@@ -419,10 +441,10 @@
           <button class="unit-toggle" id="unit-toggle" onclick="toggleUnits()">mph</button>
         </div>
         <div class="search">
-          <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. SW1 or London" onkeydown="if(event.key==='Enter')doSearch()"/>
-          <button onclick="doSearch()">Search</button>
-          <button class="myloc-btn" onclick="useMyLocation()" title="Use my location">📍</button>
-          <button onclick="toggleFavCurrent()" id="fav-btn" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0;">☆</button>
+          <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. SW1 or London" aria-label="Search postcode or town" onkeydown="if(event.key==='Enter')doSearch()"/>
+          <button onclick="doSearch()" aria-label="Search">Search</button>
+          <button class="myloc-btn" onclick="useMyLocation()" title="Use my location" aria-label="Use my current location">📍</button>
+          <button onclick="toggleFavCurrent()" id="fav-btn" aria-label="Save as favourite" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0;">☆</button>
         </div>
         <div class="fav-bar" id="fav-bar"></div>
         <div class="serr" id="serr"></div>
@@ -463,29 +485,29 @@
 
     </div>
 
-    <nav class="nav">
-      <button class="nb on" id="nb-dash" onclick="goTab('dash',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    <nav class="nav" role="tablist" aria-label="Main navigation">
+      <button class="nb on" id="nb-dash" onclick="goTab('dash',this)" role="tab" aria-selected="true" aria-label="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         Dashboard
       </button>
-      <button class="nb" id="nb-fc" onclick="goTab('fc',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="16" cy="15" r="2" fill="currentColor" stroke="none"/></svg>
+      <button class="nb" id="nb-fc" onclick="goTab('fc',this)" role="tab" aria-selected="false" aria-label="Forecast">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="16" cy="15" r="2" fill="currentColor" stroke="none"/></svg>
         Forecast
       </button>
-      <button class="nb" id="nb-radar" onclick="goTab('radar',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button class="nb" id="nb-radar" onclick="goTab('radar',this)" role="tab" aria-selected="false" aria-label="Wind">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M9.59 4.59A2 2 0 1111 8H2"/>
           <path d="M12.59 19.41A2 2 0 1114 16H2"/>
           <path d="M6.59 11.59A2 2 0 108 15H2"/>
         </svg>
         Wind
       </button>
-      <button class="nb" id="nb-gh" onclick="goTab('gh',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <button class="nb" id="nb-gh" onclick="goTab('gh',this)" role="tab" aria-selected="false" aria-label="Golden Hour">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         Golden Hour
       </button>
-      <button class="nb" id="nb-log" onclick="goTab('log',this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <button class="nb" id="nb-log" onclick="goTab('log',this)" role="tab" aria-selected="false" aria-label="Flight Log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Log
       </button>
     </nav>
@@ -493,10 +515,21 @@
 </div>
 
 <script>
-// -------------------------------------------------------
-// PASTE YOUR OpenWeatherMap API key here (used for wind map only)
-var OWM_KEY = 'PASTE_YOUR_OPENWEATHERMAP_KEY_HERE';
-// -------------------------------------------------------
+// ---- HTML escape helper (prevents broken rendering / XSS from user input or API responses) ----
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+// ---- CSV cell helper (doubles internal quotes, wraps in quotes) ----
+function csvCell(v){
+  return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+}
+
+// ---- App constants ----
+var CAA_OPERATOR_FEE = '£12.34'; // Verify annually against caa.co.uk
+var CAA_OPERATOR_FEE_NOTE = '£12.34/year — verify on caa.co.uk';
 
 var DRONES={
   lito1:{name:'DJI Lito 1',windAmber:18,windRed:25,gustAmber:20,gustRed:25},
@@ -519,7 +552,7 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.1.0';
+var APP_VERSION='1.2.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -566,7 +599,7 @@ function showOfflineBanner(ts){var bar=document.getElementById('offline-bar'),ag
 function hideOfflineBanner(){var bar=document.getElementById('offline-bar');if(bar)bar.style.display='none';}
 
 var CHECKLIST=[
-  {section:'Pilot & Registration'},{id:'reg',label:'Operator ID displayed on drone (required for drones 100g+ with camera)'},
+  {section:'Pilot & Registration'},{id:'reg',label:'Operator ID displayed on drone (required for drones 250g+ or 100g+ with camera)'},
   {id:'flyer',label:'Flyer ID carried or accessible (required for all drones 100g+)'},
   {id:'remoteid',label:'Remote ID switched on (mandatory for class-marked drones; recommended for all)'},
   {id:'greenlight',label:'Green flashing light fitted and active (required for all night flights)'},
@@ -607,8 +640,9 @@ function loadChecklist(){
     var s=localStorage.getItem('dc_checklist');
     if(s){
       var parsed=JSON.parse(s);
-      var today=new Date().toISOString().split('T')[0];
-      if(parsed.date===today){
+      var ts=parsed.ts||0;
+      // Keep checklist state for 12 hours from last save (avoids losing progress at midnight planning -> dawn flight)
+      if(Date.now() - ts < 12*3600*1000){
         clState=parsed.state||{};
       } else {
         clState={};
@@ -619,8 +653,7 @@ function loadChecklist(){
 }
 function saveChecklist(){
   try{
-    var today=new Date().toISOString().split('T')[0];
-    localStorage.setItem('dc_checklist',JSON.stringify({date:today,state:clState}));
+    localStorage.setItem('dc_checklist',JSON.stringify({ts:Date.now(),state:clState}));
   }catch(e){}
 }
 function toggleCheck(id){
@@ -643,12 +676,13 @@ function renderChecklist(){
   '<div class="card-ttl">UK CAA Rules — Quick Guide</div>'+
   '<div class="rule"><div class="rule-ico">📏</div><div><div class="rule-ttl">Max altitude 120m (400ft)</div><div class="rule-body">Do not fly above 120m AGL without special authorisation.</div></div></div>'+
   '<div class="rule"><div class="rule-ico">👁️</div><div><div class="rule-ttl">Visual line of sight always</div><div class="rule-body">Keep your drone in sight at all times. Max ~500m recommended.</div></div></div>'+
-  '<div class="rule"><div class="rule-ico">✈️</div><div><div class="rule-ttl">5km from airports</div><div class="rule-body">Never fly within the Flight Restriction Zone. Check the CAA website for airspace information before every flight.</div></div></div>'+
-  '<div class="rule"><div class="rule-ico">🪪</div><div><div class="rule-ttl">CAA registration required</div><div class="rule-body">Drones over 100g with a camera need an Operator ID (£12.34/year). A free Flyer ID is also required for drones over 100g.</div></div></div>'+
+  '<div class="rule"><div class="rule-ico">✈️</div><div><div class="rule-ttl">Stay clear of airport Flight Restriction Zones (FRZs)</div><div class="rule-body">FRZs vary in shape and extend several km around airports and airfields — they are not a simple 5km circle. Check the CAA Drone Assist app or airspace map before every flight.</div></div></div>'+
+  '<div class="rule"><div class="rule-ico">🪪</div><div><div class="rule-ttl">CAA registration required</div><div class="rule-body">Drones 250g+ or 100g+ with a camera need an Operator ID ('+CAA_OPERATOR_FEE_NOTE+'). A free Flyer ID is required for drones 100g+.</div></div></div>'+
+  '<div class="rule"><div class="rule-ico">📡</div><div><div class="rule-ttl">Remote ID (from 1 Jan 2026)</div><div class="rule-body">UK1, UK2 and UK3 class-marked drones must broadcast Remote ID during every flight. Extends to UK0 camera drones (100g+), UK4 model aircraft and legacy aircraft from 1 Jan 2028.</div></div></div>'+
   '</div>'+
   '<div class="card" style="margin-bottom:0;">'+
   '<div class="card-ttl">Official Resources</div>'+
-  '<a href="https://www.caa.co.uk/drones" target="_blank" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;text-decoration:none;">'+
+  '<a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;text-decoration:none;">'+
   '<div><div style="font-size:13px;font-weight:600;color:var(--text);">🪪 CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Official UK rules, registration and guidance</div></div>'+
   '<span style="color:var(--accent);font-size:13px;font-weight:600;flex-shrink:0;">Open →</span></a>'+
   '</div><div style="height:14px;"></div>';
@@ -668,13 +702,17 @@ function wmoInfo(code){
     95:{desc:'Thunderstorm',emoji:'⛈️'},96:{desc:'Thunderstorm w/ hail',emoji:'⛈️'},99:{desc:'Thunderstorm w/ heavy hail',emoji:'⛈️'}};
   return map[code]||{desc:'Unknown',emoji:'🌡️'};
 }
-function fcRating(wind,gust,vis,wmo,precip){
-  var d=getDrone();
-  if(gust>=d.gustRed||wmo>=95||vis<1000||wmo===65||wmo===67||wmo===75||wmo===82||wmo===86||wmo===56||wmo===57||wmo===66||wmo===63||wmo===73||wmo===81)return'red';
-  if((precip||0)>=60)return'red';
-  if(wind>=d.windAmber||wmo===55||wmo===51||wmo===53||wmo===61||wmo===80||wmo===71||wmo===77||wmo===85||wmo===45||wmo===48||vis<5000)return'amber';
-  if((precip||0)>=30)return'amber';
-  return'green';
+// Single source of truth: fcRating delegates to flyRating with optional params.
+// Returns just the level string ('green'/'amber'/'red') for compact forecast cells.
+function fcRating(wind,gust,vis,wmo,precip,temp,kp,wind80,wind120){
+  // Heavy precipitation probability still bumps red even if wmo doesn't say so
+  if((precip||0)>=60 && wmo===0) wmo = 61; // treat as light rain for rating purposes
+  return flyRating(
+    wind||0, gust||0, (vis==null?10000:vis), wmo||0,
+    (kp==null?currentKp:kp),
+    (temp==null?15:temp),
+    wind80||0, wind120||0
+  ).lvl;
 }
 function dirLabel(deg){return['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];}
 function pad(n){return(n<10?'0':'')+n;}
@@ -686,12 +724,42 @@ var DRONE_SVG='<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://w
 function loadUnits(){try{var s=localStorage.getItem('dc_units');if(s==='imperial')unitMode='mph';else if(s==='ms')unitMode='ms';else unitMode='kmh';}catch(e){}updateUnitToggle();}
 function saveUnits(){try{localStorage.setItem('dc_units',unitMode==='mph'?'imperial':unitMode==='ms'?'ms':'metric');}catch(e){}}
 function toggleUnits(){unitMode=unitMode==='kmh'?'mph':unitMode==='mph'?'ms':'kmh';saveUnits();updateUnitToggle();updateDroneLimits();if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))initWindMap();}}
-function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;var labels={kmh:'km/h ⇄',mph:'mph ⇄',ms:'m/s ⇄'};var next={kmh:'mph',mph:'m/s',ms:'km/h'};btn.textContent=labels[unitMode]||'km/h ⇄';btn.title='Switch to '+next[unitMode];}
+function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;var current={kmh:'km/h',mph:'mph',ms:'m/s'};var next={kmh:'mph',mph:'m/s',ms:'km/h'};btn.textContent=current[unitMode]+' → '+next[unitMode];btn.setAttribute('aria-label','Currently '+current[unitMode]+'. Tap to switch to '+next[unitMode]);btn.title='Switch to '+next[unitMode];}
 function spd(v){if(unitMode==='mph')return Math.round(v*0.621);if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));return Math.round(v);}
 function spdU(){return unitMode==='mph'?'mph':unitMode==='ms'?'m/s':'km/h';}
 function tmp(v){return unitMode==='mph'?Math.round(v*9/5+32):Math.round(v);}
 function tmpU(){return unitMode==='mph'?'°F':'°C';}
 function visDisp(v){if(unitMode==='mph'){if(v>=1609)return{val:(v/1609.34).toFixed(1),unit:'mi'};return{val:Math.round(v*3.281),unit:'ft'};}if(v>=1000)return{val:(v/1000).toFixed(0),unit:'km'};return{val:v,unit:'m'};}
+
+// ---- FEEDBACK MAILTO with diagnostics ----
+function buildFeedbackMailto(){
+  var info=[];
+  info.push('App version: v'+APP_VERSION);
+  info.push('Device: '+(navigator.userAgent||'unknown'));
+  info.push('Platform: '+(isIOS?'iOS':isAndroid?'Android':'Web'));
+  info.push('Standalone (installed): '+(isStandalone?'yes':'no'));
+  info.push('Location: '+((document.getElementById('loc-name')||{}).textContent||'unknown'));
+  info.push('Drone: '+getDrone().name);
+  info.push('Units: '+unitMode);
+  info.push('Date: '+new Date().toISOString());
+  var body='\n\n---\nPlease describe the issue above this line.\n\nDiagnostics (helps with debugging):\n'+info.join('\n');
+  return 'mailto:bbridgewater.dev@gmail.com?subject='+encodeURIComponent('DroneChecker Feedback')+'&body='+encodeURIComponent(body);
+}
+
+// ---- RESET ALL LOCAL DATA (GDPR right-to-erasure / withdraw consent) ----
+function resetAllData(){
+  if(!confirm('Reset all DroneChecker data on this device?\n\nThis will delete:\n• Your drone profile and unit preference\n• Saved favourite locations\n• Flight log entries\n• Pre-flight checklist progress\n• Disclaimer and onboarding state\n• Cached weather data\n\nThe page will then reload. This cannot be undone.'))return;
+  try{
+    var keys=['dc_drone','dc_units','dc_checklist','dc_disclaimer','dc_onboarded','dc_favs','dc_flights','dc_wx'];
+    keys.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
+  }catch(e){}
+  // Also clear service worker caches so they re-fetch fresh
+  if('caches' in window){
+    caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}).finally(function(){location.reload();});
+  } else {
+    location.reload();
+  }
+}
 
 // ---- TOAST ----
 function showToast(msg){
@@ -699,6 +767,22 @@ function showToast(msg){
   var t=document.createElement('div');t.className='toast';t.textContent=msg;
   document.body.appendChild(t);
   setTimeout(function(){t.style.opacity='0';setTimeout(function(){if(t.parentNode)t.remove();},300);},2200);
+}
+
+// ---- MANUAL REFRESH (with visible state so users don't tap repeatedly) ----
+var _refreshing=false;
+function manualRefresh(){
+  if(_refreshing)return;
+  _refreshing=true;
+  var btn=document.getElementById('refresh-btn');
+  if(btn){btn.textContent='↻ Refreshing...';btn.style.opacity='0.6';}
+  showToast('Refreshing weather...');
+  fetchAll();
+  // Reset button state shortly (fetchAll updates lastUpdated on success which will trigger the timestamp text refresh)
+  setTimeout(function(){
+    if(btn){btn.textContent='↻ Refresh';btn.style.opacity='1';}
+    _refreshing=false;
+  },2500);
 }
 
 // ---- USE MY LOCATION ----
@@ -736,12 +820,13 @@ function renderFavBar(){
   var isFav=favs.some(function(f){return f.name===curName;});
   btn.textContent=isFav?'★':'☆';
   btn.style.color=isFav?'var(--amber)':'var(--muted)';
+  btn.setAttribute('aria-label', isFav?'Remove from favourites':'Save as favourite');
   if(!favs.length){bar.classList.remove('show');return;}
   bar.classList.add('show');
   bar.innerHTML='<span class="fav-lbl">Saved:</span>';
   favs.forEach(function(f){
     var active=f.name===curName;
-    bar.innerHTML+='<button class="fav-pill'+(active?' active':'')+'" onclick="loadFav(\''+encodeURIComponent(f.name)+'\','+f.lat+','+f.lng+')">'+f.name+'</button>';
+    bar.innerHTML+='<button class="fav-pill'+(active?' active':'')+'" onclick="loadFav(\''+encodeURIComponent(f.name)+'\','+f.lat+','+f.lng+')">'+esc(f.name)+'</button>';
   });
 }
 function loadFav(name,lat,lng){
@@ -754,8 +839,11 @@ function loadFav(name,lat,lng){
 function renderWeekPlanner(daily){
   if(!daily||!daily.time)return'';
   var bestIdx=1,bestScore=-1;
+  // Note: daily forecast can't include KP (it's a 'right now' measurement) — assume current KP holds
+  // and current temp midpoint where helpful for the rating
   for(var i=1;i<daily.time.length&&i<=7;i++){
-    var r=fcRating(daily.wind_speed_10m_max[i]||0,daily.wind_gusts_10m_max[i]||0,10000,daily.weather_code[i]);
+    var dMidT=((daily.temperature_2m_max[i]||15)+(daily.temperature_2m_min[i]||15))/2;
+    var r=fcRating(daily.wind_speed_10m_max[i]||0,daily.wind_gusts_10m_max[i]||0,10000,daily.weather_code[i],0,dMidT,currentKp,0,0);
     var score=r==='green'?2:r==='amber'?1:0;
     var gust=daily.wind_gusts_10m_max[i]||0;
     if(score>bestScore||(score===bestScore&&gust<(daily.wind_gusts_10m_max[bestIdx]||999))){bestScore=score;bestIdx=i;}
@@ -767,7 +855,8 @@ function renderWeekPlanner(daily){
     var dWmo=daily.weather_code[j],dInfo=wmoInfo(dWmo);
     var dMax=Math.round(daily.temperature_2m_max[j]),dMin=Math.round(daily.temperature_2m_min[j]);
     var dWind=spd(daily.wind_speed_10m_max[j]||0),dGust=spd(daily.wind_gusts_10m_max[j]||0);
-    var dr=fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo);
+    var dMidT2=((daily.temperature_2m_max[j]||15)+(daily.temperature_2m_min[j]||15))/2;
+    var dr=fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo,0,dMidT2,currentKp,0,0);
     var dotCol=dr==='green'?'var(--green)':dr==='amber'?'var(--amber)':'var(--red)';
     var isBest=j===bestIdx;
     rows+='<div class="week-row'+(isBest?' best-day':'')+'">'+
@@ -820,20 +909,20 @@ function renderLog(){
     '<div class="log-field"><div class="log-field-lbl">Duration (mins)</div><input class="log-input" id="li-dur" type="number" min="1" max="999" placeholder="e.g. 25"/></div>'+
     '</div>'+
     '<div class="log-field-lbl">Location</div>'+
-    '<input class="log-input" id="li-loc" type="text" value="'+loc+'" placeholder="Where did you fly?"/>'+
+    '<input class="log-input" id="li-loc" type="text" value="'+esc(loc)+'" placeholder="Where did you fly?"/>'+
     '<div class="log-2col">'+
     '<div class="log-field"><div class="log-field-lbl">Drone</div>'+
-    '<input class="log-input" id="li-drone" type="text" value="'+drone+'" placeholder="Drone model"/></div>'+
+    '<input class="log-input" id="li-drone" type="text" value="'+esc(drone)+'" placeholder="Drone model"/></div>'+
     '<div class="log-field"><div class="log-field-lbl">Flight type</div>'+
     '<select class="log-input" id="li-type"><option>Recreation</option><option>Commercial</option><option>Training</option><option>Survey</option><option>Photography</option></select></div>'+
     '</div>'+
     '<div class="log-field-lbl">Conditions</div>'+
     '<select class="log-input" id="li-cond">'+
-    '<option'+(autoCond==='✓ Good to Fly'||autoCond==='Good to Fly'?' selected':'')+'">Good to Fly</option>'+
-    '<option'+(autoCond==='⚠ Fly with Caution'||autoCond==='Fly with Caution'?' selected':'')+'">Fly with Caution</option>'+
-    '<option'+(autoCond==='✕ Do Not Fly'||autoCond==='Do Not Fly'?' selected':'')+'">Do Not Fly</option>'+
+    '<option'+(autoCond==='✓ Good to Fly'||autoCond==='Good to Fly'?' selected':'')+'>Good to Fly</option>'+
+    '<option'+(autoCond==='⚠ Fly with Caution'||autoCond==='Fly with Caution'?' selected':'')+'>Fly with Caution</option>'+
+    '<option'+(autoCond==='✕ Do Not Fly'||autoCond==='Do Not Fly'?' selected':'')+'>Do Not Fly</option>'+
     '</select>'+
-    (autoWxSummary?'<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted);margin-bottom:10px;">💨 '+autoWxSummary+'<input type="hidden" id="li-wxwind" value="'+autoWind+'"/><input type="hidden" id="li-wxtemp" value="'+autoTemp+'"/><input type="hidden" id="li-wxvis" value="'+autoVis+'"/></div>':'')+
+    (autoWxSummary?'<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;color:var(--muted);margin-bottom:10px;">💨 '+esc(autoWxSummary)+'<input type="hidden" id="li-wxwind" value="'+esc(autoWind)+'"/><input type="hidden" id="li-wxtemp" value="'+esc(autoTemp)+'"/><input type="hidden" id="li-wxvis" value="'+esc(autoVis)+'"/></div>':'')+
     '<div class="log-field-lbl">Notes (optional)</div>'+
     '<input class="log-input" id="li-notes" type="text" placeholder="Anything worth recording..."/>'+
     '<button class="log-btn" onclick="addFlight()">✈️ Save Flight</button>'+
@@ -855,20 +944,20 @@ function renderLog(){
       var cc=condColor[f.cond]||'';
       entries+='<div class="log-entry">'+
         '<div class="log-entry-hdr">'+
-        '<div><div class="log-entry-loc">'+f.loc+'</div></div>'+
+        '<div><div class="log-entry-loc">'+esc(f.loc)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:8px;">'+
-        '<div class="log-entry-date">'+f.date+'</div>'+
-        '<button class="log-entry-del" onclick="deleteFlight('+i+')" title="Delete">×</button>'+
+        '<div class="log-entry-date">'+esc(f.date)+'</div>'+
+        '<button class="log-entry-del" onclick="deleteFlight('+i+')" title="Delete" aria-label="Delete flight entry">×</button>'+
         '</div></div>'+
         '<div class="log-entry-tags">'+
-        '<span class="log-tag">🚁 '+f.drone+'</span>'+
-        (f.dur?'<span class="log-tag">⏱ '+f.dur+' mins</span>':'')+
-        '<span class="log-tag">'+f.type+'</span>'+
-        '<span class="log-tag '+cc+'">'+f.cond+'</span>'+
-        (f.wxWind?'<span class="log-tag">💨 '+f.wxWind+'</span>':'')+
-        (f.wxTemp?'<span class="log-tag">🌡️ '+f.wxTemp+'</span>':'')+
+        '<span class="log-tag">🚁 '+esc(f.drone)+'</span>'+
+        (f.dur?'<span class="log-tag">⏱ '+esc(f.dur)+' mins</span>':'')+
+        '<span class="log-tag">'+esc(f.type)+'</span>'+
+        '<span class="log-tag '+cc+'">'+esc(f.cond)+'</span>'+
+        (f.wxWind?'<span class="log-tag">💨 '+esc(f.wxWind)+'</span>':'')+
+        (f.wxTemp?'<span class="log-tag">🌡️ '+esc(f.wxTemp)+'</span>':'')+
         '</div>'+
-        (f.notes?'<div class="log-entry-notes">📝 '+f.notes+'</div>':'')+
+        (f.notes?'<div class="log-entry-notes">📝 '+esc(f.notes)+'</div>':'')+
         '</div>';
     }
   }
@@ -910,7 +999,9 @@ function exportFlights(){
   var bom='\uFEFF';
   var csv=bom+'Date,Location,Drone,Duration (mins),Flight Type,Conditions,Wind,Temperature,Visibility,Notes\n';
   flights.forEach(function(f){
-    csv+='"'+f.date+'","'+f.loc+'","'+(f.drone||'')+'","'+(f.dur||'')+'","'+(f.type||'')+'","'+(f.cond||'')+'","'+(f.wxWind||'')+'","'+(f.wxTemp||'')+'","'+(f.wxVis||'')+'","'+(f.notes||'')+'"\n';
+    csv+=[csvCell(f.date),csvCell(f.loc),csvCell(f.drone),csvCell(f.dur),
+          csvCell(f.type),csvCell(f.cond),csvCell(f.wxWind),csvCell(f.wxTemp),
+          csvCell(f.wxVis),csvCell(f.notes)].join(',')+'\n';
   });
   var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
@@ -950,6 +1041,8 @@ function acceptDisclaimer(){
   document.body.style.overflow='';
   try{localStorage.setItem('dc_disclaimer','accepted');}catch(e){}
   overlay.style.display='none';
+  // Now that consent is recorded, initialise analytics
+  if(typeof initAnalytics==='function')initAnalytics();
   checkOnboarding();
 }
 
@@ -1054,7 +1147,8 @@ function fetchWithTimeout(url,ms){
   });
 }
 
-function fetchKp(isRetry){
+function fetchKp(attempt){
+  attempt = attempt || 0;
   fetchWithTimeout('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json',3000)
     .then(function(r){return r.json();})
     .then(function(d){
@@ -1066,11 +1160,15 @@ function fetchKp(isRetry){
       }
     })
     .catch(function(){
-      if(!isRetry){
-        setTimeout(function(){fetchKp(true);},120000);
-      } else {
+      // Exponential-ish backoff: 30s, 2min, 5min, then give up gracefully
+      var delays=[30000,120000,300000];
+      if(attempt < delays.length){
+        setTimeout(function(){fetchKp(attempt+1);}, delays[attempt]);
         var card=document.getElementById('kp-card');
-        if(card)card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">KP data unavailable — will retry shortly</div>';
+        if(card)card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">KP data unavailable — retrying in '+Math.round(delays[attempt]/60000||0.5)+' min</div>';
+      } else {
+        var card2=document.getElementById('kp-card');
+        if(card2)card2.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">KP data unavailable. Tap Refresh to try again.</div>';
       }
     });
 }
@@ -1224,7 +1322,7 @@ function renderDash(){
     lipoWarn+
     '</div></div>'+
     '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+
-    '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank">Open →</a></div></div>'+
+    '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer">Open →</a></div></div>'+
     '<div style="margin:20px 12px 0;padding:16px;border-top:1px solid var(--border);text-align:center;">'+
     (!isIOS&&!isStandalone?'<div style="display:inline-block;margin-bottom:16px;position:relative;opacity:.5;cursor:default;"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height:48px;"/><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;color:#f1f5f9;white-space:nowrap;backdrop-filter:blur(4px);">Coming Soon</div></div>':'')+
     (isIOS&&!isStandalone?
@@ -1240,13 +1338,15 @@ function renderDash(){
       '</div></div>'
     :'')+
     '<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">'+
-    '<a href="/faq.html" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none;">FAQ</a>'+
+    '<a href="/faq.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--muted);text-decoration:none;">FAQ</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+
-    '<a href="/privacy.html" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none;">Privacy Policy</a>'+
+    '<a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--muted);text-decoration:none;">Privacy Policy</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+
-    '<a href="/terms.html" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none;">Terms of Service</a>'+
+    '<a href="/terms.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--muted);text-decoration:none;">Terms of Service</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+
-    '<a href="mailto:bbridgewater.dev@gmail.com?subject=DroneChecker Feedback" style="font-size:12px;color:var(--muted);text-decoration:none;">Send Feedback</a>'+
+    '<a href="'+buildFeedbackMailto()+'" style="font-size:12px;color:var(--muted);text-decoration:none;">Send Feedback</a>'+
+    '<span style="font-size:12px;color:var(--border);">|</span>'+
+    '<a href="#" onclick="resetAllData();return false;" style="font-size:12px;color:var(--muted);text-decoration:none;">Reset Data</a>'+
     '</div>'+
     '<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
     '</div><div style="height:14px;"></div>';
@@ -1266,9 +1366,11 @@ function renderFc(){
   for(var i=0;i<hours.time.length&&count<24;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
     var wmo=hours.weather_code[i],info=wmoInfo(wmo),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
+    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
+    var w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
     var precip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
     var precipBadge='<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':precip>=10?'var(--muted)':'rgba(148,163,184,.5)')+';">💧'+precip+'%</span>';
-    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C<br><span style="font-size:11px;color:var(--muted);">'+Math.round(temp*9/5+32)+'°F</span></div><div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo,precip)+'"></div></div>';
+    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C<br><span style="font-size:11px;color:var(--muted);">'+Math.round(temp*9/5+32)+'°F</span></div><div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo,precip,temp,currentKp,w80,w120)+'"></div></div>';
     count++;
   }
   document.getElementById('fc-body').innerHTML=
@@ -1356,7 +1458,7 @@ function initWindMap(){
     var hw=spd(hours.wind_speed_10m[i]||0),hg=spd(hours.wind_gusts_10m[i]||0);
     var h80v=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
     var h120v=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
-    var hr=fcRating(Math.max(hours.wind_speed_10m[i]||0,h80v,h120v),hours.wind_gusts_10m[i]||0,10000,0);
+    var hr=fcRating(hours.wind_speed_10m[i]||0,hours.wind_gusts_10m[i]||0,hours.visibility?(hours.visibility[i]||10000):10000,hours.weather_code?(hours.weather_code[i]||0):0,hours.precipitation_probability?(hours.precipitation_probability[i]||0):0,hours.temperature_2m?Math.round(hours.temperature_2m[i]):15,currentKp,h80v,h120v);
     var hcol=hr==='red'?'var(--red)':hr==='amber'?'var(--amber)':'var(--green)';
     var hcH=aHex(hours.wind_speed_10m[i]||0),h80H=aHex(h80v),h120H=aHex(h120v);
     fcRows+='<div style="padding:10px 0;border-bottom:1px solid var(--border);">'+
@@ -1515,6 +1617,21 @@ function initWindMap(){
     }
     window._wAlt.relaunch=launch;
     launch();
+
+    // Pause animation when page is hidden to save battery
+    var visListener=function(){
+      if(document.hidden){
+        if(windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
+      } else if(!windAnimFrame && window._wAlt && window._wAlt.relaunch){
+        // Restart only if Wind tab is still active
+        var radarTab=document.getElementById('tab-radar');
+        if(radarTab && radarTab.classList.contains('on'))window._wAlt.relaunch();
+      }
+    };
+    // Remove any prior listener so we don't stack them on every wind tab re-entry
+    if(window._windVisHandler)document.removeEventListener('visibilitychange',window._windVisHandler);
+    window._windVisHandler=visListener;
+    document.addEventListener('visibilitychange',visListener);
   },150);
 }
 
@@ -1581,10 +1698,13 @@ function renderGolden(){
 
 
 function goTab(id,btn){
+  // Cancel wind animation if we're leaving the wind tab
+  if(id!=='radar' && windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
   var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('on');
   var nbs=document.querySelectorAll('.nb');for(var i=0;i<nbs.length;i++)nbs[i].classList.remove('on');
   var tabEl=document.getElementById('tab-'+id);if(tabEl)tabEl.classList.add('on');
-  if(btn)btn.classList.add('on');
+  if(btn){btn.classList.add('on');btn.setAttribute('aria-selected','true');}
+  document.querySelectorAll('.nb').forEach(function(b){if(b!==btn)b.setAttribute('aria-selected','false');});
   if(id==='radar')initWindMap();
   if(id==='gh')renderGolden();
   if(id==='cl')renderChecklist();

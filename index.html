@@ -10,7 +10,14 @@
   <meta property="og:image" content="/screenshots/screenshot-dashboard.png"/>
   <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
   <script>
-    try{if(localStorage.getItem('dc_disclaimer')==='accepted')window.location.replace('/app.html');}catch(e){}
+    // Only auto-redirect when launched as installed PWA (standalone display mode),
+    // not when users intentionally navigate back to the marketing site.
+    try {
+      var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      if (isStandalone && localStorage.getItem('dc_disclaimer') === 'accepted') {
+        window.location.replace('/app.html');
+      }
+    } catch (e) {}
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -363,7 +370,7 @@
     <h2 class="section-title" style="margin-bottom:0;">Built for serious pilots</h2>
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-num">20+</div>
+        <div class="stat-num">19</div>
         <div class="stat-label">Supported drone models</div>
       </div>
       <div class="stat-card">

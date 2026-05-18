@@ -1,10 +1,17 @@
-const CACHE = 'dronechecker-v55';
+const CACHE = 'dronechecker-v56';
 
 const STATIC = [
+  '/',
+  '/index.html',
   '/app.html',
+  '/faq.html',
+  '/privacy.html',
+  '/terms.html',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
 ];
 
 // Install — cache core files only
@@ -43,19 +50,27 @@ self.addEventListener('fetch', e => {
 
   // Never cache API calls — always fetch fresh
   if (url.includes('open-meteo.com') ||
-      url.includes('openweathermap.org') ||
       url.includes('postcodes.io') ||
       url.includes('swpc.noaa.gov') ||
       url.includes('nominatim.openstreetmap.org') ||
-      url.includes('geocoding-api.open-meteo.com')) {
+      url.includes('geocoding-api.open-meteo.com') ||
+      url.includes('tiles.stadiamaps.com') ||
+      url.includes('googletagmanager.com') ||
+      url.includes('google-analytics.com')) {
     e.respondWith(
       fetch(e.request).catch(() => new Response('{}', {headers:{'Content-Type':'application/json'}}))
     );
     return;
   }
 
-  // app.html: network first so updates deploy immediately
-  if (url.endsWith('/app.html') || url.endsWith('/app') || url.endsWith('dronechecker.co.uk/app.html')) {
+  // HTML pages (any page): network-first so updates deploy immediately
+  if (e.request.mode === 'navigate' ||
+      url.endsWith('.html') ||
+      url.endsWith('/') ||
+      url.endsWith('/app') ||
+      url.endsWith('/faq') ||
+      url.endsWith('/privacy') ||
+      url.endsWith('/terms')) {
     e.respondWith(
       fetch(e.request)
         .then(res => {
@@ -63,7 +78,11 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(e.request, clone));
           return res;
         })
-        .catch(() => caches.match('/app.html'))
+        .catch(() =>
+          caches.match(e.request).then(cached =>
+            cached || caches.match('/app.html') || caches.match('/index.html')
+          )
+        )
     );
     return;
   }

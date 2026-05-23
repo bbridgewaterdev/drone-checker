@@ -58,7 +58,10 @@ self.addEventListener('fetch', e => {
       url.includes('googletagmanager.com') ||
       url.includes('google-analytics.com')) {
     e.respondWith(
-      fetch(e.request).catch(() => new Response('{}', {headers:{'Content-Type':'application/json'}}))
+      fetch(e.request).catch(() => new Response(
+  JSON.stringify({ error: 'offline', message: 'No live data — do not fly without checking current conditions.' }),
+  { status: 503, headers: { 'Content-Type': 'application/json' } }
+))
     );
     return;
   }

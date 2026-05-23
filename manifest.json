@@ -11,6 +11,7 @@
   "theme_color": "#0f172a",
   "lang": "en-GB",
   "categories": ["utilities", "weather"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-48.png",
@@ -55,21 +56,35 @@
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "DroneChecker Dashboard"
+      "label": "Fly or Stay Grounded?"
     },
     {
       "src": "/screenshots/screenshot-forecast.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Weather Forecast"
+      "label": "Plan Your Perfect Flight"
     },
     {
       "src": "/screenshots/screenshot-golden.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Golden Hour Calculator"
+      "label": "Chase the Golden Hour"
+    },
+    {
+      "src": "/screenshots/screenshot-log.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Log Every Flight, Stay Legal"
+    },
+    {
+      "src": "/screenshots/screenshot-wind.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "See the Wind Before You Launch"
     }
   ],
   "shortcuts": [

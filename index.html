@@ -71,5 +71,10 @@ document.getElementById('email-input').addEventListener('keydown',function(e){
   if(e.key==='Enter')register();
 });
 </script>
+<script>
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});
+  }
+</script>
 </body>
 </html>

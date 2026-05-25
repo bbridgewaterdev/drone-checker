@@ -126,7 +126,7 @@
     },
     {
       "name": "Golden Hour",
-      "short_name": "Golden",
+      "short_name": "Golden Hour",
       "description": "Sunrise, sunset and golden hour times for photography",
       "url": "/app.html?tab=gh",
       "icons": [
@@ -139,7 +139,7 @@
     },
     {
       "name": "Flight Log",
-      "short_name": "Log",
+      "short_name": "Flight Log",
       "description": "Record a new flight or review your flight history",
       "url": "/app.html?tab=log",
       "icons": [

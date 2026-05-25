@@ -8,7 +8,19 @@
   <link rel="icon" type="image/png" href="/icons/icon-192.png"/>
   <link rel="manifest" href="/manifest.json"/>
   <script>
-    try{if(localStorage.getItem('dc_disclaimer')==='accepted')window.location.replace('/app.html');}catch(e){}
+    // TWA/installed app users always go straight to /app.html —
+    // they should never see this coming soon page.
+    // Web users who've previously accepted the disclaimer also redirect.
+    // ?home=1 allows deliberate access to this page from the app footer.
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var bypass = params.has('home');
+      var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      var hasAccepted = localStorage.getItem('dc_disclaimer') === 'accepted';
+      if (!bypass && (isStandalone || hasAccepted)) {
+        window.location.replace('/app.html' + window.location.search);
+      }
+    } catch(e) {}
   </script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}

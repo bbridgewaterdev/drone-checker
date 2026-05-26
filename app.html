@@ -202,7 +202,8 @@
     @keyframes sp{to{transform:rotate(360deg);}}
     .loading p{font-size:13px;color:var(--muted);}
     .err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius-sm);padding:14px;margin:12px;font-size:13px;color:var(--red);line-height:1.6;}
-    .unit-toggle{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 7px;color:var(--muted);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+    .unit-toggle{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;min-height:44px;display:flex;align-items:center;}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
     .unit-toggle.active{background:var(--accent);color:#fff;border-color:var(--accent);}
     .fav-bar{display:none;padding:6px 12px 8px;gap:8px;flex-wrap:wrap;align-items:center;background:var(--bg2);border-bottom:1px solid var(--border);}
     .fav-bar.show{display:flex;}
@@ -212,7 +213,7 @@
     .fav-pill-del{background:none;border:none;color:var(--muted);cursor:pointer;padding:0 0 0 4px;font-size:14px;line-height:1;font-family:inherit;}
     .fav-add{background:none;border:1px dashed var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap;font-family:inherit;}
     .week-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:12px 12px 0;}
-    .week-best-badge{display:inline-block;background:rgba(34,197,94,.15);color:var(--green);font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+    .week-best-badge{display:inline-block;background:rgba(34,197,94,.15);color:var(--green);font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle;}
     .week-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
     .week-row:last-child{border-bottom:none;}
     .week-row.best-day{background:rgba(34,197,94,.07);border-radius:var(--radius-sm);padding:9px 8px;margin:0 -8px;border-bottom:none;}
@@ -389,8 +390,8 @@
         <span id="loc-name">Locating...</span>
       </div>
       <div style="display:flex;align-items:center;gap:6px;margin-top:1px;">
-        <span id="updated-txt" style="font-size:10px;color:var(--muted);">—</span>
-        <button id="refresh-btn" onclick="manualRefresh()" aria-label="Refresh weather data" style="background:none;border:none;color:var(--accent);font-size:10px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;line-height:1;">↻ Refresh</button>
+        <span id="updated-txt" style="font-size:11px;color:var(--muted);">—</span>
+        <button id="refresh-btn" onclick="manualRefresh()" aria-label="Refresh weather data" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;line-height:1;min-height:44px;min-width:44px;">↻ Refresh</button>
       </div>
     </span>
   </div>
@@ -449,11 +450,13 @@
         <div class="fav-bar" id="fav-bar"></div>
         <div class="serr" id="serr"></div>
         <div class="offline-bar" id="offline-bar">⚡ Offline — showing cached data &bull; <span id="offline-age"></span></div>
-        <div id="dash">
+        <div id="dash" aria-label="Fly conditions" aria-live="polite" aria-atomic="false">
           <div class="skel skel-cond"></div>
           <div class="skel skel-card"></div>
           <div class="skel skel-card"></div>
         </div>
+        <!-- Screen reader announcer for rating changes -->
+        <div id="a11y-announce" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
       </div>
 
       <!-- FORECAST -->
@@ -689,8 +692,20 @@ function renderChecklist(){
   document.getElementById('cl-body').innerHTML=html;
 }
 
-function wmoInfo(code){
-  var map={0:{desc:'Clear sky',emoji:'☀️'},1:{desc:'Mainly clear',emoji:'🌤️'},2:{desc:'Partly cloudy',emoji:'⛅'},3:{desc:'Overcast',emoji:'☁️'},
+function wmoInfo(code,date){
+  // Determine day/night using sunrise/sunset if location known, else fall back to hour
+  var now=date||new Date();
+  var isNight=false;
+  if(uLat&&uLng){
+    var st=calcSunTimes(uLat,uLng,now);
+    isNight=!!(st.sunrise&&st.sunset&&(now<st.sunrise||now>st.sunset));
+  } else {
+    var h=now.getHours();isNight=h<6||h>=21;
+  }
+  var clearEmoji=isNight?'🌙':'☀️';
+  var mainlyEmoji=isNight?'🌙':'🌤️';
+  var partlyEmoji=isNight?'🌑':'⛅';
+  var map={0:{desc:'Clear sky',emoji:clearEmoji},1:{desc:'Mainly clear',emoji:mainlyEmoji},2:{desc:'Partly cloudy',emoji:partlyEmoji},3:{desc:'Overcast',emoji:'☁️'},
     45:{desc:'Fog',emoji:'🌫️'},48:{desc:'Icy fog',emoji:'🌫️'},
     51:{desc:'Light drizzle',emoji:'🌦️'},53:{desc:'Drizzle',emoji:'🌦️'},55:{desc:'Heavy drizzle',emoji:'🌧️'},
     56:{desc:'Light freezing drizzle',emoji:'🌨️'},57:{desc:'Freezing drizzle',emoji:'🌨️'},
@@ -860,12 +875,12 @@ function renderWeekPlanner(daily){
     var dotCol=dr==='green'?'var(--green)':dr==='amber'?'var(--amber)':'var(--red)';
     var isBest=j===bestIdx;
     rows+='<div class="week-row'+(isBest?' best-day':'')+'">'+
-      '<div class="week-day">'+dayLbl.split(' ')[0]+'<div style="font-size:10px;color:var(--muted);font-weight:400;">'+dayLbl.split(' ').slice(1).join(' ')+'</div></div>'+
+      '<div class="week-day">'+dayLbl.split(' ')[0]+'<div style="font-size:11px;color:var(--muted);font-weight:400;">'+dayLbl.split(' ').slice(1).join(' ')+'</div></div>'+
       '<div class="week-emoji">'+dInfo.emoji+'</div>'+
       '<div class="week-info">'+dMin+'–'+dMax+'°C · '+Math.round(dMin*9/5+32)+'–'+Math.round(dMax*9/5+32)+'°F<div style="color:var(--muted);">'+dInfo.desc+'</div></div>'+
       '<div class="week-wind">'+dWind+' '+spdU()+'<div style="font-size:11px;">gust '+dGust+'</div></div>'+
       '<div class="week-dot" style="background:'+dotCol+';">'+(isBest?'':'')+'</div>'+
-      (isBest?'<div style="font-size:10px;font-weight:600;color:var(--green);flex-shrink:0;">BEST</div>':'')+'</div>';
+      (isBest?'<div style="font-size:11px;font-weight:600;color:var(--green);flex-shrink:0;">BEST</div>':'')+'</div>';
   }
   return'<div class="week-card"><div class="card-ttl">Best Day to Fly — Next 7 Days</div>'+rows+'</div>';
 }
@@ -1353,6 +1368,9 @@ function renderDash(){
     '<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
     '</div><div style="height:14px;"></div>';
   renderKpCard();
+  // Announce fly rating change to screen readers
+  var announcer=document.getElementById('a11y-announce');
+  if(announcer)announcer.textContent=cond.label+'. '+cond.desc;
 }
 
 function timeSince(date){
@@ -1367,12 +1385,15 @@ function renderFc(){
   var hours=wxData.hourly,now=new Date(),rows='',count=0;
   for(var i=0;i<hours.time.length&&count<24;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
-    var wmo=hours.weather_code[i],info=wmoInfo(wmo),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
+    var wmo=hours.weather_code[i],info=wmoInfo(wmo,t),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
     var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
     var w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
     var precip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
-    var precipBadge='<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':precip>=10?'var(--muted)':'rgba(148,163,184,.5)')+';">💧'+precip+'%</span>';
-    rows+='<div class="fc-item"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C<br><span style="font-size:11px;color:var(--muted);">'+Math.round(temp*9/5+32)+'°F</span></div><div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+fcRating(wind,gust,vis,wmo,precip,temp,currentKp,w80,w120)+'"></div></div>';
+    var precipBadge=precip>0?'<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':'var(--muted)')+';">💧'+precip+'% rain</span>':'';
+    var rating=flyRating(wind,gust,vis,wmo,currentKp,temp,w80,w120);
+    var reasonLine=rating.lvl!=='green'?'<div style="font-size:11px;color:'+(rating.lvl==='red'?'var(--red)':'var(--amber)')+';margin-top:6px;padding-top:6px;border-top:1px solid var(--border);line-height:1.4;">'+rating.desc+'</div>':'';
+    var ariaLabel=pad(t.getHours())+':00. '+info.desc+'.'+(precip>0?' '+precip+' percent chance of rain.':'')+' '+spd(wind)+' '+spdU()+' wind. '+(rating.lvl==='green'?'Good to fly.':'Caution: '+rating.desc);
+    rows+='<div class="fc-item" style="flex-direction:column;align-items:stretch;" aria-label="'+ariaLabel+'"><div style="display:flex;align-items:center;gap:10px;" aria-hidden="true"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+temp+'°C<br><span style="font-size:11px;color:var(--muted);">'+Math.round(temp*9/5+32)+'°F</span></div><div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+rating.lvl+'"></div></div>'+reasonLine+'</div>';
     count++;
   }
   document.getElementById('fc-body').innerHTML=
@@ -1457,22 +1478,32 @@ function initWindMap(){
 
   for(var i=0;i<hours.time.length&&count<8;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
-    var hw=spd(hours.wind_speed_10m[i]||0),hg=spd(hours.wind_gusts_10m[i]||0);
+    var hWind=hours.wind_speed_10m[i]||0;
+    var hGust=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
+    var hw=spd(hWind),hg=spd(hGust);
     var h80v=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
     var h120v=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
-    var hr=fcRating(hours.wind_speed_10m[i]||0,hours.wind_gusts_10m[i]||0,hours.visibility?(hours.visibility[i]||10000):10000,hours.weather_code?(hours.weather_code[i]||0):0,hours.precipitation_probability?(hours.precipitation_probability[i]||0):0,hours.temperature_2m?Math.round(hours.temperature_2m[i]):15,currentKp,h80v,h120v);
+    var hr=fcRating(hWind,hGust,hours.visibility?(hours.visibility[i]||10000):10000,hours.weather_code?(hours.weather_code[i]||0):0,hours.precipitation_probability?(hours.precipitation_probability[i]||0):0,hours.temperature_2m?Math.round(hours.temperature_2m[i]):15,currentKp,h80v,h120v);
     var hcol=hr==='red'?'var(--red)':hr==='amber'?'var(--amber)':'var(--green)';
-    var hcH=aHex(hours.wind_speed_10m[i]||0),h80H=aHex(h80v),h120H=aHex(h120v);
+    // All chips: worst of altitude sustained wind OR 10m gust (no altitude gust data available)
+    var hcH=(hWind>=d.windRed||hGust>=d.gustRed)?'#ef4444':(hWind>=d.windAmber||hGust>=d.gustAmber)?'#f59e0b':'#22c55e';
+    var hcLbl=(hWind>=d.windRed||hGust>=d.gustRed)?'✕':(hWind>=d.windAmber||hGust>=d.gustAmber)?'⚠':'✓';
+    var h80H=(h80v>=d.windRed||hGust>=d.gustRed)?'#ef4444':(h80v>=d.windAmber||hGust>=d.gustAmber)?'#f59e0b':'#22c55e';
+    var h80Lbl=(h80v>=d.windRed||hGust>=d.gustRed)?'✕':(h80v>=d.windAmber||hGust>=d.gustAmber)?'⚠':'✓';
+    var h120H=(h120v>=d.windRed||hGust>=d.gustRed)?'#ef4444':(h120v>=d.windAmber||hGust>=d.gustAmber)?'#f59e0b':'#22c55e';
+    var h120Lbl=(h120v>=d.windRed||hGust>=d.gustRed)?'✕':(h120v>=d.windAmber||hGust>=d.gustAmber)?'⚠':'✓';
+    // Colour gust text so users can see at a glance why the dot might be red
+    var gustCol=hGust>=d.gustRed?'var(--red)':hGust>=d.gustAmber?'var(--amber)':'var(--muted)';
     fcRows+='<div style="padding:10px 0;border-bottom:1px solid var(--border);">'+
       '<div style="display:flex;align-items:center;gap:10px;">'+
         '<div style="width:46px;font-size:13px;font-weight:600;">'+pad(t.getHours())+':00</div>'+
-        '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:'+hcol+';">'+hw+' '+spdU()+'</div><div style="font-size:11px;color:var(--muted);">Gusts '+hg+' '+spdU()+'</div></div>'+
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:'+hcol+';">'+hw+' '+spdU()+'</div><div style="font-size:11px;color:'+gustCol+';">Gusts '+hg+' '+spdU()+'</div></div>'+
         '<div style="width:10px;height:10px;border-radius:50%;background:'+hcol+';flex-shrink:0;"></div>'+
       '</div>'+
       '<div style="display:flex;gap:6px;margin-top:6px;margin-left:56px;">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:'+hcH+';">10m '+hw+' '+spdU()+' '+aLbl(hours.wind_speed_10m[i]||0)+'</div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:'+h80H+';">80m '+spd(h80v)+' '+spdU()+' '+aLbl(h80v)+'</div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:'+h120H+';">120m '+spd(h120v)+' '+spdU()+' '+aLbl(h120v)+'</div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:5px;padding:3px 7px;font-size:11px;font-weight:600;color:'+hcH+';">10m '+hw+' '+spdU()+' '+hcLbl+'</div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:5px;padding:3px 7px;font-size:11px;font-weight:600;color:'+h80H+';">80m '+spd(h80v)+' '+spdU()+' '+h80Lbl+'</div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:5px;padding:3px 7px;font-size:11px;font-weight:600;color:'+h120H+';">120m '+spd(h120v)+' '+spdU()+' '+h120Lbl+'</div>'+
       '</div>'+
     '</div>';
     count++;
@@ -1482,12 +1513,12 @@ function initWindMap(){
   windEl.innerHTML=
     '<div style="display:flex;gap:6px;padding:10px 12px 6px;align-items:center;">'+
       '<div style="font-size:11px;color:var(--muted);font-weight:600;margin-right:2px;">ALTITUDE</div>'+
-      '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" style="background:#06b6d4;color:#fff;border:1px solid #06b6d4;border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">10m</button>'+
-      '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">80m</button>'+
-      '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">120m</button>'+
+      '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" aria-label="Show wind at 10 metres" style="background:#06b6d4;color:#fff;border:1px solid #06b6d4;border-radius:7px;padding:11px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;">10m</button>'+
+      '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" aria-label="Show wind at 80 metres" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:11px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;">80m</button>'+
+      '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" aria-label="Show wind at 120 metres" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:11px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;">120m</button>'+
     '</div>'+
     '<div style="position:relative;">'+
-      '<div id="wind-map-el" style="height:300px;width:100%;"></div>'+
+      '<div id="wind-map-el" role="application" aria-label="Interactive wind map" style="height:300px;width:100%;"></div>'+
       // Speed + direction pill
       '<div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:8px 16px;display:flex;align-items:center;gap:10px;pointer-events:none;white-space:nowrap;">'+
         '<div id="wmap-dot" style="width:9px;height:9px;border-radius:50%;background:'+colHex+';box-shadow:0 0 6px '+colHex+';flex-shrink:0;"></div>'+
@@ -1520,10 +1551,10 @@ function initWindMap(){
       // Airspace toggle button
       '<button id="airspace-btn" onclick="toggleAirspace()" style="position:absolute;bottom:24px;right:48px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 11px;font-size:11px;font-weight:600;color:rgba(241,245,249,.7);cursor:pointer;font-family:inherit;white-space:nowrap;">✈ Airspace</button>'+
     '</div>'+
-    '<div style="font-size:10px;color:var(--muted);padding:5px 12px 0;line-height:1.4;">⚠ Airspace zones are indicative only. Always verify with the <a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">CAA</a> before flying.</div>'+
+    '<div style="font-size:11px;color:var(--muted);padding:5px 12px 0;line-height:1.4;">⚠ Airspace zones are indicative only. Always verify with the <a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">CAA</a> before flying.</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+
       '<div class="wx-tile"><div class="wx-lbl">Wind</div><div id="wtile-spd" class="wx-val" style="font-size:20px;">'+wind+'</div><div id="wtile-unit" class="wx-sub">'+spdU()+'</div></div>'+
-      '<div class="wx-tile"><div class="wx-lbl">Gusts <span style="font-size:9px;color:var(--muted);font-weight:400;">(10m only)</span></div><div class="wx-val" style="font-size:20px;">'+gust+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
+      '<div class="wx-tile"><div class="wx-lbl">Gusts <span style="font-size:11px;color:var(--muted);font-weight:400;">(10m only)</span></div><div class="wx-val" style="font-size:20px;">'+gust+'</div><div class="wx-sub">'+spdU()+'</div></div>'+
       '<div class="wx-tile"><div class="wx-lbl">Knots</div><div id="wtile-kt" class="wx-val" style="font-size:20px;">'+(rawWind*0.539957).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
     '</div>'+
     '<div class="card"><div class="card-ttl">Hourly Wind Forecast</div>'+fcRows+'</div>'+
@@ -1582,6 +1613,20 @@ function initWindMap(){
 
     function launch(){
       if(windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
+      // Respect prefers-reduced-motion for users with vestibular disorders
+      if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        var alt=getAlt();
+        wctx.clearRect(0,0,W,H);
+        wctx.font='bold 16px sans-serif';
+        wctx.fillStyle=alt.hex;
+        wctx.textAlign='center';
+        wctx.textBaseline='middle';
+        wctx.fillText(alt.label+' — '+alt.spd.toFixed(0)+' '+spdU(),W/2,H/2);
+        wctx.font='13px sans-serif';
+        wctx.fillStyle='rgba(241,245,249,0.4)';
+        wctx.fillText('Wind animation paused (reduced motion)',W/2,H/2+28);
+        return;
+      }
       parts=[];
       for(var pi=0;pi<NPART;pi++)parts.push(mkPart(false));
       function wanimate(){

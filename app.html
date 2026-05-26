@@ -92,6 +92,7 @@
     .cond-desc{font-size:12px;color:var(--muted);line-height:1.5;}
     .wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
     .wx-tile{background:var(--bg3);border-radius:var(--radius-sm);padding:11px;border-left:3px solid transparent;}
+    .wx-tile-full{grid-column:span 2;}
     .wx-tile.green{border-left-color:var(--green);}
     .wx-tile.amber{border-left-color:var(--amber);}
     .wx-tile.red{border-left-color:var(--red);}
@@ -237,8 +238,21 @@
       .tabs{flex:1;}
       .wx-grid{grid-template-columns:1fr 1fr 1fr;}
       .gh-tmrw{grid-template-columns:repeat(3,1fr);}
+      /* Wind at Altitude spans all columns at wider widths, not just 2 */
+      .wx-tile-full{grid-column:1 / -1;}
+      /* Air Smoothness spans 2 columns to fill the last row gap */
+      .wx-tile-smooth{grid-column:span 2;}
     }
-    @media(min-width:1024px){.nav{width:220px;}.gh-tmrw{grid-template-columns:repeat(6,1fr);}}
+    @media(min-width:1024px){
+      .nav{width:220px;}
+      .gh-tmrw{grid-template-columns:repeat(6,1fr);}
+      /* Constrain inner content width — do NOT touch .tab itself (position:absolute system) */
+      #dash,#fc-body,#wind-display,#gh-body{
+        max-width:860px;
+        margin-left:auto;
+        margin-right:auto;
+      }
+    }
     .onboard-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.95);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
     .onboard-sheet{background:var(--bg2);border-radius:20px;padding:32px 24px 24px;width:100%;max-width:380px;border:1px solid var(--border);text-align:center;}
     .onboard-slide{display:none;}
@@ -1333,8 +1347,8 @@ function renderDash(){
     '<div class="wx-tile '+rHum+'"><div class="wx-lbl">Humidity</div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div></div>'+
     '<div class="wx-tile '+rPres+'"><div class="wx-lbl">Pressure</div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div></div>'+
     '<div class="wx-tile '+rTemp+'"><div class="wx-lbl">Dew Point</div><div class="wx-val wx-val-'+rTemp+'">'+Math.round(rawTemp-((100-hum)/5))+'°C</div><div class="wx-sub">'+(rawTemp-Math.round(rawTemp-((100-hum)/5))<2?'Condensation risk':rawTemp-Math.round(rawTemp-((100-hum)/5))<4?'Watch for dew':'Low condensation risk')+'</div></div>'+
-    (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.5?'red':ratio>=0.2?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.5?'Turbulent':ratio>=0.2?'Choppy':'Smooth';var desc=ratio>=0.5?'Large gust spikes — difficult to control':ratio>=0.2?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile '+r+'"><div class="wx-lbl">Air Smoothness</div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div></div>';})()+
-    '<div class="wx-tile" style="grid-column:span 2;"><div class="wx-lbl">Wind at Altitude</div><div style="display:flex;flex-direction:column;gap:7px;margin-top:8px;">'+
+    (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.75?'red':ratio>=0.35?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.75?'Turbulent':ratio>=0.35?'Choppy':'Smooth';var desc=ratio>=0.75?'Large gust spikes — difficult to control':ratio>=0.35?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile wx-tile-smooth '+r+'"><div class="wx-lbl">Air Smoothness</div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div></div>';})()+
+    '<div class="wx-tile wx-tile-full"><div class="wx-lbl">Wind at Altitude</div><div style="display:flex;flex-direction:column;gap:7px;margin-top:8px;">'+
     (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);var lbl=r==='red'?'✕ Too Strong':r==='amber'?'⚠ Caution':'✓ OK';rows+='<div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="width:54px;font-size:13px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+spd(l.v)+' '+spdU()+'</div><div style="width:70px;font-size:11px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+lbl+'</div></div>';});return rows;})()+'</div></div>'+
     lipoWarn+
     '</div></div>'+
@@ -1513,9 +1527,9 @@ function initWindMap(){
   windEl.innerHTML=
     '<div style="display:flex;gap:6px;padding:10px 12px 6px;align-items:center;">'+
       '<div style="font-size:11px;color:var(--muted);font-weight:600;margin-right:2px;">ALTITUDE</div>'+
-      '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" aria-label="Show wind at 10 metres" style="background:#06b6d4;color:#fff;border:1px solid #06b6d4;border-radius:7px;padding:11px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;">10m</button>'+
-      '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" aria-label="Show wind at 80 metres" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:11px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;">80m</button>'+
-      '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" aria-label="Show wind at 120 metres" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:11px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;min-height:44px;">120m</button>'+
+      '<button id="walt-10m" onclick="switchWindAlt(\'10m\')" aria-label="Show wind at 10 metres" style="background:#06b6d4;color:#fff;border:1px solid #06b6d4;border-radius:7px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">10m</button>'+
+      '<button id="walt-80m" onclick="switchWindAlt(\'80m\')" aria-label="Show wind at 80 metres" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">80m</button>'+
+      '<button id="walt-120m" onclick="switchWindAlt(\'120m\')" aria-label="Show wind at 120 metres" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border);border-radius:7px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">120m</button>'+
     '</div>'+
     '<div style="position:relative;">'+
       '<div id="wind-map-el" role="application" aria-label="Interactive wind map" style="height:300px;width:100%;"></div>'+

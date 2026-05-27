@@ -1,4 +1,4 @@
-const CACHE = 'dronechecker-v62';
+const CACHE = 'dronechecker-v63';
 
 const STATIC = [
   '/',
@@ -59,14 +59,14 @@ self.addEventListener('fetch', e => {
       url.includes('google-analytics.com')) {
     e.respondWith(
       fetch(e.request).catch(() => new Response(
-  JSON.stringify({ error: 'offline', message: 'No live data — do not fly without checking current conditions.' }),
-  { status: 503, headers: { 'Content-Type': 'application/json' } }
-))
+        JSON.stringify({ error: 'offline', message: 'No live data — do not fly without checking current conditions.' }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } }
+      ))
     );
     return;
   }
 
-  // HTML pages (any page): network-first so updates deploy immediately
+  // HTML pages: network-first so updates deploy immediately
   if (e.request.mode === 'navigate' ||
       url.endsWith('.html') ||
       url.endsWith('/') ||

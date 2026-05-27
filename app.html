@@ -1080,12 +1080,23 @@ function getLoc(){
   }
   navigator.geolocation.getCurrentPosition(
     function(p){uLat=p.coords.latitude;uLng=p.coords.longitude;fetchAll();revGeo();},
-    function(){
+    function(err){
+      // Permission denied (1) — don't retry, fall back immediately
+      // Timeout (3) or unavailable (2) — fall back but don't wipe existing data
       var last=loadLastLoc();
-      if(last&&!wxData){uLat=last.lat;uLng=last.lng;document.getElementById('loc-name').textContent=last.name;renderFavBar();fetchAll();}
-      else if(!last&&!wxData){setLoc(51.5074,-0.1278,'London (default)');}
+      if(!wxData){
+        if(last){uLat=last.lat;uLng=last.lng;document.getElementById('loc-name').textContent=last.name;renderFavBar();fetchAll();}
+        else{setLoc(51.5074,-0.1278,'London (default)');}
+      } else if(err.code!==1){
+        // Had data already but geolocation timed out — silently retry once with fresh request
+        navigator.geolocation.getCurrentPosition(
+          function(p){uLat=p.coords.latitude;uLng=p.coords.longitude;fetchAll();revGeo();},
+          function(){},
+          {timeout:15000,maximumAge:60000}
+        );
+      }
     },
-    {timeout:6000,maximumAge:300000}
+    {timeout:15000,maximumAge:300000}
   );
 }
 function setLoc(lat,lng,name){uLat=lat;uLng=lng;document.getElementById('loc-name').textContent=name;renderFavBar();fetchAll();}

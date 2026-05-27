@@ -47,13 +47,14 @@
   <h2>2. Who We Are</h2>
   <p>DroneChecker is an independent application providing drone flying condition information for users worldwide, with a focus on the United Kingdom.</p>
   <p>For any privacy-related queries, please contact us at: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a></p>
+  <p>We have assessed our data processing activities and determined that we are not required to register with the Information Commissioner's Office (ICO) at this time, as we do not store or control any personal data on our own servers. If you believe this assessment is incorrect, please contact us. You may also contact the ICO directly at <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">ico.org.uk</a>.</p>
 
   <h2>3. Information We Collect</h2>
   <p>DroneChecker is designed to collect as little information as possible. The sections below describe what data is used and why.</p>
 
   <h2>3.1 Location Data</h2>
   <p>DroneChecker requests access to your device's location (GPS) to display local weather conditions, calculate golden hour and blue hour times, and provide localised flying condition ratings.</p>
-  <p><strong>We do not store your location data.</strong> Location is used only in real time and is never transmitted to our servers or stored permanently. Your coordinates are passed to third-party weather services (listed in Section 4) solely to retrieve relevant data.</p>
+  <p><strong>We do not store your location data.</strong> Location is used only in real time and is never transmitted to our servers or stored permanently. Your coordinates are passed to third-party weather and map services (listed in Section 4) solely to retrieve relevant data.</p>
 
   <h2>3.2 Search Queries</h2>
   <p>If you use the postcode or town search feature, your query is sent to Postcodes.io (for postcodes) or the Open-Meteo Geocoding API (for town and city names) solely to retrieve location coordinates. We do not store any search queries.</p>
@@ -67,7 +68,7 @@
     <li>Approximate geographic location (city or region level — not precise GPS coordinates)</li>
     <li>How you arrived at the app (direct, search, referral)</li>
   </ul>
-  <p><strong>No personally identifiable information is collected through Google Analytics.</strong> Google Analytics 4 anonymises IP addresses by default. Google Analytics sets cookies on your device to distinguish users and sessions. Analytics are only enabled after you accept the in-app disclaimer; you can withdraw this consent at any time using the "Reset Data" option in the app footer. We do not share this data with any third parties beyond Google's own analytics processing. You can learn more about how Google handles this data at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.</p>
+  <p><strong>No personally identifiable information is collected through Google Analytics.</strong> Google Analytics 4 anonymises IP addresses by default. Google Analytics sets cookies on your device to distinguish users and sessions (see Section 3.6 for details). Analytics are only enabled after you accept the in-app disclaimer; you can withdraw this consent at any time using the "Reset Data" option in the app footer, which clears all stored data including the consent flag. We do not share this data with any third parties beyond Google's own analytics processing. You can learn more about how Google handles this data at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.</p>
 
   <h2>3.4 No Accounts Required</h2>
   <p>DroneChecker does not require you to create an account. We do not collect your name, email address, or any other personal identifiers.</p>
@@ -84,16 +85,25 @@
     <li><strong>Flight log entries</strong> — if you use the flight logger, your entries (including dates, location names, drone model, flight duration, conditions and any notes you add) are stored locally on your device. This data is never transmitted to us. You can export it as a CSV file and delete it at any time within the app.</li>
     <li><strong>Cached weather data</strong> — the most recently loaded weather conditions, stored with a timestamp to allow the app to display last known data when offline. This contains weather readings only and no personal information.</li>
   </ul>
-  <p>You can clear all locally stored data at any time by clearing your browser or app cache, or by uninstalling the app.</p>
+  <p>You can clear all locally stored data at any time by clearing your browser or app cache, or by using the "Reset Data" option in the app footer, or by uninstalling the app.</p>
+
+  <h2>3.6 Cookies</h2>
+  <p>DroneChecker itself does not set any first-party cookies. However, Google Analytics 4 — which is loaded only after you accept the in-app disclaimer — sets the following cookies on your device:</p>
+  <ul>
+    <li><strong>_ga</strong> — distinguishes unique users. Expires after 2 years.</li>
+    <li><strong>_ga_&lt;container-id&gt;</strong> — used to persist session state. Expires after 2 years.</li>
+  </ul>
+  <p>These cookies are analytics cookies only. No advertising, tracking, or profiling cookies are used. You can prevent Google Analytics cookies from being set by using the "Reset Data" option in the app footer (which withdraws your consent and reloads the app), by using your browser's built-in cookie controls, or by installing the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics opt-out browser add-on</a>.</p>
 
   <h2>4. Third-Party Services</h2>
-  <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data. When you use features such as weather or location search, your coordinates or search query may be sent to the relevant service. No personal identifying information is included in these requests.</p>
+  <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data. When you use features such as weather, map display or location search, your coordinates or search query may be sent to the relevant service. No personal identifying information is included in these requests.</p>
 
   <table>
     <tr><th>Service</th><th>Purpose</th><th>Privacy Policy</th></tr>
     <tr><td>Open-Meteo</td><td>Live weather, forecast data and town/city geocoding</td><td><a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener noreferrer">View</a></td></tr>
     <tr><td>Postcodes.io</td><td>UK postcode lookup</td><td><a href="https://postcodes.io" target="_blank" rel="noopener noreferrer">View</a></td></tr>
     <tr><td>OpenStreetMap Nominatim</td><td>Reverse geocoding (place names from coordinates)</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>Stadia Maps</td><td>Map tile rendering for the Wind Detail tab</td><td><a href="https://stadiamaps.com/privacy/" target="_blank" rel="noopener noreferrer">View</a></td></tr>
     <tr><td>NOAA Space Weather</td><td>KP geomagnetic index data</td><td><a href="https://www.noaa.gov/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
     <tr><td>Google Analytics 4</td><td>Anonymous usage analytics to improve the app</td><td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
     <tr><td>GitHub Pages</td><td>App hosting and delivery</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">View</a></td></tr>
@@ -111,12 +121,22 @@
   <p>DroneChecker is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a>.</p>
 
   <h2>7. Your Rights (UK GDPR)</h2>
-  <p>Under UK GDPR, you have the right to access, correct, or delete any personal data we hold, and to lodge a complaint with the <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">Information Commissioner's Office (ICO)</a>. As DroneChecker does not collect or store personal data on our servers, most of these rights are satisfied by the nature of the app itself.</p>
-  <p>For analytics data processed by Google, you may opt out using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics opt-out browser add-on</a>.</p>
-  <p>Any locally stored preferences and flight log data can be cleared by clearing your browser or app cache, or by using the delete functions within the app.</p>
+  <p>Under UK GDPR, you have the following rights regarding any personal data we hold:</p>
+  <ul>
+    <li><strong>Right of access</strong> — to request a copy of any personal data we hold about you.</li>
+    <li><strong>Right to rectification</strong> — to request correction of inaccurate or incomplete personal data.</li>
+    <li><strong>Right to erasure</strong> — to request deletion of your personal data ("right to be forgotten").</li>
+    <li><strong>Right to restriction of processing</strong> — to request that we limit how we use your data in certain circumstances.</li>
+    <li><strong>Right to data portability</strong> — to receive your personal data in a structured, machine-readable format and transfer it to another controller where technically feasible.</li>
+    <li><strong>Right to object</strong> — to object to processing of your personal data where we rely on legitimate interests as our legal basis.</li>
+    <li><strong>Right to withdraw consent</strong> — where processing is based on consent (such as analytics), you may withdraw consent at any time without affecting the lawfulness of prior processing. Use the "Reset Data" option in the app footer to do this.</li>
+    <li><strong>Right to lodge a complaint</strong> — with the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">ico.org.uk</a>.</li>
+  </ul>
+  <p>As DroneChecker does not collect or store personal data on our own servers, most of these rights are satisfied by the nature of the app itself. For analytics data processed by Google, you may also opt out using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics opt-out browser add-on</a>. Any locally stored preferences and flight log data can be cleared using the "Reset Data" option in the app footer, or by clearing your browser or app cache.</p>
+  <p>To exercise any of these rights, please contact us at <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a>. We will respond within 30 days.</p>
 
   <h2>8. Changes to This Policy</h2>
-  <p>We may update this Privacy Policy from time to time and will indicate the date of revision at the top of this page. Continued use of the app after changes constitutes acceptance of the updated policy.</p>
+  <p>We may update this Privacy Policy from time to time and will indicate the date of revision at the top of this page. For material changes that affect how your data is processed, we will take reasonable steps to bring these to your attention (for example by displaying a notice within the app). Where such changes require fresh consent, we will seek that consent before the new processing begins. Continued use of the app after non-material changes constitutes acceptance of the updated policy.</p>
 
   <h2>9. Contact Us</h2>
   <p>Email: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a><br/>

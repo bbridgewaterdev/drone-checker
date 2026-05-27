@@ -1072,30 +1072,17 @@ function finishOnboarding(){
   if(overlay)overlay.style.display='none';
 }
 function getLoc(){
-  if(!navigator.geolocation){
-    var last=loadLastLoc();
-    if(last){uLat=last.lat;uLng=last.lng;document.getElementById('loc-name').textContent=last.name;renderFavBar();fetchAll();}
-    else{setLoc(51.5074,-0.1278,'London (default)');}
-    return;
-  }
+  if(!navigator.geolocation)return;
   navigator.geolocation.getCurrentPosition(
-    function(p){uLat=p.coords.latitude;uLng=p.coords.longitude;fetchAll();revGeo();},
-    function(err){
-      // Permission denied (1) — don't retry, fall back immediately
-      // Timeout (3) or unavailable (2) — fall back but don't wipe existing data
-      var last=loadLastLoc();
-      if(!wxData){
-        if(last){uLat=last.lat;uLng=last.lng;document.getElementById('loc-name').textContent=last.name;renderFavBar();fetchAll();}
-        else{setLoc(51.5074,-0.1278,'London (default)');}
-      } else if(err.code!==1){
-        // Had data already but geolocation timed out — silently retry once with fresh request
-        navigator.geolocation.getCurrentPosition(
-          function(p){uLat=p.coords.latitude;uLng=p.coords.longitude;fetchAll();revGeo();},
-          function(){},
-          {timeout:15000,maximumAge:60000}
-        );
-      }
+    function(p){
+      var newLat=p.coords.latitude,newLng=p.coords.longitude;
+      // Only re-fetch if the position has changed meaningfully (>~1km) from current coords
+      var moved=!uLat||!uLng||Math.abs(newLat-uLat)>0.01||Math.abs(newLng-uLng)>0.01;
+      uLat=newLat;uLng=newLng;
+      revGeo();
+      if(moved)fetchAll();
     },
+    function(){}, // Silent failure — fetchAll() already fired from the load handler
     {timeout:15000,maximumAge:300000}
   );
 }
@@ -1699,22 +1686,31 @@ function applyDeepLink(){
 window.addEventListener('load',function(){
   checkDisclaimer();
   loadDrone();loadChecklist();loadUnits();renderFavBar();
+
   var cached=loadWxCache();
   var lastLoc=loadLastLoc();
+
+  // Step 1: Show cached data immediately while we fetch fresh
   if(cached){
     wxData=cached.data;
-    // Restore last known location name/coords so the header is correct, not blank
     if(lastLoc){uLat=lastLoc.lat;uLng=lastLoc.lng;document.getElementById('loc-name').textContent=lastLoc.name;renderFavBar();}
     hideSplash();renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);
   } else if(lastLoc){
-    // No cache but we know where the user was last time — fetch fresh for that location
     uLat=lastLoc.lat;uLng=lastLoc.lng;
     document.getElementById('loc-name').textContent=lastLoc.name;
-    renderFavBar();fetchAll();hideSplash();
+    renderFavBar();
   } else {
-    setLoc(51.5074,-0.1278,'London');
+    uLat=51.5074;uLng=-0.1278;
+    document.getElementById('loc-name').textContent='London';
   }
+
+  // Step 2: Always fetch fresh weather immediately with whatever coords we have.
+  // This is decoupled from geolocation — blocked/slow GPS never prevents a refresh.
+  fetchAll();
+
+  // Step 3: Try geolocation in the background to get accurate position.
   getLoc();
+
   startIntervals();
   setTimeout(function(){hideSplash();},5000);
   setTimeout(applyDeepLink,600);

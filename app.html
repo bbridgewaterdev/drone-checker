@@ -100,11 +100,14 @@
     .wx-val-green{color:var(--green);}
     .wx-val-amber{color:var(--amber);}
     .wx-val-red{color:var(--red);}
-    .wx-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
+    .wx-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;display:flex;justify-content:space-between;align-items:center;}
+    .wx-info-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0 2px;line-height:1;text-transform:none;letter-spacing:0;font-family:inherit;flex-shrink:0;transition:color .15s;}
+    .wx-info-btn:hover,.wx-info-btn.active{color:var(--accent);}
+    .wx-info-panel{display:none;font-size:11px;color:var(--muted);line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
     .wx-val{font-size:15px;font-weight:600;}
     .wx-sub{font-size:11px;color:var(--muted);margin-top:2px;}
     .wx-hero{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px;padding:4px 0;}
-    .wx-icon{font-size:40px;line-height:1;}
+    .wx-icon{font-size:40px;line-height:1;display:inline-flex;align-items:center;}
     .wx-temp{font-size:44px;font-weight:800;line-height:1;letter-spacing:-1px;}
     .wx-desc{font-size:13px;color:var(--muted);margin-top:4px;padding-bottom:6px;}
     .kp-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
@@ -116,7 +119,7 @@
     .kp-scale{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted);}
     .fc-item{background:var(--bg3);border-radius:var(--radius-sm);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px;}
     .fc-time{font-size:13px;font-weight:600;width:46px;flex-shrink:0;}
-    .fc-icon{font-size:20px;width:26px;text-align:center;flex-shrink:0;}
+    .fc-icon{font-size:20px;width:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .fc-temp{font-size:13px;font-weight:600;width:52px;}
     .fc-desc{flex:1;font-size:12px;color:var(--muted);}
     .fc-wind{font-size:12px;color:var(--muted);width:54px;text-align:right;}
@@ -220,7 +223,7 @@
     .week-row:last-child{border-bottom:none;}
     .week-row.best-day{background:rgba(34,197,94,.07);border-radius:var(--radius-sm);padding:9px 8px;margin:0 -8px;border-bottom:none;}
     .week-day{font-size:13px;font-weight:600;width:38px;flex-shrink:0;}
-    .week-emoji{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+    .week-emoji{font-size:20px;width:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .week-info{flex:1;font-size:12px;color:var(--muted);}
     .week-wind{font-size:12px;color:var(--muted);width:56px;text-align:right;flex-shrink:0;}
     .week-dot{width:11px;height:11px;flex-shrink:0;}
@@ -559,7 +562,7 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.3.0';
+var APP_VERSION='1.4.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -693,6 +696,71 @@ function renderChecklist(){
   '</div><div style="height:14px;"></div>';
   document.getElementById('cl-body').innerHTML=html;
 }
+var _wxId=0;
+function wxIcon(code,isNight){
+  var id='wx'+(++_wxId);
+  var SUN='#fbbf24',MOON='#fcd34d',CL='#94a3b8',CM='#64748b',CD='#475569',RN='#60a5fa',SN='#e2e8f0',IC='#bae6fd',LT='#fbbf24';
+  function svg(b){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="1em" height="1em" aria-hidden="true" overflow="visible" style="vertical-align:middle;flex-shrink:0">'+b+'</svg>';}
+  function sunEl(cx,cy,r,col){
+    col=col||SUN;
+    var s='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+col+'"/>';
+    var r1=r+3,r2=r1+5;
+    [0,45,90,135,180,225,270,315].forEach(function(a){var rad=a*Math.PI/180,cs=Math.cos(rad),sn=Math.sin(rad);
+      s+='<line x1="'+(cx+cs*r1).toFixed(1)+'" y1="'+(cy+sn*r1).toFixed(1)+'" x2="'+(cx+cs*r2).toFixed(1)+'" y2="'+(cy+sn*r2).toFixed(1)+'" stroke="'+col+'" stroke-width="2.5" stroke-linecap="round"/>';});
+    return s;
+  }
+  function moonEl(cx,cy,r){
+    var r2=Math.round(r*0.78),ox=Math.round(r*0.4),oy=Math.round(r*0.3);
+    return '<defs><mask id="'+id+'"><rect width="48" height="48" fill="white"/><circle cx="'+(cx+ox)+'" cy="'+(cy-oy)+'" r="'+r2+'" fill="black"/></mask></defs>'+
+           '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+MOON+'" mask="url(#'+id+')"/>';
+  }
+  function cloudEl(cx,cy,col,sc){
+    sc=sc||1;
+    return '<ellipse cx="'+(cx-Math.round(7*sc))+'" cy="'+(cy-Math.round(6*sc))+'" rx="'+Math.round(7*sc)+'" ry="'+Math.round(6.5*sc)+'" fill="'+col+'"/>'+
+           '<ellipse cx="'+(cx+Math.round(5*sc))+'" cy="'+(cy-Math.round(9*sc))+'" rx="'+Math.round(9*sc)+'" ry="'+Math.round(8*sc)+'" fill="'+col+'"/>'+
+           '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+Math.round(13*sc)+'" ry="'+Math.round(7*sc)+'" fill="'+col+'"/>';
+  }
+  function rainEl(cx,cy,n,col){
+    col=col||RN;var s='',sp=8,sx=cx-(n-1)*sp/2;
+    for(var i=0;i<n;i++){var x=sx+i*sp;
+      s+='<line x1="'+(x+1.5).toFixed(1)+'" y1="'+cy+'" x2="'+(x-1.5).toFixed(1)+'" y2="'+(cy+7)+'" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round"/>';}
+    return s;
+  }
+  function snowEl(cx,cy,n){
+    var s='',sp=9,r=3.5,d=2.5,sx=cx-(n-1)*sp/2;
+    for(var i=0;i<n;i++){var x=Math.round(sx+i*sp),y=cy+(i%2===1?3:0);
+      s+='<line x1="'+(x-r)+'" y1="'+y+'" x2="'+(x+r)+'" y2="'+y+'" stroke="'+SN+'" stroke-width="1.8" stroke-linecap="round"/>'+
+         '<line x1="'+x+'" y1="'+(y-r)+'" x2="'+x+'" y2="'+(y+r)+'" stroke="'+SN+'" stroke-width="1.8" stroke-linecap="round"/>'+
+         '<line x1="'+(x-d)+'" y1="'+(y-d)+'" x2="'+(x+d)+'" y2="'+(y+d)+'" stroke="'+SN+'" stroke-width="1.8" stroke-linecap="round"/>'+
+         '<line x1="'+(x+d)+'" y1="'+(y-d)+'" x2="'+(x-d)+'" y2="'+(y+d)+'" stroke="'+SN+'" stroke-width="1.8" stroke-linecap="round"/>';}
+    return s;
+  }
+  function boltEl(cx,cy){return '<polygon points="'+(cx+3)+','+(cy)+' '+(cx-4)+','+(cy+9)+' '+cx+','+(cy+9)+' '+(cx-2)+','+(cy+17)+' '+(cx+7)+','+(cy+7)+' '+(cx+2)+','+(cy+7)+'" fill="'+LT+'"/>';}
+  function fogEl(){var s='';[12,19,26,33,40].forEach(function(y,i){var x=i%2?10:6;s+='<line x1="'+x+'" y1="'+y+'" x2="'+(48-x)+'" y2="'+y+'" stroke="'+CL+'" stroke-width="3" stroke-linecap="round"/>';});return s;}
+  switch(code){
+    case 0:return svg(isNight?moonEl(24,24,12):sunEl(24,24,9));
+    case 1:return svg(isNight?moonEl(30,15,9)+cloudEl(19,36,CL,0.65):sunEl(30,14,8)+cloudEl(20,36,CL,0.65));
+    case 2:return svg(isNight?moonEl(31,14,10)+cloudEl(22,32,CL):sunEl(33,13,9)+cloudEl(22,32,CL));
+    case 3:return svg(cloudEl(24,28,CM));
+    case 45:case 48:return svg(fogEl());
+    case 51:case 53:return svg(isNight?cloudEl(24,25,CM)+rainEl(24,33,2):sunEl(32,13,7)+cloudEl(21,25,CM)+rainEl(22,33,2));
+    case 55:return svg(cloudEl(24,24,CM)+rainEl(24,32,3));
+    case 56:case 57:return svg(cloudEl(24,24,CM)+rainEl(24,32,3,IC));
+    case 61:return svg(isNight?cloudEl(24,25,CM)+rainEl(24,33,3):sunEl(32,13,7)+cloudEl(21,25,CM)+rainEl(22,33,3));
+    case 63:return svg(cloudEl(24,24,CM)+rainEl(24,32,3));
+    case 65:return svg(cloudEl(24,23,CD)+rainEl(24,31,4));
+    case 66:case 67:return svg(cloudEl(24,24,CM)+rainEl(24,32,3,IC));
+    case 71:case 73:case 75:case 77:return svg(cloudEl(24,24,CM)+snowEl(24,33,3));
+    case 80:return svg(isNight?cloudEl(24,25,CM)+rainEl(24,33,2):sunEl(32,13,7)+cloudEl(21,25,CM)+rainEl(22,33,2));
+    case 81:return svg(cloudEl(24,24,CD)+rainEl(24,32,3));
+    case 82:return svg(cloudEl(24,23,CD)+rainEl(24,31,4));
+    case 85:return svg(cloudEl(24,24,CM)+snowEl(24,32,2));
+    case 86:return svg(cloudEl(24,23,CD)+snowEl(24,31,3));
+    case 95:return svg(cloudEl(24,23,CD)+boltEl(21,28));
+    case 96:case 99:return svg(cloudEl(24,23,CD)+boltEl(17,28)+boltEl(27,28));
+    default:return svg('<text x="24" y="32" text-anchor="middle" font-size="22" fill="'+CL+'" font-family="sans-serif">?</text>');
+  }
+}
 function wmoInfo(code,date){
   var now=date||new Date();
   var isNight=false;
@@ -702,20 +770,19 @@ function wmoInfo(code,date){
   } else {
     var h=now.getHours();isNight=h<6||h>=21;
   }
-  var clearEmoji=isNight?'🌙':'☀️';
-  var mainlyEmoji=isNight?'🌙':'🌤️';
-  var partlyEmoji=isNight?'🌑':'⛅';
-  var map={0:{desc:'Clear sky',emoji:clearEmoji},1:{desc:'Mainly clear',emoji:mainlyEmoji},2:{desc:'Partly cloudy',emoji:partlyEmoji},3:{desc:'Overcast',emoji:'☁️'},
-    45:{desc:'Fog',emoji:'🌫️'},48:{desc:'Icy fog',emoji:'🌫️'},
-    51:{desc:'Light drizzle',emoji:'🌦️'},53:{desc:'Drizzle',emoji:'🌦️'},55:{desc:'Heavy drizzle',emoji:'🌧️'},
-    56:{desc:'Light freezing drizzle',emoji:'🌨️'},57:{desc:'Freezing drizzle',emoji:'🌨️'},
-    61:{desc:'Light rain',emoji:'🌧️'},63:{desc:'Rain',emoji:'🌧️'},65:{desc:'Heavy rain',emoji:'🌧️'},
-    66:{desc:'Light freezing rain',emoji:'🌨️'},67:{desc:'Freezing rain',emoji:'🌨️'},
-    71:{desc:'Light snow',emoji:'❄️'},73:{desc:'Snow',emoji:'❄️'},75:{desc:'Heavy snow',emoji:'❄️'},77:{desc:'Snow grains',emoji:'❄️'},
-    80:{desc:'Light showers',emoji:'🌦️'},81:{desc:'Showers',emoji:'🌧️'},82:{desc:'Heavy showers',emoji:'🌧️'},
-    85:{desc:'Snow showers',emoji:'❄️'},86:{desc:'Heavy snow showers',emoji:'❄️'},
-    95:{desc:'Thunderstorm',emoji:'⛈️'},96:{desc:'Thunderstorm w/ hail',emoji:'⛈️'},99:{desc:'Thunderstorm w/ heavy hail',emoji:'⛈️'}};
-  return map[code]||{desc:'Unknown',emoji:'🌡️'};
+  var descs={
+    0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+    45:'Fog',48:'Icy fog',
+    51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+    56:'Light freezing drizzle',57:'Freezing drizzle',
+    61:'Light rain',63:'Rain',65:'Heavy rain',
+    66:'Light freezing rain',67:'Freezing rain',
+    71:'Light snow',73:'Snow',75:'Heavy snow',77:'Snow grains',
+    80:'Light showers',81:'Showers',82:'Heavy showers',
+    85:'Snow showers',86:'Heavy snow showers',
+    95:'Thunderstorm',96:'Thunderstorm w/ hail',99:'Thunderstorm w/ heavy hail'
+  };
+  return {desc:descs[code]||'Unknown',emoji:wxIcon(code,isNight)};
 }
 function fcRating(wind,gust,vis,wmo,precip,temp,kp,wind80,wind120){
   if((precip||0)>=60 && wmo===0) wmo = 61;
@@ -1198,6 +1265,14 @@ function fetchAll(){
     });
 }
 function hideSplash(){var s=document.getElementById('splash');if(s){s.classList.add('hidden');setTimeout(function(){s.style.display='none';},300);}}
+function toggleTileInfo(btn){
+  var tile=btn.parentElement;while(tile&&!tile.classList.contains('wx-tile'))tile=tile.parentElement;
+  if(!tile)return;
+  var panel=tile.querySelector('.wx-info-panel');if(!panel)return;
+  var open=panel.style.display==='block';
+  panel.style.display=open?'none':'block';
+  btn.classList.toggle('active',!open);
+}
 function tileWind(v){var d=getDrone();return v>=d.windRed?'red':v>=d.windAmber?'amber':'green';}
 function tileGust(v){var d=getDrone();return v>=d.gustRed?'red':v>=d.gustAmber?'amber':'green';}
 function tileVis(v){return v<1000?'red':v<5000?'amber':'green';}
@@ -1275,16 +1350,16 @@ function renderDash(){
     '<div class="card" id="kp-card"></div>'+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tPrimary+' <span style="font-size:22px;font-weight:600;color:var(--muted);">/ '+tSecondary+'</span></div><div class="wx-desc">'+info.desc+' &middot; feels '+fPrimary+' / '+fSecondary+'</div></div></div>'+
     '<div class="wx-grid">'+
-    '<div class="wx-tile '+rWind+'"><div class="wx-lbl">Wind</div><div class="wx-val wx-val-'+rWind+'">'+spd(wind)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div></div>'+
-    '<div class="wx-tile '+rGust+'"><div class="wx-lbl">Gusts</div><div class="wx-val wx-val-'+rGust+'">'+spd(gust)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div></div>'+
-    '<div class="wx-tile '+rVis+'"><div class="wx-lbl">Visibility</div><div class="wx-val wx-val-'+rVis+'">'+vDisp.val+' <span style="font-size:13px;font-weight:400;">'+vDisp.unit+'</span></div><div class="wx-sub">'+(vis>=5000?'Good VLOS':'Reduced VLOS')+'</div></div>'+
-    '<div class="wx-tile '+rCloud+'"><div class="wx-lbl">Cloud Cover</div><div class="wx-val wx-val-'+rCloud+'">'+cloud+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(cloud<30?'Clear':cloud<70?'Partial':'Overcast')+'</div></div>'+
-    '<div class="wx-tile '+rHum+'"><div class="wx-lbl">Humidity</div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div></div>'+
-    '<div class="wx-tile '+rPres+'"><div class="wx-lbl">Pressure</div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div></div>'+
-    '<div class="wx-tile '+rTemp+'"><div class="wx-lbl">Dew Point</div><div class="wx-val wx-val-'+rTemp+'">'+Math.round(rawTemp-((100-hum)/5))+'°C</div><div class="wx-sub">'+(rawTemp-Math.round(rawTemp-((100-hum)/5))<2?'Condensation risk':rawTemp-Math.round(rawTemp-((100-hum)/5))<4?'Watch for dew':'Low condensation risk')+'</div></div>'+
-    (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.75?'red':ratio>=0.35?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.75?'Turbulent':ratio>=0.35?'Choppy':'Smooth';var desc=ratio>=0.75?'Large gust spikes — difficult to control':ratio>=0.35?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile wx-tile-smooth '+r+'"><div class="wx-lbl">Air Smoothness</div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div></div>';})()+
-    '<div class="wx-tile wx-tile-full"><div class="wx-lbl">Wind at Altitude</div><div style="display:flex;flex-direction:column;gap:7px;margin-top:8px;">'+
-    (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);var lbl=r==='red'?'✕ Too Strong':r==='amber'?'⚠ Caution':'✓ OK';rows+='<div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="width:54px;font-size:13px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+spd(l.v)+' '+spdU()+'</div><div style="width:70px;font-size:11px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+lbl+'</div></div>';});return rows;})()+'</div></div>'+
+    '<div class="wx-tile '+rWind+'"><div class="wx-lbl"><span>Wind</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind">ⓘ</button></div><div class="wx-val wx-val-'+rWind+'">'+spd(wind)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div><div class="wx-info-panel">Wind speed at 10m above ground. This directly determines whether your drone can hold position and return home safely. Above your drone\'s rated limit it may struggle to resist being pushed sideways or downwind.</div></div>'+
+    '<div class="wx-tile '+rGust+'"><div class="wx-lbl"><span>Gusts</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Gusts">ⓘ</button></div><div class="wx-val wx-val-'+rGust+'">'+spd(gust)+' <span style="font-size:13px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div><div class="wx-info-panel">Sudden bursts above the average wind speed — more dangerous than steady wind. A single gust can disorient or flip a drone before you can react. DroneChecker\'s amber and red thresholds are calibrated to your drone\'s published gust tolerance.</div></div>'+
+    '<div class="wx-tile '+rVis+'"><div class="wx-lbl"><span>Visibility</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Visibility">ⓘ</button></div><div class="wx-val wx-val-'+rVis+'">'+vDisp.val+' <span style="font-size:13px;font-weight:400;">'+vDisp.unit+'</span></div><div class="wx-sub">'+(vis>=5000?'Good VLOS':'Reduced VLOS')+'</div><div class="wx-info-panel">How far you can see horizontally. UK CAA rules require keeping your drone within visual line of sight (VLOS) at all times — close enough to see its orientation and react to hazards without visual aids. Poor visibility makes legal, safe flight impossible.</div></div>'+
+    '<div class="wx-tile '+rCloud+'"><div class="wx-lbl"><span>Cloud Cover</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Cloud Cover">ⓘ</button></div><div class="wx-val wx-val-'+rCloud+'">'+cloud+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(cloud<30?'Clear':cloud<70?'Partial':'Overcast')+'</div><div class="wx-info-panel">Percentage of sky covered by cloud. You must maintain visual line of sight at all times, so flying into cloud is not permitted — you would instantly lose sight of the drone. Heavy overcast also reduces light for photography and can signal worsening conditions.</div></div>'+
+    '<div class="wx-tile '+rHum+'"><div class="wx-lbl"><span>Humidity</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Humidity">ⓘ</button></div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:13px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div><div class="wx-info-panel">Moisture content of the air. Above 75%, humidity starts to affect sensors and cameras. Above 80–90%, condensation forms readily on electronics — causing lens fog, sensor errors and corrosion. Most consumer drones have no moisture protection at all.</div></div>'+
+    '<div class="wx-tile '+rPres+'"><div class="wx-lbl"><span>Pressure</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Pressure">ⓘ</button></div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div><div class="wx-info-panel">Atmospheric pressure at ground level. Drones use a barometric sensor to hold altitude — rapid pressure changes during flight can cause unexpected altitude drift. Low or falling pressure also signals approaching weather fronts, stronger winds and deteriorating conditions.</div></div>'+
+    '<div class="wx-tile '+rTemp+'"><div class="wx-lbl"><span>Dew Point</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Dew Point">ⓘ</button></div><div class="wx-val wx-val-'+rTemp+'">'+Math.round(rawTemp-((100-hum)/5))+'°C</div><div class="wx-sub">'+(rawTemp-Math.round(rawTemp-((100-hum)/5))<2?'Condensation risk':rawTemp-Math.round(rawTemp-((100-hum)/5))<4?'Watch for dew':'Low condensation risk')+'</div><div class="wx-info-panel">The temperature at which moisture in the air condenses into liquid. When air temperature is within 2–3°C of the dew point, condensation forms on your drone\'s cold lens, sensors and motor housings — even on a dry-feeling day.</div></div>'+
+    (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.75?'red':ratio>=0.35?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.75?'Turbulent':ratio>=0.35?'Choppy':'Smooth';var desc=ratio>=0.75?'Large gust spikes — difficult to control':ratio>=0.35?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile wx-tile-smooth '+r+'"><div class="wx-lbl"><span>Air Smoothness</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Air Smoothness">ⓘ</button></div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div><div class="wx-info-panel">The ratio of gust speed to average wind. Turbulent, gusty air means unpredictable handling and jerky footage even within safe wind speed limits. Smooth, steady air is always preferable to gusty air of the same average speed.</div></div>';})()+
+    '<div class="wx-tile wx-tile-full"><div class="wx-lbl"><span>Wind at Altitude</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind at Altitude">ⓘ</button></div><div style="display:flex;flex-direction:column;gap:7px;margin-top:8px;">'+
+    (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);var lbl=r==='red'?'✕ Too Strong':r==='amber'?'⚠ Caution':'✓ OK';rows+='<div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="width:54px;font-size:13px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+spd(l.v)+' '+spdU()+'</div><div style="width:70px;font-size:11px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+lbl+'</div></div>';});return rows;})()+'</div><div class="wx-info-panel">Wind speed typically increases with height as surface friction reduces. Ground conditions can feel calm while your drone faces much stronger winds at 80–120m. Always check altitude readings before climbing, especially near trees or obstacles.</div></div>'+
     '</div>'+warningsRow+'</div>'+
     '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+
     '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer">Open →</a></div></div>'+

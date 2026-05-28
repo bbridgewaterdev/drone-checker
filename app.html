@@ -32,7 +32,6 @@
   <meta name="description" content="UK drone flying conditions, weather &amp; golden hour calculator.">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous"/>
-  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
   <title>DroneChecker</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -484,6 +483,10 @@
       <div class="tab" id="tab-cl">
         <div id="cl-body"></div>
       </div>
+      
+      <div class="tab" id="tab-rules">
+        <div id="rules-body"></div>
+      </div>
 
       <div class="tab" id="tab-log">
         <div id="log-body"></div>
@@ -625,6 +628,12 @@ function openChecklist(){
     renderChecklist();
   }
 }
+function openRules(){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  var tabEl=document.getElementById('tab-rules');if(tabEl)tabEl.classList.add('on');
+  renderRules();
+}
 function getChecklistSummary(){
   var items=CHECKLIST.filter(function(i){return i.id;});
   var done=items.filter(function(i){return clState[i.id];}).length;
@@ -666,8 +675,11 @@ function renderChecklist(){
     if(item.section){html+='<div class="cl-section-hdr">'+item.section+'</div>';}
     else{var c=!!clState[item.id];html+='<div class="cl-item" onclick="toggleCheck(\''+item.id+'\')"><div class="cl-box'+(c?' checked':'')+'"><svg class="cl-tick" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3"/></svg></div><span class="cl-label'+(c?' checked':'')+'">'+item.label+'</span></div>';}
   });
-  html+='<button class="cl-reset" onclick="resetChecklist()">&#x21BA; Reset checklist</button></div>'+
-  '<div class="card">'+
+  html+='<button class="cl-reset" onclick="resetChecklist()">&#x21BA; Reset checklist</button></div><div style="height:14px;"></div>';
+  document.getElementById('cl-body').innerHTML=html;
+}
+function renderRules(){
+  var html='<div class="card">'+
   '<div class="card-ttl">UK Drone Law — Rules &amp; 2026 Updates</div>'+
   '<div class="rule"><div class="rule-ico">📏</div><div><div class="rule-ttl">Max altitude 120m (400ft)</div><div class="rule-body">Do not fly above 120m AGL without special authorisation.</div></div></div>'+
   '<div class="rule"><div class="rule-ico">👁️</div><div><div class="rule-ttl">Visual line of sight always</div><div class="rule-body">Keep your drone in sight at all times. Max ~500m recommended.</div></div></div>'+
@@ -684,7 +696,7 @@ function renderChecklist(){
   '<div><div style="font-size:13px;font-weight:600;color:var(--text);">🪪 CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">Official UK rules, registration and guidance</div></div>'+
   '<span style="color:var(--accent);font-size:13px;font-weight:600;flex-shrink:0;">Open →</span></a>'+
   '</div><div style="height:14px;"></div>';
-  document.getElementById('cl-body').innerHTML=html;
+  document.getElementById('rules-body').innerHTML=html;
 }
 var _wxId=0;
 function wxIcon(code,isNight){
@@ -1375,6 +1387,7 @@ function renderDash(){
     (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);var lbl=r==='red'?'✕ Too Strong':r==='amber'?'⚠ Caution':'✓ OK';rows+='<div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="width:54px;font-size:13px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+spd(l.v)+' '+spdU()+'</div><div style="width:70px;font-size:11px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+lbl+'</div></div>';});return rows;})()+'</div><div class="wx-info-panel">Wind speed typically increases with height as surface friction reduces. Ground conditions can feel calm while your drone faces much stronger winds at 80–120m. Always check altitude readings before climbing, especially near trees or obstacles.</div></div>'+
     '</div>'+warningsRow+'</div>'+
     '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+
+    '<div class="card" style="cursor:pointer;" onclick="openRules()"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-ttl" style="margin-bottom:0;">UK Drone Law &amp; Rules</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div style="font-size:12px;color:var(--muted);margin-top:6px;">2026 Updates &amp; Restrictions</div></div>'+
     '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer">Open →</a></div></div>'+
     '<div style="margin:20px 12px 0;padding:16px;border-top:1px solid var(--border);text-align:center;">'+
     (!isIOS&&!isStandalone?'<div style="display:inline-block;margin-bottom:16px;position:relative;opacity:.5;cursor:default;"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height:48px;"/><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;color:#f1f5f9;white-space:nowrap;backdrop-filter:blur(4px);">Coming Soon</div></div>':'')+
@@ -1585,9 +1598,9 @@ function initWindMap(){
   if(windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
   if(windMap){windMap.remove();windMap=null;}
   windMap=L.map('wind-map-el',{center:[lat,lng],zoom:11,zoomControl:false,attributionControl:true});
-  L.maplibreGL({
-    style: 'https://tiles.openfreemap.org/styles/liberty',
-    attribution: '© <a href="https://openfreemap.org" target="_blank" style="color:#94a3b8;">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" style="color:#94a3b8;">OSM</a>',
+  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=f83000a7-38e7-4a5b-88f4-3c696f0a8322',{
+    attribution:'© <a href="https://stadiamaps.com/" style="color:#94a3b8;">Stadia Maps</a> © <a href="https://openstreetmap.org/copyright" style="color:#94a3b8;">OSM</a>',
+    maxZoom:20
   }).addTo(windMap);
   L.control.zoom({position:'bottomright'}).addTo(windMap);
   L.circleMarker([lat,lng],{radius:6,color:colHex,fillColor:colHex,fillOpacity:1,weight:2,opacity:0.9,interactive:false}).addTo(windMap);
@@ -1753,6 +1766,7 @@ function goTab(id,btn){
   if(id==='radar')initWindMap();
   if(id==='gh')renderGolden();
   if(id==='cl')renderChecklist();
+  if(id==='rules')renderRules();
   if(id==='log')renderLog();
 }
 function applyDeepLink(){
@@ -1760,11 +1774,16 @@ function applyDeepLink(){
     var params=new URLSearchParams(window.location.search);
     var tab=params.get('tab');
     if(!tab)return;
-    var validTabs={'dash':1,'fc':1,'radar':1,'gh':1,'log':1};
+    var validTabs={'dash':1,'fc':1,'radar':1,'gh':1,'log':1,'rules':1};
     if(!validTabs[tab])return;
     var btn=document.getElementById('nb-'+tab);
     if(btn){
       goTab(tab,btn);
+      if(window.history&&window.history.replaceState){
+        window.history.replaceState({},'','/app.html');
+      }
+    } else if (tab === 'rules') {
+      openRules();
       if(window.history&&window.history.replaceState){
         window.history.replaceState({},'','/app.html');
       }
@@ -1817,7 +1836,5 @@ window.addEventListener('load',function(){
   }
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
 </body>
 </html>

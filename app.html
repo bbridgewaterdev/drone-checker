@@ -91,6 +91,8 @@
     .wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
     .wx-tile{background:var(--bg3);border-radius:var(--radius-sm);padding:11px;border-left:3px solid transparent;}
     .wx-tile-full{grid-column:span 2;}
+    .wx-tile-smooth{grid-column:span 1;}
+    .wx-tile-wide{grid-column:span 2;}
     .wx-tile.green{border-left-color:var(--green);}
     .wx-tile.amber{border-left-color:var(--amber);}
     .wx-tile.red{border-left-color:var(--red);}
@@ -240,7 +242,8 @@
       .wx-grid{grid-template-columns:1fr 1fr 1fr;}
       .gh-tmrw{grid-template-columns:repeat(3,1fr);}
       .wx-tile-full{grid-column:1 / -1;}
-      .wx-tile-smooth{grid-column:span 2;}
+      .wx-tile-smooth{grid-column:span 1;}
+      .wx-tile-wide{grid-column:span 2;}
     }
     @media(min-width:1024px){
       .nav{width:220px;}
@@ -366,7 +369,7 @@
     <div class="onboard-slide" id="onboard-3">
       <div class="onboard-icon">✈️</div>
       <div class="onboard-title">Log every flight</div>
-      <div class="onboard-desc">Record your flights with date, location, drone, duration and conditions. Export to Excel CSV for insurance records or CAA compliance documentation.</div>
+      <div class="onboard-desc">Record your flights with date, location, drone, duration and conditions — great for insurance records or CAA compliance.</div>
     </div>
     <button class="onboard-btn" id="onboard-btn" onclick="nextSlide()">Next</button>
     <button class="onboard-skip" onclick="finishOnboarding()">Skip</button>
@@ -556,11 +559,11 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.4.0';
+var APP_VERSION='1.5.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,unitMode='kmh',lastUpdated=null,windMap=null,windAnimFrame=null,airspaceLayer=null,airspaceVisible=false;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',lastUpdated=null,windMap=null,windAnimFrame=null,airspaceLayer=null,airspaceVisible=false;
 var UK_FRZS=[
   {n:'Heathrow',i:'EGLL',lat:51.4775,lng:-0.4614,r:5000},
   {n:'Gatwick',i:'EGKK',lat:51.1537,lng:-0.1821,r:5000},
@@ -878,8 +881,13 @@ function toggleFavCurrent(){
   if(name==='Locating...'||name==='London (default)')return;
   var favs=loadFavs();
   var idx=favs.findIndex(function(f){return f.name===name;});
-  if(idx>=0){favs.splice(idx,1);showToast('Removed from favourites');}
-  else{if(favs.length>=8)favs.shift();favs.push({name:name,lat:uLat,lng:uLng});showToast('⭐ '+name+' saved');}
+  if(idx>=0){
+    favs.splice(idx,1);showToast('Removed from favourites');
+  } else {
+    if(favs.length>=2){showToast('Max 2 saved locations');return;}
+    favs.push({name:name,lat:uLat,lng:uLng});
+    showToast('⭐ '+name+' saved');
+  }
   saveFavs(favs);renderFavBar();
 }
 function renderFavBar(){
@@ -910,7 +918,7 @@ function renderWeekPlanner(daily){
   var bestIdx=1,bestScore=-1;
   for(var i=1;i<daily.time.length&&i<=7;i++){
     var dMidT=((daily.temperature_2m_max[i]||15)+(daily.temperature_2m_min[i]||15))/2;
-    var r=fcRating(daily.wind_speed_10m_max[i]||0,daily.wind_gusts_10m_max[i]||0,10000,daily.weather_code[i],0,dMidT,currentKp,0,0);
+    var dayNoon1=new Date(daily.time[i]);dayNoon1.setHours(12,0,0,0);var r=fcRating(daily.wind_speed_10m_max[i]||0,daily.wind_gusts_10m_max[i]||0,10000,daily.weather_code[i],0,dMidT,getKpForTime(dayNoon1),0,0);
     var score=r==='green'?2:r==='amber'?1:0;
     var gust=daily.wind_gusts_10m_max[i]||0;
     if(score>bestScore||(score===bestScore&&gust<(daily.wind_gusts_10m_max[bestIdx]||999))){bestScore=score;bestIdx=i;}
@@ -923,7 +931,7 @@ function renderWeekPlanner(daily){
     var dMax=Math.round(daily.temperature_2m_max[j]),dMin=Math.round(daily.temperature_2m_min[j]);
     var dWind=spd(daily.wind_speed_10m_max[j]||0),dGust=spd(daily.wind_gusts_10m_max[j]||0);
     var dMidT2=((daily.temperature_2m_max[j]||15)+(daily.temperature_2m_min[j]||15))/2;
-    var dr=fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo,0,dMidT2,currentKp,0,0);
+    var dayNoon2=new Date(daily.time[j]);dayNoon2.setHours(12,0,0,0);var dr=fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo,0,dMidT2,getKpForTime(dayNoon2),0,0);
     var dotCls=dr==='green'?'g':dr==='amber'?'a':'r';
     var isBest=j===bestIdx;
     rows+='<div class="week-row'+(isBest?' best-day':'')+'">'+
@@ -993,7 +1001,7 @@ function renderLog(){
   } else {
     var condColor={'Good to Fly':'green','Fly with Caution':'amber','Do Not Fly':'red'};
     entries='<div class="log-count">'+flights.length+' flight'+(flights.length!==1?'s':'')+' logged</div>';
-    entries+='<div class="log-actions"><button class="log-export" onclick="exportFlights()">⬇️ Export to Excel (CSV)</button><button class="log-clear" onclick="clearFlights()">Clear all</button></div>';
+    entries+='<div class="log-actions"><button class="log-clear" onclick="clearFlights()">Clear all</button></div>';
     for(var i=flights.length-1;i>=0;i--){
       var f=flights[i];
       var cc=condColor[f.cond]||'';
@@ -1182,7 +1190,7 @@ function revGeo(){
     .then(function(d){
       if(done)return;done=true;clearTimeout(timer);
       var a=d.address;
-      var name=(a&&(a.city||a.town||a.village||a.county))||'Your Location';
+      var name=(a&&(a.city||a.town||a.village||a.suburb||a.hamlet||a.locality||a.county||a.state))||'Your Location';
       document.getElementById('loc-name').textContent=name;
       renderFavBar();
       saveLastLoc(uLat,uLng,name);
@@ -1217,12 +1225,19 @@ function fetchWithTimeout(url,ms){
 }
 function fetchKp(attempt){
   attempt = attempt || 0;
-  fetchWithTimeout('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json',3000)
-    .then(function(r){return r.json();})
-    .then(function(d){
+  var liveUrl='https://services.swpc.noaa.gov/json/planetary_k_index_1m.json';
+  var fcUrl='https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json';
+  Promise.all([
+    fetchWithTimeout(liveUrl,3000).then(function(r){return r.json();}),
+    fetchWithTimeout(fcUrl,3000).then(function(r){return r.json();})
+  ]).then(function(results){
+      var d=results[0],fc=results[1];
       var latest=d[d.length-1];
       currentKp=parseFloat(latest.kp_index||latest.Kp||0);
-      if(wxData){renderKpCard();updateCondBanner();}
+      var now=new Date();
+      kpForecast=fc.filter(function(e){return new Date(e.time_tag)>=now;}).map(function(e){return{t:new Date(e.time_tag),kp:parseFloat(e.kp)||0};});
+      try{localStorage.setItem('dc_kp',JSON.stringify({ts:Date.now(),kp:currentKp,fc:fc.slice(-40).map(function(e){return{t:e.time_tag,kp:e.kp};})}));}catch(e){}
+      if(wxData){renderKpCard();updateCondBanner();renderFlightWindowIfVisible();}
     })
     .catch(function(){
       var delays=[30000,120000,300000];
@@ -1262,6 +1277,8 @@ function renderKpCard(){
   else{lvl='red';label='Severe Storm (G3+)';emoji='🔴';desc='Severe geomagnetic storm. GPS is likely unreliable or unavailable. High risk of flyaway or loss of control. Do not fly.';}
   var col=lvl==='green'?'var(--green)':lvl==='amber'?'var(--amber)':'var(--red)';
   var bar=Math.min(Math.round((kp/9)*100),100);
+  var fwCard=document.getElementById('flight-window-card');
+  if(fwCard&&wxData)fwCard.outerHTML=renderFlightWindowCard();
   var card=document.getElementById('kp-card');if(!card)return;
   card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div class="kp-row"><div class="kp-num" style="color:'+col+';">'+kp.toFixed(1)+'</div><div><div class="kp-lbl" style="color:'+col+';">'+emoji+' '+label+'</div><div class="kp-desc">'+desc+'</div></div></div><div class="kp-bar-bg"><div class="kp-bar" style="width:'+bar+'%;background:'+col+';"></div></div><div class="kp-scale"><span>0 — Quiet</span><span>4 — Storm</span><span>9 — Extreme</span></div>';
 }
@@ -1299,6 +1316,7 @@ function toggleTileInfo(btn){
   panel.style.display=open?'none':'block';
   btn.classList.toggle('active',!open);
 }
+function tilePrecip(v){return v>=70?'red':v>=50?'amber':'green';}
 function tileWind(v){var d=getDrone();return v>=d.windRed?'red':v>=d.windAmber?'amber':'green';}
 function tileGust(v){var d=getDrone();return v>=d.gustRed?'red':v>=d.gustAmber?'amber':'green';}
 function tileVis(v){return v<1000?'red':v<5000?'amber':'green';}
@@ -1339,6 +1357,144 @@ function flyRating(wind,gust,vis,wmo,kp,temp,wind80,wind120){
   var labels={green:'✓ Good to Fly',amber:'⚠ Fly with Caution',red:'✕ Do Not Fly'};
   return{lvl:lvl,label:labels[lvl],desc:lvl==='green'?'Conditions look good for your '+getDrone().name+'.':issues.join('. ')+(lvl==='amber'?' — fly carefully.':' — not safe for your '+getDrone().name+'.')};
 }
+
+function getKpForTime(t){
+  if(!kpForecast.length)return currentKp;
+  var best=currentKp;
+  var tMs=t.getTime();
+  for(var i=0;i<kpForecast.length;i++){
+    var entry=kpForecast[i];
+    var entryMs=entry.t.getTime();
+    var nextMs=i+1<kpForecast.length?kpForecast[i+1].t.getTime():entryMs+3*3600000;
+    if(tMs>=entryMs&&tMs<nextMs){best=entry.kp;break;}
+  }
+  return best;
+}
+function getNext24hRatings(){
+  if(!wxData||!wxData.hourly)return[];
+  var hours=wxData.hourly,now=new Date();
+  var windowStart=new Date(now);windowStart.setMinutes(0,0,0);
+  var windowEnd=new Date(windowStart.getTime()+24*3600000);
+  var results=[];
+  for(var i=0;i<hours.time.length;i++){
+    var t=new Date(hours.time[i]);
+    if(t<windowStart||t>=windowEnd)continue;
+    var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
+    var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;
+    var tmp=hours.temperature_2m?hours.temperature_2m[i]||15:15;
+    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
+    var kpT=getKpForTime(t);
+    var r=flyRating(w,g,v,wmo,kpT,tmp,w80,w120);
+    results.push({hour:t.getHours(),rating:r.lvl,time:t,kp:kpT});
+  }
+  return results;
+}
+function buildHourStrip(hourlyRatings,now){
+  var nowH=now.getHours();
+  var strip='<div style="display:flex;gap:1.5px;margin:10px 0 4px;">';
+  var tickLabels=[];
+  for(var i=0;i<hourlyRatings.length;i++){
+    var entry=hourlyRatings[i];
+    var col=entry.rating==='green'?'#22c55e':entry.rating==='amber'?'#f59e0b':'#ef4444';
+    var isNowHour=entry.hour===nowH&&i===0;
+    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'"></div>';
+    if(i%6===0)tickLabels.push({idx:i,label:pad(entry.hour)});
+  }
+  strip+='</div>';
+  var labelHtml='<div style="position:relative;height:14px;margin-bottom:2px;">';
+  var pct=[0,25,50,75,100];
+  for(var j=0;j<tickLabels.length;j++){
+    var left=pct[j]+'%';
+    var transform=j===0?'none':j===tickLabels.length-1?'translateX(-100%)':'translateX(-50%)';
+    labelHtml+='<span style="position:absolute;left:'+left+';transform:'+transform+';font-size:10px;color:var(--muted);">'+tickLabels[j].label+'</span>';
+  }
+  var lastEntry=hourlyRatings[hourlyRatings.length-1];
+  var endH=lastEntry?pad((lastEntry.hour+1)%24):pad((nowH+24)%24);
+  labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endH+'</span>';
+  labelHtml+='</div>';
+  return strip+labelHtml;
+}
+function getFlightWindows(hourlyRatings){
+  var windows=[],inWindow=false,winStart=null,winEnd=null;
+  for(var i=0;i<hourlyRatings.length;i++){
+    var entry=hourlyRatings[i];
+    if(entry.rating==='green'){if(!inWindow){inWindow=true;winStart=entry.time;}winEnd=entry.time;}
+    else{if(inWindow){windows.push({start:winStart,end:winEnd});inWindow=false;}}
+  }
+  if(inWindow)windows.push({start:winStart,end:winEnd});
+  return windows;
+}
+function renderFlightWindowIfVisible(){
+  var fwCard=document.getElementById('flight-window-card');
+  if(fwCard&&wxData)fwCard.outerHTML=renderFlightWindowCard();
+}
+function loadKpCache(){
+  try{
+    var s=localStorage.getItem('dc_kp');if(!s)return;
+    var cached=JSON.parse(s);
+    if(Date.now()-cached.ts>3600000)return;
+    currentKp=cached.kp||0;
+    var now=new Date();
+    if(cached.fc){kpForecast=cached.fc.filter(function(e){return new Date(e.t)>=now;}).map(function(e){return{t:new Date(e.t),kp:parseFloat(e.kp)||0};});}
+  }catch(e){}
+}
+function renderFlightWindowCard(){
+  if(!wxData||!wxData.hourly)return '<div class="card" id="flight-window-card"><div class="card-ttl">Best Flight Window</div><div style="font-size:13px;color:var(--muted);">No data available.</div></div>';
+  var now=new Date();
+  var next24=getNext24hRatings();
+  var windows=getFlightWindows(next24);
+  var currentWin=null,nextWin=null;
+  for(var i=0;i<windows.length;i++){
+    var w=windows[i];var wEnd=new Date(w.end.getTime()+3600000);
+    if(now>=w.start&&now<=wEnd){currentWin=w;break;}
+    if(w.start>now&&!nextWin){nextWin=w;}
+  }
+  var primaryWin=currentWin||nextWin;
+  var isNowOpen=!!currentWin;
+  var isTomorrow=primaryWin&&primaryWin.start.getDate()!==now.getDate();
+  var hourStrip=buildHourStrip(next24,now);
+  var mainHtml='';
+  if(!primaryWin){
+    mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
+      '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(100,116,139,.08)" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="11" fill="none" stroke="#475569" stroke-width="1.5"/><line x1="14" y1="14" x2="26" y2="26" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="14" x2="14" y2="26" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/></svg>'+
+      '<div><div style="font-size:15px;font-weight:700;color:var(--muted);">No flyable windows in 48hrs</div>'+
+      '<div style="font-size:12px;color:var(--muted);margin-top:1px;">Check conditions again tomorrow.</div></div></div>';
+  } else {
+    var wEnd=new Date(primaryWin.end.getTime()+3600000);
+    var durationMs=wEnd-(isNowOpen?now:primaryWin.start);
+    var durationH=Math.floor(durationMs/3600000),durationM=Math.floor((durationMs%3600000)/60000);
+    var durationStr=durationH>0?durationH+'h'+(durationM>0?' '+durationM+'m':''):durationM+'m';
+    var startStr=pad(primaryWin.start.getHours())+':00',endStr=pad(wEnd.getHours())+':00';
+    var col=isNowOpen?'var(--green)':'var(--accent)';
+    var label=isNowOpen?'Open now':'Next window'+(isTomorrow?' · Tomorrow':'');
+    var timeStr=isNowOpen?'Until '+endStr:startStr+' – '+endStr;
+    var subStr=isNowOpen?durationStr+' remaining':(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
+    mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
+      (isNowOpen?'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><circle cx="20" cy="20" r="13" fill="rgba(34,197,94,.2)" stroke="#22c55e" stroke-width="1.5"/><polyline points="12,20 17,26 28,13" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(6,182,212,.10)" stroke="#06b6d4" stroke-width="1.5"/><circle cx="20" cy="20" r="11" fill="rgba(6,182,212,.12)" stroke="#06b6d4" stroke-width="1.5"/><line x1="20" y1="20" x2="20" y2="12" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="20" x2="26" y2="20" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#06b6d4"/><line x1="20" y1="9.5" x2="20" y2="11" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="30.5" y1="20" x2="29" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="20" y1="30.5" x2="20" y2="29" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="9.5" y1="20" x2="11" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>')+
+      '<div style="flex:1;">'+
+        '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px;">'+label+'</div>'+
+        '<div style="font-size:19px;font-weight:700;color:'+col+';">'+timeStr+'</div>'+
+        '<div style="font-size:12px;color:var(--muted);">'+subStr+'</div>'+
+      '</div>'+
+      (isNowOpen&&nextWin?
+        '<div style="text-align:right;flex-shrink:0;">'+
+          '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Also ahead</div>'+
+          '<div style="font-size:13px;font-weight:600;color:var(--accent);">'+pad(nextWin.start.getHours())+':00 – '+pad(new Date(nextWin.end.getTime()+3600000).getHours())+':00</div>'+
+        '</div>':'')+
+    '</div>';
+  }
+  var legend='<div style="display:flex;gap:12px;margin-top:6px;font-size:11px;color:var(--muted);">'+
+    '<span><span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Good</span>'+
+    '<span><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Caution</span>'+
+    '<span><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Avoid</span>'+
+    '<span><span style="display:inline-block;width:10px;height:10px;background:#334155;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>No data</span>'+
+    '</div>';
+  return '<div class="card" id="flight-window-card">'+
+    '<div class="card-ttl">Best Flight Window</div>'+
+    mainHtml+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">Next 24 hours</div>'+
+    hourStrip+legend+'</div>';
+}
 function renderDash(){
   var c=wxData.current,wind=c.wind_speed_10m||0,gust=c.wind_gusts_10m||0,vis=c.visibility||10000,wmo=c.weather_code||0;
   var rawTemp=c.temperature_2m||15,rawWind=c.wind_speed_10m||0,rawGust=c.wind_gusts_10m||0;
@@ -1346,6 +1502,16 @@ function renderDash(){
   var info=wmoInfo(wmo),cond=flyRating(wind,gust,vis,wmo,currentKp,rawTemp,wind80,wind120);
   var temp=Math.round(rawTemp),feels=Math.round(c.apparent_temperature),cloud=c.cloud_cover||0,hum=c.relative_humidity_2m,pres=Math.round(c.surface_pressure||0);
   var rWind=tileWind(wind),rGust=tileGust(gust),rVis=tileVis(vis),rCloud=tileCloud(cloud),rHum=tileHum(hum),rPres=tilePres(pres),rTemp=tileTemp(rawTemp);
+  // Get current hour precipitation probability from hourly data
+  var curPrecip=0;
+  if(wxData.hourly&&wxData.hourly.precipitation_probability){
+    var now=new Date(),nowH=now.getHours();
+    for(var pi=0;pi<wxData.hourly.time.length;pi++){
+      var pt=new Date(wxData.hourly.time[pi]);
+      if(pt.getHours()===nowH&&pt.getDate()===now.getDate()){curPrecip=Math.round(wxData.hourly.precipitation_probability[pi]||0);break;}
+    }
+  }
+  var rPrecip=tilePrecip(curPrecip);
   var vDisp=visDisp(vis);
   var tPrimary=unitMode==='mph'?Math.round(rawTemp*9/5+32)+'°F':Math.round(rawTemp)+'°C';
   var tSecondary=unitMode==='mph'?Math.round(rawTemp)+'°C':Math.round(rawTemp*9/5+32)+'°F';
@@ -1373,19 +1539,22 @@ function renderDash(){
   var warningsRow=(lipoWarnInner||nightWarnInner)?'<div style="display:flex;gap:8px;margin-top:8px;">'+lipoWarnInner+nightWarnInner+'</div>':'';
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">🔗 Share</button></div>'+
-    '<div class="card" id="kp-card"></div>'+
+    renderFlightWindowCard()+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tPrimary+' <span style="font-size:22px;font-weight:600;color:var(--muted);">/ '+tSecondary+'</span></div><div class="wx-desc">'+info.desc+' &middot; feels '+fPrimary+' / '+fSecondary+'</div></div></div>'+
     '<div class="wx-grid">'+
     '<div class="wx-tile '+rWind+'"><div class="wx-lbl"><span>Wind</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rWind+'">'+spd(wind)+' <span style="font-size:11px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div><div class="wx-info-panel">Wind speed at 10m above ground. This directly determines whether your drone can hold position and return home safely. Above your drone\'s rated limit it may struggle to resist being pushed sideways or downwind.</div></div>'+
     '<div class="wx-tile '+rGust+'"><div class="wx-lbl"><span>Gusts</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Gusts"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rGust+'">'+spd(gust)+' <span style="font-size:11px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+(gust>=getDrone().gustRed?'Too strong':'Within limits')+'</div><div class="wx-info-panel">Sudden bursts above the average wind speed, measured at 10m above ground — more dangerous than steady wind. A single gust can disorient or flip a drone before you can react. DroneChecker\'s amber and red thresholds are calibrated to your drone\'s published gust tolerance.</div></div>'+
     '<div class="wx-tile '+rVis+'"><div class="wx-lbl"><span>Visibility</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Visibility"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rVis+'">'+vDisp.val+' <span style="font-size:11px;font-weight:400;">'+vDisp.unit+'</span></div><div class="wx-sub">'+(vis>=5000?'Good VLOS':'Reduced VLOS')+'</div><div class="wx-info-panel">How far you can see horizontally. UK CAA rules require keeping your drone within visual line of sight (VLOS) at all times — close enough to see its orientation and react to hazards without visual aids. Poor visibility makes legal, safe flight impossible.</div></div>'+
     '<div class="wx-tile '+rCloud+'"><div class="wx-lbl"><span>Cloud Cover</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Cloud Cover"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rCloud+'">'+cloud+'<span style="font-size:11px;font-weight:400;">%</span></div><div class="wx-sub">'+(cloud<30?'Clear':cloud<70?'Partial':'Overcast')+'</div><div class="wx-info-panel">Percentage of sky covered by cloud. You must maintain visual line of sight at all times, so flying into cloud is not permitted — you would instantly lose sight of the drone. Heavy overcast also reduces light for photography and can signal worsening conditions.</div></div>'+
-    '<div class="wx-tile '+rHum+'"><div class="wx-lbl"><span>Humidity</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Humidity"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:11px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div><div class="wx-info-panel">Moisture content of the air. Above 75%, humidity starts to affect sensors and cameras. Above 80–90%, condensation forms readily on electronics — causing lens fog, sensor errors and corrosion. Most consumer drones have no moisture protection at all.</div></div>'+
+    '<div class="wx-tile '+rPrecip+'"><div class="wx-lbl"><span>Precipitation</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Precipitation"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rPrecip+'">'+curPrecip+'<span style="font-size:11px;font-weight:400;">%</span></div><div class="wx-sub">'+(curPrecip>=60?'High chance':curPrecip>=50?'Moderate chance':curPrecip>0?'Low chance':'Unlikely')+'</div><div class="wx-info-panel">Probability of precipitation in the current hour. Above 50% consider whether your drone has water resistance. Above 70% flying is not advisable — even light rain can cause water ingress and damage electronics or motors on most consumer drones.</div></div>'+
+    (function(){var kp=currentKp;var kc=kp>=6?'red':kp>=4?'amber':'green';var klab=kp>=6?'Severe Storm':kp>=5?'Moderate Storm':kp>=4?'Minor Storm':kp>=2?'Unsettled':'Quiet';return'<div class="wx-tile '+rHum+'"><div class="wx-lbl"><span>Humidity</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Humidity"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rHum+'">'+hum+'<span style="font-size:11px;font-weight:400;">%</span></div><div class="wx-sub">'+(hum>90?'Condensation risk':hum>75?'High humidity':'Normal')+'</div><div class="wx-info-panel">Moisture content of the air. Above 75%, humidity starts to affect sensors and cameras. Above 80–90%, condensation forms readily on electronics — causing lens fog, sensor errors and corrosion. Most consumer drones have no moisture protection at all.</div></div>'+
     '<div class="wx-tile '+rPres+'"><div class="wx-lbl"><span>Pressure</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Pressure"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rPres+'" style="font-size:16px;">'+pres+'</div><div class="wx-sub">'+(pres<980?'Very low':pres<1000?'Low':'Normal')+' hPa</div><div class="wx-info-panel">Atmospheric pressure at ground level. Drones use a barometric sensor to hold altitude — rapid pressure changes during flight can cause unexpected altitude drift. Low or falling pressure also signals approaching weather fronts, stronger winds and deteriorating conditions.</div></div>'+
     '<div class="wx-tile '+rTemp+'"><div class="wx-lbl"><span>Dew Point</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Dew Point"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rTemp+'">'+Math.round(rawTemp-((100-hum)/5))+'°C</div><div class="wx-sub">'+(rawTemp-Math.round(rawTemp-((100-hum)/5))<2?'Condensation risk':rawTemp-Math.round(rawTemp-((100-hum)/5))<4?'Watch for dew':'Low condensation risk')+'</div><div class="wx-info-panel">The temperature at which moisture in the air condenses into liquid. When air temperature is within 2–3°C of the dew point, condensation forms on your drone\'s cold lens, sensors and motor housings — even on a dry-feeling day.</div></div>'+
+    '<div class="wx-tile '+kc+'"><div class="wx-lbl"><span>KP Index</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About KP Index"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+kc+'">'+kp.toFixed(1)+'</div><div class="wx-sub">'+klab+'</div><div class="wx-info-panel">The planetary K-index measures geomagnetic storm activity. Above KP 4, GPS accuracy can be reduced and compass drift may occur. Above KP 6, flying is not recommended. Data updates every few minutes from NOAA.</div></div>';})()+
+    
     (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.75?'red':ratio>=0.35?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.75?'Turbulent':ratio>=0.35?'Choppy':'Smooth';var desc=ratio>=0.75?'Large gust spikes — difficult to control':ratio>=0.35?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile wx-tile-smooth '+r+'"><div class="wx-lbl"><span>Air Smoothness</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Air Smoothness"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div><div class="wx-info-panel">The ratio of gust speed to average wind. Turbulent, gusty air means unpredictable handling and jerky footage even within safe wind speed limits. Smooth, steady air is always preferable to gusty air of the same average speed.</div></div>';})()+
-    '<div class="wx-tile wx-tile-full"><div class="wx-lbl"><span>Wind at Altitude</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind at Altitude"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div style="display:flex;flex-direction:column;gap:7px;margin-top:8px;">'+
-    (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);var lbl=r==='red'?'✕ Too Strong':r==='amber'?'⚠ Caution':'✓ OK';rows+='<div style="display:flex;align-items:center;gap:8px;"><div style="width:32px;font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:5px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="width:54px;font-size:13px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+spd(l.v)+' '+spdU()+'</div><div style="width:70px;font-size:11px;font-weight:600;color:'+col+';text-align:right;flex-shrink:0;">'+lbl+'</div></div>';});return rows;})()+'</div><div class="wx-info-panel">Wind speed typically increases with height as surface friction reduces. Ground conditions can feel calm while your drone faces much stronger winds at 80–120m. Always check altitude readings before climbing, especially near trees or obstacles.</div></div>'+
+    '<div class="wx-tile wx-tile-wide"><div class="wx-lbl"><span>Wind at Altitude</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind at Altitude"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">'+
+    (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);rows+='<div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:var(--muted);width:28px;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:4px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="font-size:12px;font-weight:600;color:'+col+';flex-shrink:0;min-width:44px;text-align:right;">'+spd(l.v)+' '+spdU()+'</div></div>';});return rows;})()+'</div><div class="wx-info-panel">Wind speed typically increases with height as surface friction reduces. Ground conditions can feel calm while your drone faces much stronger winds at 80–120m. Always check altitude readings before climbing, especially near trees or obstacles.</div></div>'+
     '</div>'+warningsRow+'</div>'+
     '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+
     '<div class="card" style="cursor:pointer;" onclick="openRules()"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-ttl" style="margin-bottom:0;">UK Drone Law &amp; Rules</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div style="font-size:12px;color:var(--muted);margin-top:6px;">2026 Updates &amp; Restrictions</div></div>'+
@@ -1417,7 +1586,6 @@ function renderDash(){
     '</div>'+
     '<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
     '</div><div style="height:14px;"></div>';
-  renderKpCard();
   var announcer=document.getElementById('a11y-announce');
   if(announcer)announcer.textContent=cond.label+'. '+cond.desc;
 }
@@ -1440,7 +1608,7 @@ function renderFc(){
     var fcTempPrimary=tmp(rawTempHr)+tmpU();
     var fcTempSecondary=unitMode==='mph'?Math.round(rawTempHr)+'°C':Math.round(rawTempHr*9/5+32)+'°F';
     var precipBadge=precip>0?'<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':'var(--muted)')+';">💧'+precip+'% rain</span>':'';
-    var rating=flyRating(wind,gust,vis,wmo,currentKp,temp,w80,w120);
+    var rating=flyRating(wind,gust,vis,wmo,getKpForTime(t),temp,w80,w120);
     var reasonLine=rating.lvl!=='green'?'<div style="font-size:11px;color:'+(rating.lvl==='red'?'var(--red)':'var(--amber)')+';margin-top:6px;padding-top:6px;border-top:1px solid var(--border);line-height:1.4;">'+rating.desc+'</div>':'';
     var ariaLabel=pad(t.getHours())+':00. '+info.desc+'.'+(precip>0?' '+precip+' percent chance of rain.':'')+' '+spd(wind)+' '+spdU()+' wind. '+(rating.lvl==='green'?'Good to fly.':'Caution: '+rating.desc);
     rows+='<div class="fc-item" style="flex-direction:column;align-items:stretch;" aria-label="'+ariaLabel+'"><div style="display:flex;align-items:center;gap:10px;" aria-hidden="true"><div class="fc-time">'+pad(t.getHours())+':00</div><div class="fc-icon">'+info.emoji+'</div><div class="fc-temp">'+fcTempPrimary+'<br><span style="font-size:11px;color:var(--muted);">'+fcTempSecondary+'</span></div><div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div><div class="fc-wind">'+spd(wind)+' '+spdU()+'</div><div class="fc-dot '+rating.lvl+'"></div></div>'+reasonLine+'</div>';
@@ -1498,9 +1666,9 @@ function switchWindAlt(alt){
     var btn=document.getElementById('walt-'+a);
     if(!btn)return;
     var on=(a===alt);
-    btn.style.background=on?'#06b6d4':'';
-    btn.style.color=on?'#fff':'';
-    btn.style.borderColor=on?'#06b6d4':'';
+    btn.style.background=on?'#06b6d4':'var(--bg3)';
+    btn.style.color=on?'#fff':'var(--muted)';
+    btn.style.borderColor=on?'#06b6d4':'var(--border)';
   });
   var ad=window._wAlt.data[alt];
   var dot=document.getElementById('wmap-dot');if(dot){dot.style.background=ad.hex;dot.style.boxShadow='0 0 6px '+ad.hex;}
@@ -1548,7 +1716,7 @@ function initWindMap(){
     var hw=spd(hWind),hg=spd(hGust);
     var h80v=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
     var h120v=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
-    var hr=fcRating(hWind,hGust,hours.visibility?(hours.visibility[i]||10000):10000,hours.weather_code?(hours.weather_code[i]||0):0,hours.precipitation_probability?(hours.precipitation_probability[i]||0):0,hours.temperature_2m?Math.round(hours.temperature_2m[i]):15,currentKp,h80v,h120v);
+    var hr=fcRating(hWind,hGust,hours.visibility?(hours.visibility[i]||10000):10000,hours.weather_code?(hours.weather_code[i]||0):0,0,hours.temperature_2m?Math.round(hours.temperature_2m[i]):15,0,0,0);
     var hcol=hr==='red'?'var(--red)':hr==='amber'?'var(--amber)':'var(--green)';
     var gustCol=hGust>=d.gustRed?'var(--red)':hGust>=d.gustAmber?'var(--amber)':'var(--muted)';
     fcRows+='<div class="wind-hr-row" data-w10="'+hWind+'" data-w80="'+h80v+'" data-w120="'+h120v+'" data-g="'+hGust+'" style="padding:10px 0;border-bottom:1px solid var(--border);">'+
@@ -1594,7 +1762,7 @@ function initWindMap(){
       '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val" style="font-size:16px;">'+gust+'</div><div class="wx-sub">'+spdU()+' · 10m only</div></div>'+
       '<div class="wx-tile"><div class="wx-lbl">Knots</div><div id="wtile-kt" class="wx-val" style="font-size:16px;">'+(rawWind*0.539957).toFixed(1)+'</div><div class="wx-sub">kt</div></div>'+
     '</div>'+
-    '<div class="card"><div class="card-ttl">Hourly Wind Forecast</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Rating icon shows overall fly conditions including gusts. Use the altitude buttons above to switch wind speeds.</div>'+fcRows+'</div>'+
+    '<div class="card"><div class="card-ttl">Hourly Wind Forecast</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Rating icon shows wind conditions including gusts at the selected altitude. Use the altitude buttons above to switch.</div>'+fcRows+'</div>'+
     '<div style="height:14px;"></div>';
   if(windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
   if(windMap){windMap.remove();windMap=null;}
@@ -1823,6 +1991,7 @@ window.addEventListener('load',function(){
 
   // Step 2: Always fetch fresh weather immediately with whatever coords we have.
   // This is decoupled from geolocation — blocked/slow GPS never prevents a refresh.
+  loadKpCache();
   fetchAll();
 
   // Step 3: Try geolocation in the background to get accurate position.

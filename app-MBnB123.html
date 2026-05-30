@@ -279,13 +279,13 @@
 
     /* ── PRO STYLES ── */
     .pro-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10001;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;}
-    .pro-sheet{background:var(--bg2);border-radius:20px;padding:0;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);display:flex;flex-direction:column;}
+    .pro-sheet{background:var(--bg2);border-radius:20px;padding:0;width:100%;max-width:420px;max-height:90vh;overflow-y:hidden;border:1px solid var(--border);display:flex;flex-direction:column;}
     .pro-sheet::-webkit-scrollbar{width:3px;}
-    .pro-sheet-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+    .pro-sheet-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-bottom:1px solid var(--border);border-radius:20px 20px 0 0;flex-shrink:0;position:sticky;top:0;z-index:1;}
     .pro-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px;}
-    .pro-body{padding:0 20px 24px;}
+    .pro-body{padding:0 20px 24px;overflow-y:auto;flex:1;}
     .pro-hero{text-align:center;padding:20px 0 16px;}
-    .pro-hero-icon{width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+    .pro-hero-icon{width:72px;height:72px;border-radius:20px;background:#0f172a;border:2px solid rgba(245,158,11,.4);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;position:relative;box-shadow:0 0 0 4px rgba(245,158,11,.08);}
     .pro-hero-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
     .pro-hero-sub{font-size:13px;color:var(--muted);}
     .pro-price-card{background:var(--bg3);border-radius:var(--radius-sm);padding:14px;text-align:center;margin-bottom:16px;}
@@ -304,10 +304,11 @@
     .pro-feat-title{font-size:13px;font-weight:600;color:var(--text);}
     .pro-feat-desc{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.4;}
     .pro-feat-badge{font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:4px;padding:1px 5px;margin-left:4px;}
+    .pro-feat-badge-soon{font-size:9px;font-weight:700;color:var(--muted);background:var(--bg3);border-radius:4px;padding:1px 5px;margin-left:4px;}
     .pro-divider{height:1px;background:var(--border);margin:14px 0;}
     .pro-cta-btn{width:100%;background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;margin-bottom:8px;}
     .pro-cta-sub{text-align:center;font-size:11px;color:var(--muted);margin-bottom:4px;}
-    .pro-signin-body{padding:24px 20px 28px;display:flex;flex-direction:column;align-items:center;}
+    .pro-signin-body{padding:24px 20px 28px;display:flex;flex-direction:column;align-items:center;overflow-y:auto;flex:1;}
     .pro-signin-icon{width:64px;height:64px;border-radius:20px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
     .pro-signin-title{font-size:18px;font-weight:700;color:var(--text);text-align:center;margin-bottom:6px;}
     .pro-signin-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:22px;line-height:1.6;}
@@ -388,7 +389,28 @@
       <div class="pro-body">
         <div class="pro-hero">
           <div class="pro-hero-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <!-- DroneChecker logo -->
+            <svg width="44" height="44" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
+              <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+              <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+              <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+              <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+              <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+              <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+              <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+              <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+              <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
+              <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
+              <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
+              <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
+              <circle cx="50" cy="50" r="11" fill="white"/>
+              <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
+            </svg>
+            <!-- Gold star badge bottom-right -->
+            <div style="position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#f59e0b;border:2px solid #0f172a;display:flex;align-items:center;justify-content:center;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#000"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
           </div>
           <div class="pro-hero-title">DroneChecker Pro</div>
           <div class="pro-hero-sub">Everything free pilots love, plus more.</div>
@@ -400,33 +422,84 @@
         <div class="pro-feat-section">Always free</div>
         <div class="pro-feat-row">
           <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div class="pro-feat-title">Fly rating &amp; all weather tiles</div><div class="pro-feat-desc">Full dashboard &mdash; no account ever needed</div></div>
+          <div><div class="pro-feat-title">Intelligent fly rating</div><div class="pro-feat-desc">Green, amber or red &mdash; calibrated to your exact drone model</div></div>
         </div>
         <div class="pro-feat-row">
           <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div class="pro-feat-title">24hr forecast, wind map &amp; golden hour</div><div class="pro-feat-desc">No limits, no account</div></div>
+          <div><div class="pro-feat-title">10 live weather tiles</div><div class="pro-feat-desc">Wind, gusts, visibility, cloud, precipitation, KP index, humidity, pressure, dew point &amp; air smoothness</div></div>
         </div>
         <div class="pro-feat-row">
           <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div class="pro-feat-title">Local flight log (on-device)</div><div class="pro-feat-desc">Private, stored only on your phone</div></div>
+          <div><div class="pro-feat-title">Wind at altitude (10m, 80m &amp; 120m)</div><div class="pro-feat-desc">See how conditions change as you climb &mdash; all free</div></div>
         </div>
-        <div class="pro-divider"></div>
-        <div class="pro-feat-section gold">Pro only</div>
         <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">24-hour forecast &amp; 7-day planner</div><div class="pro-feat-desc">Hourly fly ratings and best day to fly this week</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">Wind map with animated particles</div><div class="pro-feat-desc">Live direction, speed and hourly wind forecast</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">Golden hour &amp; blue hour calculator</div><div class="pro-feat-desc">Precise sunrise, sunset and golden hour times with live countdowns</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">Pre-flight checklist</div><div class="pro-feat-desc">Full CAA-aligned checklist with progress tracking</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">UK drone law &amp; 2026 rules</div><div class="pro-feat-desc">Remote ID, night flying, registration &amp; airspace guidance</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">Flight log (on-device)</div><div class="pro-feat-desc">Log flights with conditions, duration &amp; notes &mdash; stored privately on your phone</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">No account &middot; No adverts &middot; No tracking</div><div class="pro-feat-desc">Completely private &mdash; always</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
           <div><div class="pro-feat-title">Saved locations <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Save unlimited flying spots for one-tap checks</div></div>
         </div>
         <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div><div class="pro-feat-title">Cloud flight log sync <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Access your log across all your devices</div></div>
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div><div class="pro-feat-title">Export flight log to CSV <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Download your full flight history as a spreadsheet</div></div>
+        </div>
+
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div><div class="pro-feat-title">72-hour flight window <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">See the best flight windows across the next 3 days</div></div>
         </div>
         <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div><div class="pro-feat-title">Wind at altitude (80m &amp; 120m) <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">See how conditions change as you climb</div></div>
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div><div class="pro-feat-title">Custom drone profile <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Add your own drone with custom wind limits</div></div>
         </div>
         <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div><div class="pro-feat-title">Fly alerts <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Notify me when saved spots turn flyable</div></div>
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div><div class="pro-feat-title">Best time to fly today <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Smart 2-hour window recommendation with golden hour overlap</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div><div class="pro-feat-title">Flight statistics <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Monthly charts, top locations and condition breakdown</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div><div class="pro-feat-title">Offline saved locations <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Weather pre-cached for all your spots — works without signal</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div>
+          <div><div class="pro-feat-title">Pro share card <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Share a branded image card of current conditions</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#475569" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#475569" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#475569" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#475569" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#475569" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="#64748b" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="#64748b" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="#64748b" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="#64748b" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div>
+          <div><div class="pro-feat-title" style="color:var(--muted);">Fly alerts <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Notify me when saved spots turn flyable</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#475569" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="#64748b" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#475569" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#475569" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#475569" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#475569" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="#64748b" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="#64748b" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="#64748b" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="#64748b" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div>
+          <div><div class="pro-feat-title" style="color:var(--muted);">Cloud flight log sync <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Access your log across all your devices</div></div>
         </div>
         <div style="height:16px;"></div>
         <button class="pro-cta-btn" onclick="showProSignin()">Get Pro &middot; &pound;2.99/month</button>
@@ -547,7 +620,7 @@
       </div>
     </span>
     <div class="pro-pill" id="pro-header-pill" onclick="openProOverlay()" style="display:none;" aria-label="Go Pro">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>
       <span id="pro-pill-label">Go Pro</span>
     </div>
   </div>
@@ -591,6 +664,9 @@
             <optgroup label="Other">
               <option value="generic_light">Generic Light (&lt;500g)</option>
               <option value="generic_heavy">Generic Heavy (&gt;500g)</option>
+            </optgroup>
+            <optgroup label="Pro" id="drone-custom-group" style="display:none;">
+              <option value="custom" id="drone-custom-option">My Custom Drone</option>
             </optgroup>
           </select>
           <span class="drone-limits" id="drone-limits"></span>
@@ -1036,7 +1112,7 @@ function toggleFavCurrent(){
       return;
     }
     favs.push({name:name,lat:uLat,lng:uLng});
-    showToast('⭐ '+name+' saved');
+    showToast(name+' saved');
   }
   saveFavs(favs);renderFavBar();
 }
@@ -1059,7 +1135,7 @@ function renderFavBar(){
   });
   // Pro upsell nudge at free limit, or Add button for Pro users
   if(PAID_FEATURES_ENABLED&&!isPro()&&favs.length>=2){
-    bar.innerHTML+='<button class="fav-add" onclick="openProOverlay()" style="border-color:rgba(245,158,11,.4);color:#f59e0b;">&#11088; More spots</button>';
+    bar.innerHTML+='<button class="fav-add" onclick="openProOverlay()" style="border-color:rgba(245,158,11,.4);color:#f59e0b;display:flex;align-items:center;gap:4px;"><svg width=\"11\" height=\"11\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"#0f172a\"/><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"4\"/><circle cx=\"50\" cy=\"50\" r=\"32\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"3.5\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><circle cx=\"21\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"21\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><rect x=\"14\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 21 21)\"/><rect x=\"72\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 79 21)\"/><rect x=\"14\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 21 79)\"/><rect x=\"72\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 79 79)\"/><circle cx=\"50\" cy=\"50\" r=\"11\" fill=\"white\"/><circle cx=\"50\" cy=\"50\" r=\"5.5\" fill=\"#0f172a\"/></svg> More spots</button>';
   } else if(isPro()){
     bar.innerHTML+='<button class="fav-add" onclick="toggleFavCurrent()">+ Add</button>';
   }
@@ -1125,7 +1201,7 @@ function renderLog(){
     '<div class="log-stat-tile"><div class="log-stat-val">'+totalFlights+'</div><div class="log-stat-lbl">Flights</div></div>'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+(totalFlights?timeStr:'—')+'</div><div class="log-stat-lbl">Total time</div></div>'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+thisMonth+'</div><div class="log-stat-lbl">This month</div></div>'+
-    '</div>';
+    '</div>'+renderFlightStats(flights);
   var form='<div class="log-form">'+
     '<div class="card-ttl" style="margin-bottom:12px;">Log a Flight</div>'+
     '<div class="log-2col">'+
@@ -1705,7 +1781,7 @@ function renderDash(){
   var warningsRow=(lipoWarnInner||nightWarnInner)?'<div style="display:flex;gap:8px;margin-top:8px;">'+lipoWarnInner+nightWarnInner+'</div>':'';
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">🔗 Share</button></div>'+
-    renderFlightWindowCard()+
+    renderFlightWindowCard()+renderBestTimeCard()+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tPrimary+' <span style="font-size:22px;font-weight:600;color:var(--muted);">/ '+tSecondary+'</span></div><div class="wx-desc">'+info.desc+' &middot; feels '+fPrimary+' / '+fSecondary+'</div></div></div>'+
     '<div class="wx-grid">'+
     '<div class="wx-tile '+rWind+'"><div class="wx-lbl"><span>Wind</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rWind+'">'+spd(wind)+' <span style="font-size:11px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div><div class="wx-info-panel">Wind speed at 10m above ground. This directly determines whether your drone can hold position and return home safely. Above your drone\'s rated limit it may struggle to resist being pushed sideways or downwind.</div></div>'+
@@ -2187,7 +2263,7 @@ function showProSignedIn() {
         '<div style="flex:1;">' +
           '<div style="font-size:14px;font-weight:600;color:var(--text);">' + esc(proUser.name || '') + '</div>' +
           '<div style="font-size:11px;color:var(--muted);">' + esc(proUser.email || '') + '</div>' +
-          '<div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;">&#11088; Pro subscriber</div>' +
+          '<div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;display:flex;align-items:center;gap:4px;"><svg width=\"11\" height=\"11\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"#0f172a\"/><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"4\"/><circle cx=\"50\" cy=\"50\" r=\"32\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"3.5\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><circle cx=\"21\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"21\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><rect x=\"14\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 21 21)\"/><rect x=\"72\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 79 21)\"/><rect x=\"14\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 21 79)\"/><rect x=\"72\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 79 79)\"/><circle cx=\"50\" cy=\"50\" r=\"11\" fill=\"white\"/><circle cx=\"50\" cy=\"50\" r=\"5.5\" fill=\"#0f172a\"/></svg> DroneChecker Pro</div>' +
         '</div>' +
       '</div>' +
       '<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Subscription: <strong style="color:var(--green);">Active</strong></div>' +
@@ -2212,7 +2288,7 @@ function onGoogleSignInSuccess(user) {
   saveProUser(user);
   updateProUI();
   closeProOverlay();
-  showToast('&#11088; Welcome to Pro, ' + (user.name.split(' ')[0] || 'there') + '!');
+  showToast('Welcome to Pro, ' + (user.name.split(' ')[0] || 'there') + '!');
   if (wxData) renderDash();
 }
 function signOutPro() {
@@ -2230,17 +2306,17 @@ function updateProUI() {
   pill.style.display = 'flex';
   if (isPro() && proUser) {
     var initials = (proUser.name || proUser.email || 'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-    pill.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>' + esc(initials) + '</span>';
+    pill.innerHTML = '<svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg><span>' + esc(initials) + '</span>';
     pill.title = (proUser.name || '') + ' - Pro';
   } else {
-    pill.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>Go Pro</span>';
+    pill.innerHTML = '<svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg><span>Go Pro</span>';
     pill.title = 'Upgrade to DroneChecker Pro';
   }
 }
 function proUpsellStrip() {
   if (!PAID_FEATURES_ENABLED || isPro()) return '';
   return '<div class="pro-upsell" onclick="openProOverlay()" role="button" tabindex="0" aria-label="DroneChecker Pro">' +
-    '<div style="flex:1;"><div class="pro-upsell-t">&#11088; DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind, cloud sync &amp; fly alerts</div></div>' +
+    '<div style="flex:1;"><div class="pro-upsell-t" style="display:flex;align-items:center;gap:5px;"><svg width=\"11\" height=\"11\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"#0f172a\"/><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"4\"/><circle cx=\"50\" cy=\"50\" r=\"32\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"3.5\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><circle cx=\"21\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"21\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><rect x=\"14\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 21 21)\"/><rect x=\"72\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 79 21)\"/><rect x=\"14\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 21 79)\"/><rect x=\"72\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 79 79)\"/><circle cx=\"50\" cy=\"50\" r=\"11\" fill=\"white\"/><circle cx=\"50\" cy=\"50\" r=\"5.5\" fill=\"#0f172a\"/></svg> DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind, cloud sync &amp; fly alerts</div></div>' +
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' +
   '</div>';
 }
@@ -2250,7 +2326,7 @@ function proAccountCard() {
   return '<div class="pro-account-card">' +
     '<div class="pro-avatar">' + esc(initials) + '</div>' +
     '<div style="flex:1;"><div class="pro-account-name">' + esc(proUser.name || proUser.email || 'Pro user') + '</div>' +
-    '<div class="pro-account-badge">&#11088; Pro subscriber</div></div>' +
+    '<div class="pro-account-badge" style="display:flex;align-items:center;gap:4px;"><svg width=\"11\" height=\"11\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"#0f172a\"/><rect width=\"100\" height=\"100\" rx=\"20\" fill=\"none\" stroke=\"#f59e0b\" stroke-width=\"4\"/><circle cx=\"50\" cy=\"50\" r=\"32\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"3.5\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"21\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"21\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"50\" y1=\"50\" x2=\"79\" y2=\"79\" stroke=\"white\" stroke-width=\"9\" stroke-linecap=\"round\"/><circle cx=\"21\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"21\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"21\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><circle cx=\"79\" cy=\"79\" r=\"13\" fill=\"none\" stroke=\"#38bdf8\" stroke-width=\"4\"/><rect x=\"14\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 21 21)\"/><rect x=\"72\" y=\"18\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 79 21)\"/><rect x=\"14\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(45 21 79)\"/><rect x=\"72\" y=\"76\" width=\"14\" height=\"6\" rx=\"2\" fill=\"white\" transform=\"rotate(-45 79 79)\"/><circle cx=\"50\" cy=\"50\" r=\"11\" fill=\"white\"/><circle cx=\"50\" cy=\"50\" r=\"5.5\" fill=\"#0f172a\"/></svg> DroneChecker Pro</div></div>' +
     '<button class="pro-signout-btn" onclick="signOutPro()">Sign out</button>' +
   '</div>';
 }
@@ -2258,7 +2334,9 @@ function proAccountCard() {
 window.addEventListener('load',function(){
   checkDisclaimer();
   loadProUser(); updateProUI();
-  loadDrone();loadChecklist();loadUnits();renderFavBar();
+  loadDrone();
+  initCustomDroneUI();
+  if(isPro())setTimeout(prefetchSavedLocations,3000);loadChecklist();loadUnits();renderFavBar();
 
   var cached=loadWxCache();
   var lastLoc=loadLastLoc();
@@ -2296,15 +2374,197 @@ window.addEventListener('load',function(){
   setTimeout(function(){hideSplash();},5000);
   setTimeout(applyDeepLink,600);
 });
-</script>
 
-<script>
-  if('serviceWorker' in navigator){
-    window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});
+/* ── Custom drone profile (Pro) ── */
+var customDrone={name:'My Custom Drone',windAmber:22,windRed:31,gustAmber:25,gustRed:31};
+function loadCustomDrone(){try{var s=localStorage.getItem('dc_custom_drone');if(s)customDrone=JSON.parse(s);}catch(e){}}
+function saveCustomDrone(d){customDrone=d;try{localStorage.setItem('dc_custom_drone',JSON.stringify(d));}catch(e){}}
+function openCustomDroneEditor(){
+  if(!isPro()){openProOverlay();return;}
+  var d=customDrone;
+  var overlay=document.createElement('div');
+  overlay.id='custom-drone-overlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+  overlay.innerHTML='<div style="background:var(--bg2);border-radius:16px;padding:24px 20px;width:100%;max-width:380px;border:1px solid var(--border);">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'+
+    '<div style="font-size:15px;font-weight:700;">Custom Drone Profile</div>'+
+    '<button onclick="document.getElementById(\'custom-drone-overlay\').remove()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;">&times;</button>'+
+    '</div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Drone name</div>'+
+    '<input id="cd-name" class="log-input" value="'+esc(d.name)+'" placeholder="e.g. My FPV Quad" style="margin-bottom:12px;"/>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind amber (km/h)</div><input id="cd-wa" class="log-input" type="number" value="'+d.windAmber+'" style="margin-bottom:0;"/></div>'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind red (km/h)</div><input id="cd-wr" class="log-input" type="number" value="'+d.windRed+'" style="margin-bottom:0;"/></div>'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust amber (km/h)</div><input id="cd-ga" class="log-input" type="number" value="'+d.gustAmber+'" style="margin-bottom:0;"/></div>'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust red (km/h)</div><input id="cd-gr" class="log-input" type="number" value="'+d.gustRed+'" style="margin-bottom:0;"/></div>'+
+    '</div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Values in km/h regardless of your display unit setting.</div>'+
+    '<button onclick="applyCustomDrone()" class="log-btn">Save Profile</button>'+
+    '</div>';
+  document.body.appendChild(overlay);
+}
+function applyCustomDrone(){
+  var name=document.getElementById('cd-name').value.trim()||'My Custom Drone';
+  var wa=parseInt(document.getElementById('cd-wa').value)||22;
+  var wr=parseInt(document.getElementById('cd-wr').value)||31;
+  var ga=parseInt(document.getElementById('cd-ga').value)||25;
+  var gr=parseInt(document.getElementById('cd-gr').value)||31;
+  var d={name:name,windAmber:wa,windRed:wr,gustAmber:ga,gustRed:gr};
+  saveCustomDrone(d);DRONES['custom']=d;
+  var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=name;
+  selectedDrone='custom';try{localStorage.setItem('dc_drone','custom');}catch(e){}
+  var sel=document.getElementById('drone-sel');if(sel)sel.value='custom';
+  updateDroneLimits();if(wxData)renderDash();
+  document.getElementById('custom-drone-overlay').remove();
+  showToast('Custom profile saved');
+}
+function initCustomDroneUI(){
+  if(!PAID_FEATURES_ENABLED)return;
+  loadCustomDrone();DRONES['custom']=customDrone;
+  if(isPro()){
+    var g=document.getElementById('drone-custom-group');if(g)g.style.display='';
+    var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=customDrone.name;
+    var bar=document.querySelector('.drone-bar');
+    if(bar&&!document.getElementById('custom-drone-btn')){
+      var btn=document.createElement('button');btn.id='custom-drone-btn';btn.textContent='+ Custom';
+      btn.style.cssText='background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);padding:7px 8px;color:#f59e0b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;';
+      btn.onclick=openCustomDroneEditor;bar.appendChild(btn);
+    }
   }
+}
+
+/* ── Best time to fly today (Pro) ── */
+function renderBestTimeCard(){
+  if(!isPro()||!wxData||!wxData.hourly)return '';
+  var hours=wxData.hourly,now=new Date(),today=now.toDateString(),candidates=[];
+  for(var i=0;i<hours.time.length;i++){
+    var t=new Date(hours.time[i]);
+    if(t.toDateString()!==today||t<=now)continue;
+    var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
+    var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;
+    var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;
+    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
+    var r=flyRating(w,g,v,wmo,getKpForTime(t),tp,w80,w120);
+    var score=r.lvl==='green'?3:r.lvl==='amber'?1:0;
+    if(uLat&&uLng){var st=calcSunTimes(uLat,uLng,t);if(st.goldMornS&&st.goldMornE&&t>=st.goldMornS&&t<=st.goldMornE)score+=2;if(st.goldEveS&&st.goldEveE&&t>=st.goldEveS&&t<=st.goldEveE)score+=2;}
+    candidates.push({t:t,score:score,rating:r.lvl,wind:w,gust:g});
+  }
+  if(!candidates.length)return '';
+  var best=null,bestScore=-1;
+  for(var j=0;j<candidates.length-1;j++){var s=candidates[j].score+(candidates[j+1]?candidates[j+1].score:0);if(s>bestScore){bestScore=s;best=candidates[j];}}
+  if(!best)return '';
+  var col=best.rating==='green'?'var(--green)':best.rating==='amber'?'var(--amber)':'var(--red)';
+  var endH=new Date(best.t.getTime()+7200000);
+  var isGolden=bestScore>=5;
+  return '<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
+    '<div class="card-ttl" style="margin-bottom:0;">Best time to fly today</div>'+
+    '<span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div>'+
+    '<div style="display:flex;align-items:center;gap:12px;">'+
+    '<div style="font-size:28px;font-weight:800;color:'+col+';">'+pad(best.t.getHours())+':00</div>'+
+    '<div style="font-size:13px;color:var(--muted);">&ndash;</div>'+
+    '<div style="font-size:28px;font-weight:800;color:'+col+';">'+pad(endH.getHours())+':00</div>'+
+    '<div style="flex:1;padding-left:4px;"><div style="font-size:12px;font-weight:600;color:'+col+';">'+(best.rating==='green'?'Good to fly':best.rating==='amber'?'Fly with care':'Avoid')+(isGolden?' &middot; Golden hour overlap':'')+' </div>'+
+    '<div style="font-size:11px;color:var(--muted);">Wind '+spd(best.wind)+' '+spdU()+' &middot; Gusts '+spd(best.gust)+' '+spdU()+'</div></div></div></div>';
+}
+
+/* ── Historical flight stats (Pro) ── */
+function renderFlightStats(flights){
+  if(!isPro()||flights.length<3)return '';
+  var now=new Date(),months=[];
+  for(var m=5;m>=0;m--){
+    var d=new Date(now.getFullYear(),now.getMonth()-m,1);
+    var label=d.toLocaleDateString('en-GB',{month:'short'});
+    var mf=flights.filter(function(f){var fd=new Date(f.date);return fd.getMonth()===d.getMonth()&&fd.getFullYear()===d.getFullYear();});
+    months.push({label:label,count:mf.length});
+  }
+  var maxCount=Math.max.apply(null,months.map(function(m){return m.count;}));
+  if(maxCount===0)return '';
+  var locMap={};flights.forEach(function(f){if(f.loc)locMap[f.loc]=(locMap[f.loc]||0)+1;});
+  var topLocs=Object.keys(locMap).sort(function(a,b){return locMap[b]-locMap[a];}).slice(0,3);
+  var good=flights.filter(function(f){return f.cond==='Good to Fly';}).length;
+  var caution=flights.filter(function(f){return f.cond==='Fly with Caution';}).length;
+  var avoid=flights.filter(function(f){return f.cond==='Do Not Fly';}).length;
+  var bars=months.map(function(m){
+    var h=maxCount>0?Math.max(4,Math.round((m.count/maxCount)*60)):4;
+    return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">'+
+      '<div style="font-size:10px;color:var(--muted);">'+(m.count||'')+'</div>'+
+      '<div style="width:100%;background:var(--accent);border-radius:3px 3px 0 0;height:'+h+'px;min-height:4px;opacity:'+(m.count?'1':'0.15')+';"></div>'+
+      '<div style="font-size:9px;color:var(--muted);">'+m.label+'</div></div>';
+  }).join('');
+  return '<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">'+
+    '<div class="card-ttl" style="margin-bottom:0;">Flight statistics</div>'+
+    '<span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div>'+
+    '<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Flights per month</div>'+
+    '<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:16px;">'+bars+'</div>'+
+    (topLocs.length?'<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Top locations</div>'+
+      topLocs.map(function(l){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="color:var(--text);">'+esc(l)+'</span><span style="color:var(--muted);">'+locMap[l]+' flight'+(locMap[l]!==1?'s':'')+'</span></div>';}).join(''):'')+ 
+    '<div style="display:flex;gap:8px;margin-top:12px;">'+
+    '<div style="flex:1;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--green);">'+good+'</div><div style="font-size:10px;color:var(--muted);">Good</div></div>'+
+    '<div style="flex:1;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--amber);">'+caution+'</div><div style="font-size:10px;color:var(--muted);">Caution</div></div>'+
+    '<div style="flex:1;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--red);">'+avoid+'</div><div style="font-size:10px;color:var(--muted);">Avoided</div></div>'+
+    '</div></div>';
+}
+
+/* ── Offline cache for saved locations (Pro) ── */
+function prefetchSavedLocations(){
+  if(!isPro())return;
+  var favs=loadFavs();if(!favs.length)return;
+  var fetched=0,total=favs.length;
+  favs.forEach(function(fav){
+    var url='https://api.open-meteo.com/v1/forecast?latitude='+fav.lat+'&longitude='+fav.lng+
+      '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,surface_pressure,visibility,cloud_cover,wind_speed_80m,wind_speed_120m'+
+      '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility,precipitation_probability,wind_speed_80m,wind_speed_120m'+
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max'+
+      '&wind_speed_unit=kmh&timezone=auto&forecast_days=8';
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      try{localStorage.setItem('dc_wx_fav_'+encodeURIComponent(fav.name),JSON.stringify({ts:Date.now(),data:data}));fetched++;
+        if(fetched===total)showToast(total+' location'+(total>1?'s':'')+' cached for offline');
+      }catch(e){}
+    }).catch(function(){});
+  });
+}
+function loadFavCache(name){try{var s=localStorage.getItem('dc_wx_fav_'+encodeURIComponent(name));if(s)return JSON.parse(s);}catch(e){}return null;}
+
+/* ── Pro share card (upgrades shareConditions for Pro users) ── */
+function shareConditions(){
+  if(!wxData||!wxData.current){showToast('No data to share yet');return;}
+  var c=wxData.current;
+  var cond=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15,c.wind_speed_80m||0,c.wind_speed_120m||0);
+  var loc=document.getElementById('loc-name').textContent;
+  var info=wmoInfo(c.weather_code||0);
+  if(isPro()){shareProCard(cond,loc,c,info);return;}
+  var emoji=cond.lvl==='green'?'[G]':cond.lvl==='amber'?'[A]':'[R]';
+  var text='DroneChecker - Flying Conditions\n'+emoji+' '+cond.label+' in '+loc+'\n\n'+info.desc+'\nWind: '+spd(c.wind_speed_10m||0)+' '+spdU()+' Gusts: '+spd(c.wind_gusts_10m||0)+' '+spdU()+'\n'+Math.round(c.temperature_2m||0)+'C\n\ndronechecker.co.uk';
+  if(navigator.share){navigator.share({text:text}).catch(function(){});}
+  else{navigator.clipboard.writeText(text).then(function(){showToast('Copied to clipboard');}).catch(function(){showToast('Could not share');});}
+}
+function shareProCard(cond,loc,c,info){
+  var canvas=document.createElement('canvas');canvas.width=800;canvas.height=420;
+  var ctx=canvas.getContext('2d');
+  var accentCol=cond.lvl==='green'?'#22c55e':cond.lvl==='amber'?'#f59e0b':'#ef4444';
+  ctx.fillStyle='#0f172a';ctx.beginPath();ctx.roundRect(0,0,800,420,20);ctx.fill();
+  ctx.fillStyle=accentCol;ctx.fillRect(0,0,6,420);
+  ctx.fillStyle='#f1f5f9';ctx.font='bold 18px sans-serif';ctx.fillText('DroneChecker',32,40);
+  ctx.fillStyle='#f59e0b';ctx.font='bold 11px sans-serif';ctx.fillText('PRO',32+ctx.measureText('DroneChecker').width+8,36);
+  ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.fillText(loc,32,66);
+  ctx.fillStyle=accentCol;ctx.font='bold 48px sans-serif';ctx.fillText(cond.label,32,140);
+  ctx.fillStyle='#94a3b8';ctx.font='14px sans-serif';ctx.fillText(info.desc,32,168);
+  var stats=[{label:'Wind',val:spd(c.wind_speed_10m||0)+' '+spdU()},{label:'Gusts',val:spd(c.wind_gusts_10m||0)+' '+spdU()},{label:'Temp',val:Math.round(c.temperature_2m||0)+'C'},{label:'KP',val:currentKp.toFixed(1)}];
+  stats.forEach(function(s,i){var x=32+i*185;ctx.fillStyle='#1e293b';ctx.beginPath();ctx.roundRect(x,200,170,80,10);ctx.fill();ctx.fillStyle='#64748b';ctx.font='10px sans-serif';ctx.fillText(s.label.toUpperCase(),x+10,222);ctx.fillStyle='#f1f5f9';ctx.font='bold 22px sans-serif';ctx.fillText(s.val,x+10,254);});
+  ctx.fillStyle='#334155';ctx.font='11px sans-serif';
+  var ts=new Date().toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  ctx.fillText(ts+' - dronechecker.co.uk',32,390);
+  canvas.toBlob(function(blob){
+    if(!blob){doTxtShare();return;}
+    var file=new File([blob],'dronechecker-conditions.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'DroneChecker '+cond.label,text:'Flying conditions in '+loc+' - dronechecker.co.uk'}).catch(function(){doImgDl(blob);});
+    }else{doImgDl(blob);}
+  },'image/png');
+  function doImgDl(blob){var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='dronechecker-conditions.png';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Conditions card saved');}
+  function doTxtShare(){var text='DroneChecker Pro - '+cond.label+' in '+loc+' - dronechecker.co.uk';if(navigator.share){navigator.share({text:text}).catch(function(){});}else{navigator.clipboard.writeText(text).then(function(){showToast('Copied');});}}
+}
+
 </script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
-</body>
-</html>

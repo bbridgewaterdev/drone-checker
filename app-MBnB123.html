@@ -1027,7 +1027,14 @@ function toggleFavCurrent(){
   if(idx>=0){
     favs.splice(idx,1);showToast('Removed from favourites');
   } else {
-    if(favs.length>=2){showToast('Max 2 saved locations');return;}
+    var maxFavs=isPro()?999:2;
+    if(favs.length>=maxFavs){
+      if(!isPro()){
+        showToast('Max 2 locations — Go Pro for unlimited');
+        openProOverlay();
+      }
+      return;
+    }
     favs.push({name:name,lat:uLat,lng:uLng});
     showToast('⭐ '+name+' saved');
   }
@@ -1050,6 +1057,12 @@ function renderFavBar(){
     var active=f.name===curName;
     bar.innerHTML+='<button class="fav-pill'+(active?' active':'')+'" onclick="loadFav(\''+encodeURIComponent(f.name)+'\','+f.lat+','+f.lng+')">'+esc(f.name)+'</button>';
   });
+  // Pro upsell nudge at free limit, or Add button for Pro users
+  if(PAID_FEATURES_ENABLED&&!isPro()&&favs.length>=2){
+    bar.innerHTML+='<button class="fav-add" onclick="openProOverlay()" style="border-color:rgba(245,158,11,.4);color:#f59e0b;">&#11088; More spots</button>';
+  } else if(isPro()){
+    bar.innerHTML+='<button class="fav-add" onclick="toggleFavCurrent()">+ Add</button>';
+  }
 }
 function loadFav(name,lat,lng){
   uLat=lat;uLng=lng;
@@ -1144,7 +1157,10 @@ function renderLog(){
   } else {
     var condColor={'Good to Fly':'green','Fly with Caution':'amber','Do Not Fly':'red'};
     entries='<div class="log-count">'+flights.length+' flight'+(flights.length!==1?'s':'')+' logged</div>';
-    entries+='<div class="log-actions"><button class="log-clear" onclick="clearFlights()">Clear all</button></div>';
+    var exportBtn=isPro()
+      ? '<button class="log-export" onclick="exportFlights()">📊 Export CSV</button>'
+      : '<button class="log-export" onclick="exportFlights()" style="opacity:.5;border-style:dashed;color:var(--muted);">📊 Export CSV <span style="font-size:10px;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;margin-left:2px;">PRO</span></button>';
+    entries+='<div class="log-actions">'+exportBtn+'<button class="log-clear" onclick="clearFlights()">Clear all</button></div>';
     for(var i=flights.length-1;i>=0;i--){
       var f=flights[i];
       var cc=condColor[f.cond]||'';
@@ -1196,6 +1212,11 @@ function clearFlights(){
   saveFlights([]);renderLog();
 }
 function exportFlights(){
+  if(!isPro()){
+    showToast('Export is a Pro feature');
+    openProOverlay();
+    return;
+  }
   var flights=loadFlights();
   if(!flights.length){showToast('No flights to export');return;}
   var bom='\uFEFF';
@@ -1513,47 +1534,48 @@ function getKpForTime(t){
   }
   return best;
 }
-function getNext24hRatings(){
+function getHourlyRatings(hours){
+  // hours = number of hours ahead to fetch (24 for free, 72 for Pro)
   if(!wxData||!wxData.hourly)return[];
-  var hours=wxData.hourly,now=new Date();
+  var data=wxData.hourly,now=new Date();
   var windowStart=new Date(now);windowStart.setMinutes(0,0,0);
-  var windowEnd=new Date(windowStart.getTime()+24*3600000);
+  var windowEnd=new Date(windowStart.getTime()+hours*3600000);
   var results=[];
-  for(var i=0;i<hours.time.length;i++){
-    var t=new Date(hours.time[i]);
+  for(var i=0;i<data.time.length;i++){
+    var t=new Date(data.time[i]);
     if(t<windowStart||t>=windowEnd)continue;
-    var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
-    var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;
-    var tmp=hours.temperature_2m?hours.temperature_2m[i]||15:15;
-    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
+    var w=data.wind_speed_10m[i]||0,g=data.wind_gusts_10m?data.wind_gusts_10m[i]||0:0;
+    var v=data.visibility?data.visibility[i]||10000:10000,wmo=data.weather_code?data.weather_code[i]||0:0;
+    var tmp=data.temperature_2m?data.temperature_2m[i]||15:15;
+    var w80=data.wind_speed_80m?data.wind_speed_80m[i]||0:0,w120=data.wind_speed_120m?data.wind_speed_120m[i]||0:0;
     var kpT=getKpForTime(t);
     var r=flyRating(w,g,v,wmo,kpT,tmp,w80,w120);
     results.push({hour:t.getHours(),rating:r.lvl,time:t,kp:kpT});
   }
   return results;
 }
+function getNext24hRatings(){return getHourlyRatings(24);}
 function buildHourStrip(hourlyRatings,now){
   var nowH=now.getHours();
-  var strip='<div style="display:flex;gap:1.5px;margin:10px 0 4px;">';
+  var total=hourlyRatings.length;
+  var strip='<div style="display:flex;gap:1px;margin:10px 0 4px;">';
+  var tickEvery=total<=24?6:total<=48?8:12;
   var tickLabels=[];
-  for(var i=0;i<hourlyRatings.length;i++){
+  for(var i=0;i<total;i++){
     var entry=hourlyRatings[i];
     var col=entry.rating==='green'?'#22c55e':entry.rating==='amber'?'#f59e0b':'#ef4444';
-    var isNowHour=entry.hour===nowH&&i===0;
-    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'"></div>';
-    if(i%6===0)tickLabels.push({idx:i,label:pad(entry.hour)});
+    var isNow=i===0;
+    // Day boundary marker
+    var dayBorder=i>0&&entry.hour===0?'border-left:1px solid rgba(255,255,255,.2);':'';    strip+='<div title="'+entry.time.toLocaleString('en-GB',{weekday:'short',hour:'2-digit',minute:'2-digit'})+'" style="flex:1;height:20px;background:'+col+';border-radius:1px;'+dayBorder+(isNow?'box-shadow:0 0 0 1.5px #fff;':'')+'"></div>';
+    if(i%tickEvery===0)tickLabels.push({idx:i,label:(entry.hour===0?entry.time.toLocaleDateString('en-GB',{weekday:'short'})+' ':'')+pad(entry.hour)});
   }
   strip+='</div>';
   var labelHtml='<div style="position:relative;height:14px;margin-bottom:2px;">';
-  var pct=[0,25,50,75,100];
   for(var j=0;j<tickLabels.length;j++){
-    var left=pct[j]+'%';
+    var pct=Math.round((tickLabels[j].idx/total)*100);
     var transform=j===0?'none':j===tickLabels.length-1?'translateX(-100%)':'translateX(-50%)';
-    labelHtml+='<span style="position:absolute;left:'+left+';transform:'+transform+';font-size:10px;color:var(--muted);">'+tickLabels[j].label+'</span>';
+    labelHtml+='<span style="position:absolute;left:'+pct+'%;transform:'+transform+';font-size:10px;color:var(--muted);white-space:nowrap;">'+tickLabels[j].label+'</span>';
   }
-  var lastEntry=hourlyRatings[hourlyRatings.length-1];
-  var endH=lastEntry?pad((lastEntry.hour+1)%24):pad((nowH+24)%24);
-  labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endH+'</span>';
   labelHtml+='</div>';
   return strip+labelHtml;
 }
@@ -1584,7 +1606,8 @@ function loadKpCache(){
 function renderFlightWindowCard(){
   if(!wxData||!wxData.hourly)return '<div class="card" id="flight-window-card"><div class="card-ttl">Best Flight Window</div><div style="font-size:13px;color:var(--muted);">No data available.</div></div>';
   var now=new Date();
-  var next24=getNext24hRatings();
+  var windowHours=isPro()?72:24;
+  var next24=getHourlyRatings(windowHours);
   var windows=getFlightWindows(next24);
   var currentWin=null,nextWin=null;
   for(var i=0;i<windows.length;i++){
@@ -1635,7 +1658,7 @@ function renderFlightWindowCard(){
   return '<div class="card" id="flight-window-card">'+
     '<div class="card-ttl">Best Flight Window</div>'+
     mainHtml+
-    '<div style="font-size:11px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">Next 24 hours</div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">Next '+(isPro()?'72':'24')+' hours'+(isPro()?' <span style="font-size:9px;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;margin-left:4px;">PRO</span>':'')+' </div>'+
     hourStrip+legend+'</div>';
 }
 function renderDash(){

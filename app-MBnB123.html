@@ -277,19 +277,13 @@
       border-radius: 4px;
     }
 
-    /* ── PRO FEATURE FLAG ── */
-    /* Set PAID_FEATURES_ENABLED = false in JS to hide all Pro UI entirely.
-       Set to true to show paywalls, upgrade screen and sign-in flow.       */
-
-    /* Pro overlay (upgrade / sign-in sheet) */
+    /* ── PRO STYLES ── */
     .pro-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10001;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;}
     .pro-sheet{background:var(--bg2);border-radius:20px;padding:0;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;border:1px solid var(--border);display:flex;flex-direction:column;}
     .pro-sheet::-webkit-scrollbar{width:3px;}
     .pro-sheet-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;}
     .pro-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px;}
     .pro-body{padding:0 20px 24px;}
-
-    /* Upgrade screen */
     .pro-hero{text-align:center;padding:20px 0 16px;}
     .pro-hero-icon{width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
     .pro-hero-title{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
@@ -313,8 +307,6 @@
     .pro-divider{height:1px;background:var(--border);margin:14px 0;}
     .pro-cta-btn{width:100%;background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;margin-bottom:8px;}
     .pro-cta-sub{text-align:center;font-size:11px;color:var(--muted);margin-bottom:4px;}
-
-    /* Sign-in screen */
     .pro-signin-body{padding:24px 20px 28px;display:flex;flex-direction:column;align-items:center;}
     .pro-signin-icon{width:64px;height:64px;border-radius:20px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
     .pro-signin-title{font-size:18px;font-weight:700;color:var(--text);text-align:center;margin-bottom:6px;}
@@ -325,12 +317,9 @@
     .pro-privacy-note{font-size:10px;color:var(--muted);text-align:center;line-height:1.6;}
     .pro-privacy-note a{color:var(--accent);}
     .pro-free-link{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;margin-top:14px;padding:4px;}
-
-    /* Pro account pill in header */
-    .pro-pill{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;}
+    .pro-pill{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:3px 10px;display:flex;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;margin-left:8px;}
     .pro-pill span{font-size:10px;font-weight:600;color:#f59e0b;letter-spacing:.3px;}
-
-    /* Paywall card overlay */
+    .pro-avatar{width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#f59e0b;flex-shrink:0;}
     .paywall-card{position:relative;overflow:hidden;border-radius:var(--radius);margin:12px 12px 0;border:1px solid rgba(245,158,11,.3);}
     .paywall-blurred{filter:blur(3px);pointer-events:none;padding:16px;background:var(--bg2);opacity:.4;}
     .paywall-over{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;background:rgba(15,23,42,.78);}
@@ -338,15 +327,10 @@
     .paywall-over-title{font-size:14px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px;}
     .paywall-over-sub{font-size:11px;color:var(--muted);text-align:center;margin-bottom:12px;line-height:1.5;}
     .paywall-over-btn{background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:8px 20px;font-size:13px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;}
-
-    /* Upsell strip */
     .pro-upsell{margin:12px 12px 0;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-sm);padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;}
     .pro-upsell-t{font-size:12px;font-weight:700;color:#f59e0b;}
     .pro-upsell-s{font-size:11px;color:var(--muted);}
-
-    /* Pro signed-in account card */
     .pro-account-card{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius);padding:14px;margin:12px 12px 0;display:flex;align-items:center;gap:12px;}
-    .pro-avatar{width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#f59e0b;flex-shrink:0;}
     .pro-account-name{font-size:13px;font-weight:600;color:var(--text);}
     .pro-account-badge{font-size:10px;color:#f59e0b;font-weight:600;}
     .pro-signout-btn{margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;flex-shrink:0;}
@@ -354,103 +338,6 @@
 </head>
 <body>
 <div id="disclaimer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
-
-<!-- ── PRO OVERLAY (upgrade + sign-in) ── -->
-<div class="pro-overlay" id="pro-overlay">
-  <div class="pro-sheet" id="pro-sheet">
-
-    <!-- Upgrade screen -->
-    <div id="pro-screen-upgrade">
-      <div class="pro-sheet-header">
-        <div style="width:24px;"></div>
-        <div style="font-size:13px;font-weight:600;color:var(--muted);">DroneChecker Pro</div>
-        <button class="pro-close" onclick="closeProOverlay()" aria-label="Close">×</button>
-      </div>
-      <div class="pro-body">
-        <div class="pro-hero">
-          <div class="pro-hero-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <div class="pro-hero-title">DroneChecker Pro</div>
-          <div class="pro-hero-sub">Everything free pilots love, plus more.</div>
-        </div>
-
-        <div class="pro-price-card">
-          <div class="pro-price-row">
-            <span class="pro-price-amt">£2.99</span>
-            <span class="pro-price-per">/ month</span>
-          </div>
-          <div class="pro-price-note">Or £24.99/year · Cancel anytime · No hidden fees</div>
-        </div>
-
-        <div class="pro-feat-section">Always free</div>
-        <div class="pro-feat-row">
-          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div class="pro-feat-title">Fly rating &amp; all weather tiles</div><div class="pro-feat-desc">Full dashboard — no account ever needed</div></div>
-        </div>
-        <div class="pro-feat-row">
-          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div class="pro-feat-title">24hr forecast, wind map &amp; golden hour</div><div class="pro-feat-desc">No limits, no account</div></div>
-        </div>
-        <div class="pro-feat-row">
-          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div><div class="pro-feat-title">Local flight log (on-device)</div><div class="pro-feat-desc">Private, stored only on your phone</div></div>
-        </div>
-
-        <div class="pro-divider"></div>
-        <div class="pro-feat-section gold">Pro only</div>
-
-        <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div><div class="pro-feat-title">Saved locations <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Save unlimited flying spots for one-tap checks</div></div>
-        </div>
-        <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div><div class="pro-feat-title">Cloud flight log sync <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Access your log across all your devices</div></div>
-        </div>
-        <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div><div class="pro-feat-title">Wind at altitude (80m &amp; 120m) <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">See how conditions change as you climb</div></div>
-        </div>
-        <div class="pro-feat-row">
-          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-          <div><div class="pro-feat-title">Fly alerts <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Notify me when saved spots turn flyable</div></div>
-        </div>
-
-        <div style="height:16px;"></div>
-        <button class="pro-cta-btn" onclick="showProSignin()">Get Pro · £2.99/month</button>
-        <div class="pro-cta-sub">7-day free trial · Cancel anytime</div>
-      </div>
-    </div>
-
-    <!-- Sign-in screen -->
-    <div id="pro-screen-signin" style="display:none;">
-      <div class="pro-sheet-header">
-        <button class="pro-close" onclick="showProUpgrade()" aria-label="Back" style="font-size:16px;">←</button>
-        <div style="font-size:13px;font-weight:600;color:var(--muted);">Sign in</div>
-        <button class="pro-close" onclick="closeProOverlay()" aria-label="Close">×</button>
-      </div>
-      <div class="pro-signin-body">
-        <div class="pro-signin-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-        <div class="pro-signin-title">Sign in to unlock Pro</div>
-        <div class="pro-signin-sub"><strong>Free users never need an account.</strong><br>Sign in only to activate your Pro subscription and sync your flight log across devices.</div>
-        <button class="pro-google-btn" id="pro-google-signin-btn" onclick="handleGoogleSignIn()">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          <span>Continue with Google</span>
-        </button>
-        <div class="pro-privacy-note">
-          Free users remain completely anonymous.<br>
-          Signing in creates a Pro account tied to your Google identity.<br>
-          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a>
-        </div>
-        <button class="pro-free-link" onclick="closeProOverlay()">No thanks, continue for free</button>
-      </div>
-    </div>
-
-  </div>
-</div>
   <div class="disclaimer-sheet">
     <div class="disclaimer-icon">
       <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
@@ -485,6 +372,87 @@
       <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
     </label>
     <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled>Enter DroneChecker</button>
+  </div>
+</div>
+
+
+<!-- PRO OVERLAY -->
+<div class="pro-overlay" id="pro-overlay">
+  <div class="pro-sheet" id="pro-sheet">
+    <div id="pro-screen-upgrade">
+      <div class="pro-sheet-header">
+        <div style="width:24px;"></div>
+        <div style="font-size:13px;font-weight:600;color:var(--muted);">DroneChecker Pro</div>
+        <button class="pro-close" onclick="closeProOverlay()" aria-label="Close">&times;</button>
+      </div>
+      <div class="pro-body">
+        <div class="pro-hero">
+          <div class="pro-hero-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="pro-hero-title">DroneChecker Pro</div>
+          <div class="pro-hero-sub">Everything free pilots love, plus more.</div>
+        </div>
+        <div class="pro-price-card">
+          <div class="pro-price-row"><span class="pro-price-amt">&pound;2.99</span><span class="pro-price-per">/ month</span></div>
+          <div class="pro-price-note">Or &pound;24.99/year &middot; Cancel anytime</div>
+        </div>
+        <div class="pro-feat-section">Always free</div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">Fly rating &amp; all weather tiles</div><div class="pro-feat-desc">Full dashboard &mdash; no account ever needed</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">24hr forecast, wind map &amp; golden hour</div><div class="pro-feat-desc">No limits, no account</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div><div class="pro-feat-title">Local flight log (on-device)</div><div class="pro-feat-desc">Private, stored only on your phone</div></div>
+        </div>
+        <div class="pro-divider"></div>
+        <div class="pro-feat-section gold">Pro only</div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <div><div class="pro-feat-title">Saved locations <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Save unlimited flying spots for one-tap checks</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <div><div class="pro-feat-title">Cloud flight log sync <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Access your log across all your devices</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <div><div class="pro-feat-title">Wind at altitude (80m &amp; 120m) <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">See how conditions change as you climb</div></div>
+        </div>
+        <div class="pro-feat-row">
+          <div class="pro-feat-check pro"><svg viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+          <div><div class="pro-feat-title">Fly alerts <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Notify me when saved spots turn flyable</div></div>
+        </div>
+        <div style="height:16px;"></div>
+        <button class="pro-cta-btn" onclick="showProSignin()">Get Pro &middot; &pound;2.99/month</button>
+        <div class="pro-cta-sub">7-day free trial &middot; Cancel anytime</div>
+      </div>
+    </div>
+    <div id="pro-screen-signin" style="display:none;">
+      <div class="pro-sheet-header">
+        <button class="pro-close" onclick="showProUpgrade()" aria-label="Back" style="font-size:16px;">&larr;</button>
+        <div style="font-size:13px;font-weight:600;color:var(--muted);">Sign in</div>
+        <button class="pro-close" onclick="closeProOverlay()" aria-label="Close">&times;</button>
+      </div>
+      <div class="pro-signin-body">
+        <div class="pro-signin-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="pro-signin-title">Sign in to unlock Pro</div>
+        <div class="pro-signin-sub"><strong>Free users never need an account.</strong><br>Sign in only to activate your Pro subscription and sync your flight log across devices.</div>
+        <button class="pro-google-btn" id="pro-google-signin-btn" onclick="handleGoogleSignIn()">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          <span>Continue with Google</span>
+        </button>
+        <div class="pro-privacy-note">Free users remain completely anonymous.<br>Signing in creates a Pro account tied to your Google identity.<br><a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a></div>
+        <button class="pro-free-link" onclick="closeProOverlay()">No thanks, continue for free</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -578,9 +546,8 @@
         <button id="refresh-btn" onclick="manualRefresh()" aria-label="Refresh weather data" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;line-height:1;">↻ Refresh</button>
       </div>
     </span>
-    <!-- Pro pill — only shown when PAID_FEATURES_ENABLED is true -->
-    <div class="pro-pill" id="pro-header-pill" onclick="openProOverlay()" style="display:none;" aria-label="DroneChecker Pro">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    <div class="pro-pill" id="pro-header-pill" onclick="openProOverlay()" style="display:none;" aria-label="Go Pro">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       <span id="pro-pill-label">Go Pro</span>
     </div>
   </div>
@@ -1733,8 +1700,7 @@ function renderDash(){
     (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);rows+='<div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:var(--muted);width:28px;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:4px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="font-size:12px;font-weight:600;color:'+col+';flex-shrink:0;min-width:44px;text-align:right;">'+spd(l.v)+' '+spdU()+'</div></div>';});return rows;})()+'</div><div class="wx-info-panel">Wind speed typically increases with height as surface friction reduces. Ground conditions can feel calm while your drone faces much stronger winds at 80–120m. Always check altitude readings before climbing, especially near trees or obstacles.</div></div>'+
     '</div>'+warningsRow+'</div>'+
     '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+
-    proUpsellStrip()+
-    '<div class="card" style="cursor:pointer;" onclick="openRules()"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-ttl" style="margin-bottom:0;">UK Drone Law &amp; Rules</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div style="font-size:12px;color:var(--muted);margin-top:6px;">2026 Updates &amp; Restrictions</div></div>'+
+    proUpsellStrip()+'<div class="card" style="cursor:pointer;" onclick="openRules()"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-ttl" style="margin-bottom:0;">UK Drone Law &amp; Rules</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div style="font-size:12px;color:var(--muted);margin-top:6px;">2026 Updates &amp; Restrictions</div></div>'+
     '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer">Open →</a></div></div>'+
     '<div style="margin:20px 12px 0;padding:16px;border-top:1px solid var(--border);text-align:center;">'+
     (!isIOS&&!isStandalone?'<div style="display:inline-block;margin-bottom:16px;position:relative;opacity:.5;cursor:default;"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height:48px;"/><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;color:#f1f5f9;white-space:nowrap;backdrop-filter:blur(4px);">Coming Soon</div></div>':'')+
@@ -1761,8 +1727,7 @@ function renderDash(){
     '<span style="font-size:12px;color:var(--border);">|</span>'+
     '<a href="#" onclick="resetAllData();return false;" style="font-size:12px;color:var(--muted);text-decoration:none;">Reset Data</a>'+
     '</div>'+
-    proAccountCard()+
-    '<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
+    proAccountCard()+'<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
     '</div><div style="height:14px;"></div>';
   var announcer=document.getElementById('a11y-announce');
   if(announcer)announcer.textContent=cond.label+'. '+cond.desc;
@@ -2139,27 +2104,137 @@ function applyDeepLink(){
     }
   }catch(e){}
 }
-/* Pro init */
+
+/* ════════════════════════════════════════
+   PRO FEATURE FLAG
+   false = hidden entirely (app as today)
+   true  = paywall + sign-in flow active
+   ════════════════════════════════════════ */
 var PAID_FEATURES_ENABLED = true;
 var proUser = null;
-function loadProUser(){try{var s=localStorage.getItem('dc_pro_user');if(s)proUser=JSON.parse(s);}catch(e){}}
-function saveProUser(u){proUser=u;try{localStorage.setItem('dc_pro_user',u?JSON.stringify(u):'');}catch(e){}}
-function isPro(){return PAID_FEATURES_ENABLED&&proUser&&proUser.isPro;}
-function openProOverlay(){if(!PAID_FEATURES_ENABLED)return;var o=document.getElementById('pro-overlay');if(!o)return;if(isPro()){showProSignedIn();}else{showProUpgrade();}o.style.display='flex';document.body.style.overflow='hidden';}
-function closeProOverlay(){var o=document.getElementById('pro-overlay');if(o)o.style.display='none';document.body.style.overflow='';}
-function showProUpgrade(){var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');if(u)u.style.display='';if(s)s.style.display='none';}
-function showProSignin(){var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');if(u)u.style.display='none';if(s)s.style.display='';}
-function showProSignedIn(){var sheet=document.getElementById('pro-sheet');if(!sheet||!proUser)return;var initials=(proUser.name||proUser.email||'U').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();sheet.innerHTML='<div class="pro-sheet-header"><div style="width:24px;"></div><div style="font-size:13px;font-weight:600;color:var(--muted);">Your Pro Account</div><button class="pro-close" onclick="closeProOverlay()" aria-label="Close">00d7</button></div><div class="pro-body" style="padding-top:12px;"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--text);">'+esc(proUser.name||'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(proUser.email||'')+'</div><div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;">2b50 Pro subscriber</div></div></div><div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Subscription: <strong style="color:var(--green);">Active</strong></div><button onclick="signOutPro()" style="width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:12px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;">Sign out</button><button onclick="closeProOverlay()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button></div>';}
-var GOOGLE_CLIENT_ID='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
-function handleGoogleSignIn(){var btn=document.getElementById('pro-google-signin-btn');if(btn){btn.style.opacity='0.6';btn.disabled=true;}if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'){setTimeout(function(){onGoogleSignInSuccess({name:'Ben Bridgewater',email:'bbridgewater.dev@gmail.com',photoUrl:'',isPro:true});},1200);return;}showToast('Connect your Google Client ID to enable real sign-in.');if(btn){btn.style.opacity='1';btn.disabled=false;}}
-function onGoogleSignInSuccess(user){saveProUser(user);updateProUI();closeProOverlay();showToast('⭐ Welcome to Pro, '+(user.name.split(' ')[0]||'there')+'!');if(wxData)renderDash();}
-function signOutPro(){if(!confirm('Sign out of Pro?'))return;saveProUser(null);updateProUI();closeProOverlay();showToast('Signed out of Pro');if(wxData)renderDash();}
-function updateProUI(){if(!PAID_FEATURES_ENABLED)return;var pill=document.getElementById('pro-header-pill');if(!pill)return;pill.style.display='flex';if(isPro()&&proUser){var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();pill.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>'+esc(initials)+'</span>';}else{pill.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>Go Pro</span>';}}
-function proPaywallCard(title,subtitle,html){return '<div class="paywall-card"><div class="paywall-blurred">'+html+'</div><div class="paywall-over"><div class="paywall-over-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="paywall-over-title">'+esc(title)+'</div><div class="paywall-over-sub">'+esc(subtitle)+'</div><button class="paywall-over-btn" onclick="openProOverlay()">Unlock with Pro</button></div></div>';}
-function proUpsellStrip(){return PAID_FEATURES_ENABLED&&!isPro()?'<div class="pro-upsell" onclick="openProOverlay()" role="button" tabindex="0"><div style="flex:1;"><div class="pro-upsell-t">2b50 DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind, cloud sync &amp; fly alerts</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>':'';}
+
+function loadProUser() {
+  try { var s = localStorage.getItem('dc_pro_user'); if (s) proUser = JSON.parse(s); } catch(e) {}
+}
+function saveProUser(u) {
+  proUser = u;
+  try { localStorage.setItem('dc_pro_user', u ? JSON.stringify(u) : ''); } catch(e) {}
+}
+function isPro() {
+  return PAID_FEATURES_ENABLED && proUser && proUser.isPro;
+}
+function openProOverlay() {
+  if (!PAID_FEATURES_ENABLED) return;
+  var o = document.getElementById('pro-overlay');
+  if (!o) return;
+  if (isPro()) { showProSignedIn(); } else { showProUpgrade(); }
+  o.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeProOverlay() {
+  var o = document.getElementById('pro-overlay');
+  if (o) o.style.display = 'none';
+  document.body.style.overflow = '';
+}
+function showProUpgrade() {
+  var u = document.getElementById('pro-screen-upgrade');
+  var s = document.getElementById('pro-screen-signin');
+  if (u) u.style.display = '';
+  if (s) s.style.display = 'none';
+}
+function showProSignin() {
+  var u = document.getElementById('pro-screen-upgrade');
+  var s = document.getElementById('pro-screen-signin');
+  if (u) u.style.display = 'none';
+  if (s) s.style.display = '';
+}
+function showProSignedIn() {
+  var sheet = document.getElementById('pro-sheet');
+  if (!sheet || !proUser) return;
+  var initials = (proUser.name || proUser.email || 'U').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  sheet.innerHTML =
+    '<div class="pro-sheet-header">' +
+      '<div style="width:24px;"></div>' +
+      '<div style="font-size:13px;font-weight:600;color:var(--muted);">Your Pro Account</div>' +
+      '<button class="pro-close" onclick="closeProOverlay()" aria-label="Close">&times;</button>' +
+    '</div>' +
+    '<div class="pro-body" style="padding-top:12px;">' +
+      '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;">' +
+        '<div class="pro-avatar">' + esc(initials) + '</div>' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:14px;font-weight:600;color:var(--text);">' + esc(proUser.name || '') + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);">' + esc(proUser.email || '') + '</div>' +
+          '<div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;">&#11088; Pro subscriber</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Subscription: <strong style="color:var(--green);">Active</strong></div>' +
+      '<button onclick="signOutPro()" style="width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:12px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;">Sign out</button>' +
+      '<button onclick="closeProOverlay()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button>' +
+    '</div>';
+}
+var GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+function handleGoogleSignIn() {
+  var btn = document.getElementById('pro-google-signin-btn');
+  if (btn) { btn.style.opacity = '0.6'; btn.disabled = true; }
+  if (GOOGLE_CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+    setTimeout(function() {
+      onGoogleSignInSuccess({ name: 'Ben Bridgewater', email: 'bbridgewater.dev@gmail.com', photoUrl: '', isPro: true });
+    }, 1200);
+    return;
+  }
+  showToast('Connect your Google Client ID to enable real sign-in.');
+  if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
+}
+function onGoogleSignInSuccess(user) {
+  saveProUser(user);
+  updateProUI();
+  closeProOverlay();
+  showToast('&#11088; Welcome to Pro, ' + (user.name.split(' ')[0] || 'there') + '!');
+  if (wxData) renderDash();
+}
+function signOutPro() {
+  if (!confirm('Sign out of Pro?\n\nYour free features continue to work. Local flight logs are kept on this device.')) return;
+  saveProUser(null);
+  updateProUI();
+  closeProOverlay();
+  showToast('Signed out of Pro');
+  if (wxData) renderDash();
+}
+function updateProUI() {
+  if (!PAID_FEATURES_ENABLED) return;
+  var pill = document.getElementById('pro-header-pill');
+  if (!pill) return;
+  pill.style.display = 'flex';
+  if (isPro() && proUser) {
+    var initials = (proUser.name || proUser.email || 'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+    pill.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>' + esc(initials) + '</span>';
+    pill.title = (proUser.name || '') + ' - Pro';
+  } else {
+    pill.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>Go Pro</span>';
+    pill.title = 'Upgrade to DroneChecker Pro';
+  }
+}
+function proUpsellStrip() {
+  if (!PAID_FEATURES_ENABLED || isPro()) return '';
+  return '<div class="pro-upsell" onclick="openProOverlay()" role="button" tabindex="0" aria-label="DroneChecker Pro">' +
+    '<div style="flex:1;"><div class="pro-upsell-t">&#11088; DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind, cloud sync &amp; fly alerts</div></div>' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>' +
+  '</div>';
+}
+function proAccountCard() {
+  if (!isPro() || !proUser) return '';
+  var initials = (proUser.name || proUser.email || 'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+  return '<div class="pro-account-card">' +
+    '<div class="pro-avatar">' + esc(initials) + '</div>' +
+    '<div style="flex:1;"><div class="pro-account-name">' + esc(proUser.name || proUser.email || 'Pro user') + '</div>' +
+    '<div class="pro-account-badge">&#11088; Pro subscriber</div></div>' +
+    '<button class="pro-signout-btn" onclick="signOutPro()">Sign out</button>' +
+  '</div>';
+}
+
 window.addEventListener('load',function(){
   checkDisclaimer();
-  loadProUser();updateProUI();
+  loadProUser(); updateProUI();
   loadDrone();loadChecklist();loadUnits();renderFavBar();
 
   var cached=loadWxCache();
@@ -2199,6 +2274,7 @@ window.addEventListener('load',function(){
   setTimeout(applyDeepLink,600);
 });
 </script>
+
 <script>
   if('serviceWorker' in navigator){
     window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});

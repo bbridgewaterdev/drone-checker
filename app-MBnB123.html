@@ -339,7 +339,31 @@
     .pro-account-name{font-size:13px;font-weight:600;color:var(--text);}
     .pro-account-badge{font-size:10px;color:#f59e0b;font-weight:600;}
     .pro-signout-btn{margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;flex-shrink:0;}
+    @media(max-width:400px){
+      .header{padding:0 10px 0 10px;gap:6px;}
+      .h-title{font-size:13px;}
+      #pro-title-badge{font-size:11px;margin-left:2px;}
+      .h-loc{font-size:10px;}
+      .h-loc #loc-name{font-size:11px;}
+      #updated-txt{font-size:9px;}
+      #refresh-btn{font-size:9px;}
+      .pro-pill{padding:2px 6px;gap:3px;margin-left:3px;}
+      .pro-pill span{font-size:9px;letter-spacing:0;}
+      .header svg[viewBox="0 0 100 100"]{width:26px;height:26px;}
+    }
+    @media(max-width:480px) and (min-width:401px){
+      .header{padding:0 12px 0 12px;gap:7px;}
+      .h-title{font-size:15px;}
+      #pro-title-badge{font-size:12px;}
+      .h-loc{font-size:11px;}
+      #updated-txt{font-size:10px;}
+      .pro-pill{padding:3px 8px;gap:3px;}
+      .pro-pill span{font-size:9px;}
+    }
   </style>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 </head>
 <body>
 <div id="disclaimer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
@@ -794,7 +818,16 @@ var UK_FRZS=[
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
 function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])selectedDrone=s;}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;updateDroneLimits();}
 function saveDrone(){var sel=document.getElementById('drone-sel');if(!sel)return;selectedDrone=sel.value;try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}updateDroneLimits();if(wxData)renderDash();}
-function updateDroneLimits(){var el=document.getElementById('drone-limits');if(el)el.textContent='Max '+spd(getDrone().windRed)+' '+spdU();}
+function updateDroneLimits(){
+  var el=document.getElementById('drone-limits');
+  if(!el)return;
+  if(selectedDrone==='custom'&&isPro()){
+    el.innerHTML='Max '+spd(getDrone().windRed)+' '+spdU()+
+      ' <button onclick="openCustomDroneEditor()" style="background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer;padding:0 0 0 4px;font-family:inherit;vertical-align:middle;" aria-label="Edit custom drone profile">&#9998; Edit</button>';
+  } else {
+    el.textContent='Max '+spd(getDrone().windRed)+' '+spdU();
+  }
+}
 function saveWxCache(data){try{localStorage.setItem('dc_wx',JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
 function loadWxCache(){try{var s=localStorage.getItem('dc_wx');if(s)return JSON.parse(s);}catch(e){}return null;}
 function saveLastLoc(lat,lng,name){try{localStorage.setItem('dc_lastloc',JSON.stringify({lat:lat,lng:lng,name:name}));}catch(e){}}
@@ -1319,26 +1352,7 @@ function acceptDisclaimer(){
   checkOnboarding();
   setTimeout(applyDeepLink,300);
 }
-function shareConditions(){
-  if(!wxData||!wxData.current){showToast('No data to share yet');return;}
-  var c=wxData.current;
-  var cond=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15,c.wind_speed_80m||0,c.wind_speed_120m||0);
-  var loc=document.getElementById('loc-name').textContent;
-  var emoji=cond.lvl==='green'?'🟢':cond.lvl==='amber'?'🟡':'🔴';
-  var info=wmoInfo(c.weather_code||0);
-  var text=
-    'DroneChecker — Flying Conditions\n'+
-    emoji+' '+cond.label+' in '+loc+'\n\n'+
-    '🌤️ '+info.desc+'\n'+
-    '💨 Wind: '+spd(c.wind_speed_10m||0)+' '+spdU()+' · Gusts: '+spd(c.wind_gusts_10m||0)+' '+spdU()+'\n'+
-    '🌡️ '+Math.round(c.temperature_2m||0)+'°C / '+Math.round((c.temperature_2m||0)*9/5+32)+'°F\n\n'+
-    '🔗 dronechecker.co.uk';
-  if(navigator.share){
-    navigator.share({text:text}).catch(function(){});
-  } else {
-    navigator.clipboard.writeText(text).then(function(){showToast('📋 Copied to clipboard');}).catch(function(){showToast('Could not share');});
-  }
-}
+/* shareConditions replaced by Pro version below */
 function startIntervals(){
   setInterval(function(){
     var updEl=document.getElementById('updated-txt');
@@ -1776,7 +1790,7 @@ function renderDash(){
     (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);rows+='<div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:var(--muted);width:28px;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:4px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="font-size:12px;font-weight:600;color:'+col+';flex-shrink:0;min-width:44px;text-align:right;">'+spd(l.v)+' '+spdU()+'</div></div>';});return rows;})()+'</div><div class="wx-info-panel">Wind speed typically increases with height as surface friction reduces. Ground conditions can feel calm while your drone faces much stronger winds at 80–120m. Always check altitude readings before climbing, especially near trees or obstacles.</div></div>'+
     '</div>'+warningsRow+'</div>'+
     '<div class="card" style="cursor:pointer;" onclick="openChecklist()"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="card-ttl" style="margin-bottom:0;">Pre-flight Checklist</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div class="cl-progress"><div class="cl-progress-bar" id="dash-cl-bar" style="width:'+getChecklistSummary().pct+'%;"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted);"><span id="dash-cl-count">'+getChecklistSummary().done+' / '+getChecklistSummary().total+' complete</span>'+(getChecklistSummary().done===getChecklistSummary().total?'<span style="color:var(--green);">✓ All done</span>':'<span>'+(getChecklistSummary().total-getChecklistSummary().done)+' remaining</span>')+'</div></div>'+
-    proUpsellStrip()+'<div class="card" style="cursor:pointer;" onclick="openRules()"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-ttl" style="margin-bottom:0;">UK Drone Law &amp; Rules</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div style="font-size:12px;color:var(--muted);margin-top:6px;">2026 Updates &amp; Restrictions</div></div>'+
+    '<div class="card" style="cursor:pointer;" onclick="openRules()"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="card-ttl" style="margin-bottom:0;">UK Drone Law &amp; Rules</div><span style="font-size:12px;color:var(--accent);font-weight:600;">View →</span></div><div style="font-size:12px;color:var(--muted);margin-top:6px;">2026 Updates &amp; Restrictions</div></div>'+
     '<div class="card"><div class="nats-card"><div style="font-size:28px;">🛩️</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;margin-bottom:3px;">CAA Drone Safety</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Official UK drone rules, registration and airspace information.</div></div><a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer">Open →</a></div></div>'+
     '<div style="margin:20px 12px 0;padding:16px;border-top:1px solid var(--border);text-align:center;">'+
     (!isIOS&&!isStandalone?'<div style="display:inline-block;margin-bottom:16px;position:relative;opacity:.5;cursor:default;"><img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" style="height:48px;"/><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;color:#f1f5f9;white-space:nowrap;backdrop-filter:blur(4px);">Coming Soon</div></div>':'')+
@@ -1803,7 +1817,7 @@ function renderDash(){
     '<span style="font-size:12px;color:var(--border);">|</span>'+
     '<a href="#" onclick="resetAllData();return false;" style="font-size:12px;color:var(--muted);text-decoration:none;">Reset Data</a>'+
     '</div>'+
-    proAccountCard()+'<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
+    proUpsellStrip()+proAccountCard()+'<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
     '</div><div style="height:14px;"></div>';
   var announcer=document.getElementById('a11y-announce');
   if(announcer)announcer.textContent=cond.label+'. '+cond.desc;
@@ -2153,7 +2167,7 @@ function goTab(id,btn){
   var tabEl=document.getElementById('tab-'+id);if(tabEl)tabEl.classList.add('on');
   if(btn){btn.classList.add('on');btn.setAttribute('aria-selected','true');}
   document.querySelectorAll('.nb').forEach(function(b){if(b!==btn)b.setAttribute('aria-selected','false');});
-  if(id==='radar')initWindMap();
+  if(id==='radar')setTimeout(function(){initWindMap();},100);
   if(id==='gh')renderGolden();
   if(id==='cl')renderChecklist();
   if(id==='rules')renderRules();
@@ -2264,6 +2278,7 @@ function handleGoogleSignIn() {
 function onGoogleSignInSuccess(user) {
   saveProUser(user);
   updateProUI();
+  initCustomDroneUI();
   closeProOverlay();
   showToast('Welcome to Pro, ' + (user.name.split(' ')[0] || 'there') + '!');
   if (wxData) renderDash();
@@ -2272,6 +2287,8 @@ function signOutPro() {
   if (!confirm('Sign out of Pro?\n\nYour free features continue to work. Local flight logs are kept on this device.')) return;
   saveProUser(null);
   updateProUI();
+  var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();
+  var cg=document.getElementById('drone-custom-group');if(cg)cg.style.display='none';
   closeProOverlay();
   showToast('Signed out of Pro');
   if (wxData) renderDash();

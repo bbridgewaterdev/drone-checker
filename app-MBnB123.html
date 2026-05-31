@@ -339,6 +339,15 @@
     .pro-account-name{font-size:13px;font-weight:600;color:var(--text);}
     .pro-account-badge{font-size:10px;color:#f59e0b;font-weight:600;}
     .pro-signout-btn{margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;flex-shrink:0;}
+
+    @media(max-width:520px){
+      .drone-bar{flex-wrap:wrap;gap:5px;padding:7px 10px;}
+      .drone-bar label{font-size:11px;}
+      .drone-bar select{font-size:12px;padding:6px 5px;min-width:0;max-width:140px;}
+      .drone-limits{font-size:10px;order:10;width:100%;padding-top:2px;border-top:1px solid var(--border);margin-top:2px;display:flex;align-items:center;gap:6px;}
+      .unit-toggle{font-size:10px;padding:7px 8px;min-height:38px;}
+      #custom-drone-btn{order:11;font-size:10px;padding:5px 7px;}
+    }
     @media(max-width:400px){
       .header{padding:0 10px 0 10px;gap:6px;}
       .h-title{font-size:13px;}
@@ -2432,36 +2441,102 @@ function initCustomDroneUI(){
 /* ── Best time to fly today (Pro) ── */
 function renderBestTimeCard(){
   if(!isPro()||!wxData||!wxData.hourly)return '';
-  var hours=wxData.hourly,now=new Date(),today=now.toDateString(),candidates=[];
+  var hours=wxData.hourly,now=new Date(),today=now.toDateString();
+  var sun=uLat&&uLng?calcSunTimes(uLat,uLng,now):null;
+
+  // Analyse all remaining hours today
+  var todayHours=[],greenCount=0,amberCount=0,redCount=0;
+  var windSum=0,gustMax=0,tempSum=0,tempCount=0;
+  var bestGoldenHour=null,bestGoldenScore=-1;
   for(var i=0;i<hours.time.length;i++){
     var t=new Date(hours.time[i]);
     if(t.toDateString()!==today||t<=now)continue;
     var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
-    var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;
+    var v=hours.visibility?hours.visibility[i]||10000:10000;
+    var wmo=hours.weather_code?hours.weather_code[i]||0:0;
     var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;
-    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
+    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
+    var w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
     var r=flyRating(w,g,v,wmo,getKpForTime(t),tp,w80,w120);
-    var score=r.lvl==='green'?3:r.lvl==='amber'?1:0;
-    if(uLat&&uLng){var st=calcSunTimes(uLat,uLng,t);if(st.goldMornS&&st.goldMornE&&t>=st.goldMornS&&t<=st.goldMornE)score+=2;if(st.goldEveS&&st.goldEveE&&t>=st.goldEveS&&t<=st.goldEveE)score+=2;}
-    candidates.push({t:t,score:score,rating:r.lvl,wind:w,gust:g});
+    var isGolden=sun&&((sun.goldMornS&&sun.goldMornE&&t>=sun.goldMornS&&t<=sun.goldMornE)||(sun.goldEveS&&sun.goldEveE&&t>=sun.goldEveS&&t<=sun.goldEveE));
+    var score=(r.lvl==="green"?3:r.lvl==="amber"?1:0)+(isGolden?2:0);
+    if(r.lvl==="green")greenCount++;
+    else if(r.lvl==="amber")amberCount++;
+    else redCount++;
+    windSum+=w;gustMax=Math.max(gustMax,g);
+    tempSum+=tp;tempCount++;
+    todayHours.push({t:t,rating:r.lvl,wind:w,gust:g,temp:tp,wmo:wmo,score:score,isGolden:isGolden});
+    if(isGolden&&score>bestGoldenScore){bestGoldenScore=score;bestGoldenHour={t:t,rating:r.lvl,wind:w};}
   }
-  if(!candidates.length)return '';
+  if(!todayHours.length)return '';
+
+  // Find best consecutive 2-hour block
   var best=null,bestScore=-1;
-  for(var j=0;j<candidates.length-1;j++){var s=candidates[j].score+(candidates[j+1]?candidates[j+1].score:0);if(s>bestScore){bestScore=s;best=candidates[j];}}
-  if(!best)return '';
-  var col=best.rating==='green'?'var(--green)':best.rating==='amber'?'var(--amber)':'var(--red)';
-  var endH=new Date(best.t.getTime()+7200000);
-  var isGolden=bestScore>=5;
+  for(var j=0;j<todayHours.length-1;j++){
+    var s=todayHours[j].score+(todayHours[j+1]?todayHours[j+1].score:0);
+    if(s>bestScore){bestScore=s;best=todayHours[j];}
+  }
+
+  // Wind trend: is wind easing or rising through the day?
+  var firstThird=todayHours.slice(0,Math.ceil(todayHours.length/3));
+  var lastThird=todayHours.slice(Math.floor(todayHours.length*2/3));
+  var avgFirst=firstThird.reduce(function(s,h){return s+h.wind;},0)/(firstThird.length||1);
+  var avgLast=lastThird.reduce(function(s,h){return s+h.wind;},0)/(lastThird.length||1);
+  var windTrend=avgLast-avgFirst;
+  var trendStr=windTrend>3?"easing later in the day":windTrend<-3?"picking up later in the day":"staying fairly consistent all day";
+
+  // Temperature note
+  var avgTemp=tempCount?Math.round(tempSum/tempCount):null;
+  var tempNote="";
+  if(avgTemp!==null){
+    if(avgTemp<5)tempNote=" It will be cold — battery performance may be reduced.";
+    else if(avgTemp>28)tempNote=" It will be warm — watch for overheating.";
+  }
+
+  // Overall day verdict
+  var total=todayHours.length;
+  var verdictLine,verdictCol;
+  if(greenCount>=Math.floor(total*0.6)){
+    verdictLine="Most of the day looks good to fly.";verdictCol="var(--green)";
+  } else if(greenCount+amberCount>=Math.floor(total*0.5)){
+    verdictLine="Mixed conditions today — some good windows available.";verdictCol="var(--amber)";
+  } else {
+    verdictLine="Challenging conditions for most of today.";verdictCol="var(--red)";
+  }
+
+  // Build narrative — contextual insights only, no competing time recommendation
+  var narrative='';
+  // Wind trend
+  narrative+='Wind is '+trendStr+'.';
+  // Morning vs afternoon
+  var morningHours=todayHours.filter(function(h){return h.t.getHours()<13;});
+  var afternoonHours=todayHours.filter(function(h){return h.t.getHours()>=13;});
+  var morningGreen=morningHours.filter(function(h){return h.rating==='green';}).length;
+  var afternoonGreen=afternoonHours.filter(function(h){return h.rating==='green';}).length;
+  if(morningHours.length&&afternoonHours.length){
+    if(morningGreen>afternoonGreen)narrative+=' Conditions look better in the morning.';
+    else if(afternoonGreen>morningGreen)narrative+=' Conditions look better in the afternoon.';
+  }
+  // Golden hour insight
+  if(bestGoldenHour&&bestGoldenHour.rating==='green'){
+    narrative+=' Golden hour around '+pad(bestGoldenHour.t.getHours())+':00 looks flyable — good for photography.';
+  } else if(bestGoldenHour&&bestGoldenHour.rating==='amber'){
+    narrative+=' Golden hour around '+pad(bestGoldenHour.t.getHours())+':00 is marginal — fly with care.';
+  } else if(bestGoldenHour){
+    narrative+=' Golden hour conditions look poor today.';
+  } else {
+    narrative+=' No golden hour overlap today.';
+  }
+  // Temperature note
+  narrative+=tempNote;
+
+
   return '<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);">'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
-    '<div class="card-ttl" style="margin-bottom:0;">Best time to fly today</div>'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'+
+    '<div class="card-ttl" style="margin-bottom:0;">Today\'s conditions summary</div>'+
     '<span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div>'+
-    '<div style="display:flex;align-items:center;gap:12px;">'+
-    '<div style="font-size:28px;font-weight:800;color:'+col+';">'+pad(best.t.getHours())+':00</div>'+
-    '<div style="font-size:13px;color:var(--muted);">&ndash;</div>'+
-    '<div style="font-size:28px;font-weight:800;color:'+col+';">'+pad(endH.getHours())+':00</div>'+
-    '<div style="flex:1;padding-left:4px;"><div style="font-size:12px;font-weight:600;color:'+col+';">'+(best.rating==='green'?'Good to fly':best.rating==='amber'?'Fly with care':'Avoid')+(isGolden?' &middot; Golden hour overlap':'')+' </div>'+
-    '<div style="font-size:11px;color:var(--muted);">Wind '+spd(best.wind)+' '+spdU()+' &middot; Gusts '+spd(best.gust)+' '+spdU()+'</div></div></div></div>';
+    '<div style="font-size:13px;font-weight:600;color:'+verdictCol+';margin-bottom:8px;">'+verdictLine+'</div>'+
+    '<div style="font-size:12px;color:var(--muted);line-height:1.7;">'+narrative+'</div>';
 }
 
 /* ── Historical flight stats (Pro) ── */

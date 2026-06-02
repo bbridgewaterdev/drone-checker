@@ -1031,16 +1031,42 @@ function useMyLocation(){
   document.getElementById('serr').style.display='none';
   document.getElementById('dash').innerHTML='<div class="skel skel-cond"></div><div class="skel skel-card"></div>';
   showToast('Finding your location...');
-  if(!navigator.geolocation){showToast('Location not supported');return;}
+  if(!navigator.geolocation){
+    showToast('Location not supported');
+    // Restore dashboard if we had data, otherwise fetch at last known coords
+    if(wxData){renderDash();renderFc();renderGolden();}
+    else if(uLat&&uLng){fetchAll();}
+    return;
+  }
   navigator.geolocation.getCurrentPosition(
     function(p){
       uLat=p.coords.latitude;uLng=p.coords.longitude;
-      // Show something immediately while Nominatim resolves the real name
       var locEl=document.getElementById('loc-name');
       if(locEl)locEl.textContent='Your Location';
       revGeo();fetchAll();
     },
-    function(){showToast('Could not get location');}
+    function(err){
+      // GPS failed — fall back to cached last location silently if available
+      var lastLoc=loadLastLoc();
+      if(lastLoc){
+        uLat=lastLoc.lat;uLng=lastLoc.lng;
+        var locEl=document.getElementById('loc-name');
+        if(locEl)locEl.textContent=lastLoc.name;
+        fetchAll();
+      } else if(wxData){
+        // No cached location but have weather data — restore dashboard as-is
+        renderDash();renderFc();renderGolden();
+        showToast('Could not get location — try searching a postcode');
+      } else if(uLat&&uLng){
+        // Have coords from startup — fetch weather at those
+        fetchAll();
+      } else {
+        // Nothing at all — show error
+        document.getElementById('dash').innerHTML='';
+        showToast('Could not get location — try searching a postcode');
+      }
+    },
+    {timeout:8000,maximumAge:60000,enableHighAccuracy:false}
   );
 }
 function loadFavs(){try{return JSON.parse(localStorage.getItem('dc_favs'))||[];}catch(e){return[];}}

@@ -777,7 +777,6 @@ var DRONES={
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
 var APP_VERSION='1.5.0';
-var TOMORROW_API_KEY='IrYIbAI1lodqewDqE6aqxQ2fslGbQS32';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -1527,155 +1526,32 @@ function renderKpCard(){
   var card=document.getElementById('kp-card');if(!card)return;
   card.innerHTML='<div class="card-ttl">Geomagnetic Activity — KP Index</div><div class="kp-row"><div class="kp-num" style="color:'+col+';">'+kp.toFixed(1)+'</div><div><div class="kp-lbl" style="color:'+col+';">'+emoji+' '+label+'</div><div class="kp-desc">'+desc+'</div></div></div><div class="kp-bar-bg"><div class="kp-bar" style="width:'+bar+'%;background:'+col+';"></div></div><div class="kp-scale"><span>0 — Quiet</span><span>4 — Storm</span><span>9 — Extreme</span></div>';
 }
-// ── Tomorrow.io weather code → WMO equivalent ─────────────────────────────
-// Tomorrow.io uses codes 1000-8000; we map to WMO so wmoInfo/flyRating work unchanged.
-function tomorrowCodeToWmo(code){
-  var map={
-    1000:0,   // Clear, Sunny
-    1001:3,   // Cloudy
-    1100:1,   // Mostly Clear
-    1101:2,   // Partly Cloudy
-    1102:2,   // Mostly Cloudy
-    2000:45,  // Fog
-    2100:45,  // Light Fog
-    3000:0,   // Light Wind  (no WMO equiv — treat as clear)
-    3001:0,   // Wind
-    3002:0,   // Strong Wind
-    4000:51,  // Drizzle
-    4001:63,  // Rain
-    4200:61,  // Light Rain
-    4201:65,  // Heavy Rain
-    5000:73,  // Snow
-    5001:85,  // Flurries
-    5100:71,  // Light Snow
-    5101:75,  // Heavy Snow
-    6000:56,  // Freezing Drizzle
-    6001:67,  // Freezing Rain
-    6200:56,  // Light Freezing Rain
-    6201:67,  // Heavy Freezing Rain
-    7000:77,  // Ice Pellets
-    7101:77,  // Heavy Ice Pellets
-    7102:77,  // Light Ice Pellets
-    8000:95   // Thunderstorm
-  };
-  return map[code]!==undefined?map[code]:0;
-}
-
-// ── Fetch weather from Tomorrow.io and normalise into wxData shape ─────────
-function fetchTomorrow(lat,lng){
-  // Two parallel requests: realtime (current) + forecast (hourly + daily)
-  var base='https://api.tomorrow.io/v4/weather/';
-  var params='?location='+lat+','+lng+'&units=metric&apikey='+TOMORROW_API_KEY;
-  var realtimeUrl =base+'realtime'+params;
-  var forecastUrl =base+'forecast'+params+'&timesteps=1h,1d';
-  return Promise.all([
-    fetchWithTimeout(realtimeUrl,10000).then(function(r){if(!r.ok)throw new Error('realtime HTTP '+r.status);return r.json();}),
-    fetchWithTimeout(forecastUrl,10000).then(function(r){if(!r.ok)throw new Error('forecast HTTP '+r.status);return r.json();})
-  ]).then(function(results){
-    var rt=results[0],fc=results[1];
-    var cv=rt.data.values;
-    // Derive wind at 80m/120m: Tomorrow.io only provides surface wind, so we apply
-    // a conservative wind-shear exponent (α=0.143, standard for open terrain).
-    // This matches the approach used by Open-Meteo and is adequate for fly-rating.
-    var windSurface=cv.windSpeed||0;
-    var wind80 =parseFloat((windSurface*Math.pow(80/10,0.143)).toFixed(1));
-    var wind120=parseFloat((windSurface*Math.pow(120/10,0.143)).toFixed(1));
-
-    // ── current ─────────────────────────────────────────────────────────────
-    var current={
-      temperature_2m:      Math.round(cv.temperature*10)/10,
-      apparent_temperature: Math.round(cv.temperatureApparent*10)/10,
-      relative_humidity_2m: Math.round(cv.humidity||0),
-      wind_speed_10m:      Math.round(cv.windSpeed||0),
-      // Tomorrow.io realtime does return windGust, but apply a floor of 1.3× windSpeed
-      // to avoid underreporting gusts on breezy days with smooth model output
-      wind_gusts_10m:      Math.max(Math.round(cv.windGust||0), Math.round((cv.windSpeed||0)*1.3)),
-      wind_direction_10m:  Math.round(cv.windDirection||0),
-      surface_pressure:    Math.round(cv.pressureSurfaceLevel||1013),
-      visibility:          Math.round((cv.visibility||10)*1000),
-      cloud_cover:         Math.round(cv.cloudCover||0),
-      weather_code:        tomorrowCodeToWmo(cv.weatherCode),
-      wind_speed_80m:      wind80,
-      wind_speed_120m:     wind120
-    };
-
-    // ── hourly ──────────────────────────────────────────────────────────────
-    var hourly={time:[],temperature_2m:[],weather_code:[],wind_speed_10m:[],
-      wind_gusts_10m:[],visibility:[],precipitation_probability:[],
-      wind_speed_80m:[],wind_speed_120m:[]};
-    var hIntervals=(fc.timelines&&fc.timelines.hourly)||[];
-    hIntervals.forEach(function(h){
-      var v=h.values;
-      var ws=v.windSpeed||0;
-      hourly.time.push(h.time);
-      hourly.temperature_2m.push(Math.round((v.temperature||15)*10)/10);
-      hourly.weather_code.push(tomorrowCodeToWmo(v.weatherCode||1000));
-      hourly.wind_speed_10m.push(Math.round(ws));
-      // Tomorrow.io forecast doesn't provide windGust at hourly resolution.
-      // Derive using 1.4× gust factor — standard for UK open terrain (conservative).
-      // Falls back to actual windGust value if Tomorrow.io ever starts returning it.
-      var derivedGust=Math.round(Math.max(v.windGust||0, ws*1.4));
-      hourly.wind_gusts_10m.push(derivedGust);
-      hourly.visibility.push(Math.round((v.visibility||10)*1000));
-      hourly.precipitation_probability.push(Math.round(v.precipitationProbability||0));
-      hourly.wind_speed_80m.push(parseFloat((ws*Math.pow(80/10,0.143)).toFixed(1)));
-      hourly.wind_speed_120m.push(parseFloat((ws*Math.pow(120/10,0.143)).toFixed(1)));
-    });
-
-    // ── daily ───────────────────────────────────────────────────────────────
-    var daily={time:[],weather_code:[],temperature_2m_max:[],temperature_2m_min:[],
-      wind_speed_10m_max:[],wind_gusts_10m_max:[]};
-    var dIntervals=(fc.timelines&&fc.timelines.daily)||[];
-    dIntervals.forEach(function(d){
-      var v=d.values;
-      daily.time.push(d.time);
-      daily.weather_code.push(tomorrowCodeToWmo(v.weatherCodeMax||1000));
-      daily.temperature_2m_max.push(v.temperatureMax||15);
-      daily.temperature_2m_min.push(v.temperatureMin||10);
-      // Use windSpeedMax (not windSpeedAvg) for daily worst-case fly rating
-      daily.wind_speed_10m_max.push(Math.round(v.windSpeedMax||v.windSpeedAvg||0));
-      daily.wind_gusts_10m_max.push(Math.round(v.windGustMax||0));
-    });
-
-    return {current:current,hourly:hourly,daily:daily};
-  });
-}
-
-// ── Open-Meteo fallback — same wxData shape, no transformation needed ────────
+// ── Fetch weather from Open-Meteo (primary source) ───────────────────────
 function fetchOpenMeteo(lat,lng){
   var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+
     '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,surface_pressure,visibility,cloud_cover,wind_speed_80m,wind_speed_120m'+
     '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility,precipitation_probability,wind_speed_80m,wind_speed_120m'+
     '&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max'+
     '&wind_speed_unit=kmh&timezone=auto&forecast_days=8';
-  return fetchWithTimeout(url,10000)
+  return fetchWithTimeout(url,12000)
     .then(function(r){if(!r.ok)throw new Error('Open-Meteo HTTP '+r.status);return r.json();});
 }
 
 function fetchAll(){
   var cached=loadWxCache();
   if(cached){wxData=cached.data;hideSplash();renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}
-  fetchTomorrow(uLat,uLng)
+  fetchOpenMeteo(uLat,uLng)
     .then(function(data){
       wxData=data;lastUpdated=new Date();saveWxCache(data);hideOfflineBanner();hideSplash();
       renderDash();renderFc();renderGolden();
       fetchKp();
     })
     .catch(function(err){
-      console.warn('Tomorrow.io failed, falling back to Open-Meteo:',err);
-      fetchOpenMeteo(uLat,uLng)
-        .then(function(data){
-          wxData=data;lastUpdated=new Date();saveWxCache(data);hideOfflineBanner();hideSplash();
-          renderDash();renderFc();renderGolden();
-          fetchKp();
-        })
-        .catch(function(err2){
-          console.warn('Open-Meteo fallback also failed:',err2);
-          hideSplash();
-          if(!wxData)document.getElementById('dash').innerHTML=
-            '<div class="err">Could not load weather data.<br><br>'+
-            '<button onclick="fetchAll()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
-        });
+      console.warn('Open-Meteo fetch failed:',err);
+      hideSplash();
+      if(!wxData)document.getElementById('dash').innerHTML=
+        '<div class="err">Could not load weather data.<br><br>'+
+        '<button onclick="fetchAll()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
     });
 }
 function hideSplash(){var s=document.getElementById('splash');if(s){s.classList.add('hidden');setTimeout(function(){s.style.display='none';},300);}}
@@ -2544,8 +2420,7 @@ function prefetchSavedLocations(){
   var favs=loadFavs();if(!favs.length)return;
   var fetched=0,total=favs.length;
   favs.forEach(function(fav){
-    fetchTomorrow(fav.lat,fav.lng)
-      .catch(function(){return fetchOpenMeteo(fav.lat,fav.lng);})
+    fetchOpenMeteo(fav.lat,fav.lng)
       .then(function(data){
         try{
           localStorage.setItem('dc_wx_fav_'+encodeURIComponent(fav.name),JSON.stringify({ts:Date.now(),data:data}));
@@ -2572,7 +2447,49 @@ function getHazardType(tags){
   return null;
 }
 function renderRestrictionsTab(){var el=document.getElementById('tab-restrict');if(!el)return;if(!isPro()){el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Restrictions Map</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Schools, railways, National Trust land and more.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';return;}if(restrictInitDone){if(restrictMap)restrictMap.invalidateSize();return;}restrictInitDone=true;var legendHtml=HAZARD_TYPES.map(function(h){var onch='toggleHazardLayer('+JSON.stringify(h.key)+',this.checked)';return'<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 0;"><input type="checkbox" checked onchange="'+onch+'" style="accent-color:'+h.color+';width:13px;height:13px;cursor:pointer;flex-shrink:0;"><span style="width:10px;height:10px;border-radius:2px;background:'+h.color+';flex-shrink:0;opacity:.8;display:inline-block;"></span><span style="font-size:10px;color:var(--text);">'+h.label+'</span></label>';}).join('');el.innerHTML='<div style="background:rgba(239,68,68,.06);border-bottom:1px solid rgba(239,68,68,.15);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div style="flex:1;font-size:11px;color:var(--muted);">Ground hazards only - not a substitute for official airspace checks.</div><button onclick="openNotamLink()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:#ef4444;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">NOTAMs &#8599;</button></div><div id="restrict-map-el" style="flex:1;min-height:0;"></div><div style="background:var(--bg2);border-top:1px solid var(--border);padding:8px 12px;flex-shrink:0;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Hazard layers</span><span id="restrict-zoom-warn" style="font-size:10px;color:var(--amber);display:none;">Zoom in to see hazards</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px;">'+legendHtml+'</div></div>';setTimeout(function(){initRestrictMap();showToast('Zoom in on the map to load hazard data');},100);}
-function initRestrictMap(){var mapEl=document.getElementById('restrict-map-el');if(!mapEl)return;if(restrictMap){restrictMap.invalidateSize();return;}var lat=uLat||51.5,lng=uLng||-0.1;restrictMap=L.map('restrict-map-el',{center:[lat,lng],zoom:13,zoomControl:true,attributionControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(restrictMap);restrictHazardsLayer=L.layerGroup().addTo(restrictMap);if(uLat&&uLng){L.circleMarker([uLat,uLng],{radius:7,color:'#06b6d4',fillColor:'#06b6d4',fillOpacity:1,weight:2,interactive:false}).addTo(restrictMap);}restrictMap.on('moveend',fetchGroundHazards);restrictMap.on('zoomend',fetchGroundHazards);setTimeout(function(){restrictMap.invalidateSize();},200);setTimeout(function(){fetchGroundHazards();loadNatsFrz();},800);}
+function initRestrictMap(){var mapEl=document.getElementById('restrict-map-el');if(!mapEl)return;if(restrictMap){restrictMap.invalidateSize();return;}var lat=uLat||51.5,lng=uLng||-0.1;restrictMap=L.map('restrict-map-el',{center:[lat,lng],zoom:13,zoomControl:true,attributionControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(restrictMap);restrictHazardsLayer=L.layerGroup().addTo(restrictMap);if(uLat&&uLng){L.circleMarker([uLat,uLng],{radius:7,color:'#06b6d4',fillColor:'#06b6d4',fillOpacity:1,weight:2,interactive:false}).addTo(restrictMap);}restrictMap.on('moveend',fetchGroundHazards);restrictMap.on('zoomend',fetchGroundHazards);
+  // ── Locate button overlay ──
+  var locBtn=document.createElement('button');
+  locBtn.id='restrict-locate-btn';
+  locBtn.title='Go to my location';
+  locBtn.setAttribute('aria-label','Centre map on my location');
+  locBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>';
+  locBtn.style.cssText='position:absolute;bottom:60px;right:10px;z-index:1000;width:36px;height:36px;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(241,245,249,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:color .15s,border-color .15s;';
+  locBtn.onclick=locateOnRestrictMap;
+  mapEl.style.position='relative';
+  mapEl.appendChild(locBtn);
+  setTimeout(function(){restrictMap.invalidateSize();},200);setTimeout(function(){fetchGroundHazards();loadNatsFrz();},800);}
+function locateOnRestrictMap(){
+  var btn=document.getElementById('restrict-locate-btn');
+  if(!restrictMap)return;
+  // Spin the icon while locating
+  if(btn){btn.style.color='var(--accent)';btn.style.borderColor='rgba(6,182,212,.5)';}
+  function panTo(lat,lng,fromGps){
+    if(btn){btn.style.color='rgba(241,245,249,.85)';btn.style.borderColor='rgba(255,255,255,.12)';}
+    restrictMap.flyTo([lat,lng],14,{duration:0.8});
+    // Drop a brief pulse marker
+    var pulse=L.circleMarker([lat,lng],{radius:10,color:'#06b6d4',fillColor:'#06b6d4',fillOpacity:0.25,weight:2,interactive:false}).addTo(restrictMap);
+    setTimeout(function(){if(restrictMap)restrictMap.removeLayer(pulse);},2500);
+    if(fromGps)showToast('📍 Centred on your GPS position');
+    else showToast('📍 Centred on '+document.getElementById('loc-name').textContent);
+  }
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      function(p){panTo(p.coords.latitude,p.coords.longitude,true);},
+      function(){
+        // GPS denied/failed — fall back to searched location
+        if(uLat&&uLng){panTo(uLat,uLng,false);}
+        else{if(btn){btn.style.color='rgba(241,245,249,.85)';btn.style.borderColor='rgba(255,255,255,.12)';}showToast('No location available');}
+      },
+      {timeout:6000,maximumAge:30000}
+    );
+  } else if(uLat&&uLng){
+    panTo(uLat,uLng,false);
+  } else {
+    if(btn){btn.style.color='rgba(241,245,249,.85)';btn.style.borderColor='rgba(255,255,255,.12)';}
+    showToast('No location available');
+  }
+}
 function fetchGroundHazards(){if(!restrictMap||!restrictHazardsLayer)return;var zoom=restrictMap.getZoom();var warn=document.getElementById('restrict-zoom-warn');if(zoom<11){if(warn){warn.style.display='';warn.textContent='Zoom in further to see hazards (current zoom: '+Math.round(zoom)+')';}restrictHazardsLayer.clearLayers();return;}if(warn)warn.style.display='none';var bounds=restrictMap.getBounds();var bbox=bounds.getSouth()+','+bounds.getWest()+','+bounds.getNorth()+','+bounds.getEast();var queryParts=[];HAZARD_TYPES.forEach(function(h){if(activeHazardKeys[h.key]){h.query.split(';').forEach(function(q){if(q.trim())queryParts.push(q.trim()+'('+bbox+');');});}});if(!queryParts.length){restrictHazardsLayer.clearLayers();return;}var query='[out:json][timeout:20];(\n'+queryParts.join('\n')+'\n);\nout body;\n>;\nout skel qt;';var OVERPASS_ENDPOINTS=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];function tryOverpass(idx){if(idx>=OVERPASS_ENDPOINTS.length){console.warn('All Overpass endpoints failed');return;}var controller=new AbortController();var tid=setTimeout(function(){controller.abort();},12000);fetch(OVERPASS_ENDPOINTS[idx]+'?data='+encodeURIComponent(query),{signal:controller.signal}).then(function(r){clearTimeout(tid);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(data){restrictHazardsLayer.clearLayers();if(typeof osmtogeojson==='undefined'){setTimeout(fetchGroundHazards,1000);return;}var geojson=osmtogeojson(data);L.geoJSON(geojson,{style:function(feature){var p=feature.properties||{};var tags=p.tags||p;var h=getHazardType(tags);if(!h)return{color:'#999',weight:1,fillOpacity:.15};return{color:h.color,weight:h.key==='railway'?4:2,fillColor:h.fill||h.color,fillOpacity:h.fill?.25:0,opacity:.85};},onEachFeature:function(feature,layer){var p=feature.properties||{};var tags=p.tags||p;var h=getHazardType(tags);var name=tags.name||tags.operator||(h?h.label:'Unknown');var title=h?h.label:'Ground Restriction';var note=h?h.note:'Check local rules before flying.';layer.bindPopup('<strong style=\"color:'+(h?h.color:'#999')+';\">'  +esc(title)+'</strong><br><span style=\"font-size:12px;\">'  +esc(name)+'</span><br><span style=\"font-size:11px;color:#888;line-height:1.5;\">'  +note+'</span>');}}).addTo(restrictHazardsLayer);}).catch(function(err){clearTimeout(tid);console.warn('Overpass endpoint '+idx+' failed:',err.message);setTimeout(function(){tryOverpass(idx+1);},1500);});}tryOverpass(0);}
 function getHazardType(tags){if(tags.amenity==='school')return HAZARD_TYPES[0];if(tags.railway==='rail')return HAZARD_TYPES[1];if((tags.operator||'').indexOf('National Trust')>=0)return HAZARD_TYPES[2];if(tags.amenity==='prison')return HAZARD_TYPES[3];if(tags.landuse==='military')return HAZARD_TYPES[4];if(tags.amenity==='hospital')return HAZARD_TYPES[5];if(tags.leisure==='nature_reserve')return HAZARD_TYPES[6];if(tags.historic==='monument'||tags.historic==='castle')return HAZARD_TYPES[7];if(tags.amenity==='police')return HAZARD_TYPES[8];return null;}
 var natsFrzLayer=null,natsFilesLoaded=false;

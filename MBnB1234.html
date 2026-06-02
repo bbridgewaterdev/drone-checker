@@ -2234,49 +2234,79 @@ function renderRestrictionsTab(){var el=document.getElementById('tab-restrict');
 function initRestrictMap(){var mapEl=document.getElementById('restrict-map-el');if(!mapEl)return;if(restrictMap){restrictMap.invalidateSize();return;}var lat=uLat||51.5,lng=uLng||-0.1;restrictMap=L.map('restrict-map-el',{center:[lat,lng],zoom:13,zoomControl:true,attributionControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(restrictMap);restrictHazardsLayer=L.layerGroup().addTo(restrictMap);if(uLat&&uLng){L.circleMarker([uLat,uLng],{radius:7,color:'#06b6d4',fillColor:'#06b6d4',fillOpacity:1,weight:2,interactive:false}).addTo(restrictMap);}restrictMap.on('moveend',fetchGroundHazards);restrictMap.on('zoomend',fetchGroundHazards);setTimeout(function(){restrictMap.invalidateSize();},200);setTimeout(function(){fetchGroundHazards();loadNatsFrz();},800);}
 function fetchGroundHazards(){if(!restrictMap||!restrictHazardsLayer)return;var zoom=restrictMap.getZoom();var warn=document.getElementById('restrict-zoom-warn');if(zoom<11){if(warn){warn.style.display='';warn.textContent='Zoom in further to see hazards (current zoom: '+Math.round(zoom)+')';}restrictHazardsLayer.clearLayers();return;}if(warn)warn.style.display='none';var bounds=restrictMap.getBounds();var bbox=bounds.getSouth()+','+bounds.getWest()+','+bounds.getNorth()+','+bounds.getEast();var queryParts=[];HAZARD_TYPES.forEach(function(h){if(activeHazardKeys[h.key]){h.query.split(';').forEach(function(q){if(q.trim())queryParts.push(q.trim()+'('+bbox+');');});}});if(!queryParts.length){restrictHazardsLayer.clearLayers();return;}var query='[out:json][timeout:20];(\n'+queryParts.join('\n')+'\n);\nout body;\n>;\nout skel qt;';fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(query)).then(function(r){return r.json();}).then(function(data){restrictHazardsLayer.clearLayers();if(typeof osmtogeojson==='undefined'){setTimeout(fetchGroundHazards,1000);return;}var geojson=osmtogeojson(data);L.geoJSON(geojson,{style:function(feature){var tags=feature.properties.tags||{};var h=getHazardType(tags);if(!h)return{color:'#999',weight:1,fillOpacity:.15};return{color:h.color,weight:h.key==='railway'?4:2,fillColor:h.fill||h.color,fillOpacity:h.fill?.25:0,opacity:.85};},onEachFeature:function(feature,layer){var tags=feature.properties.tags||{};var h=getHazardType(tags);var name=tags.name||tags.operator||'Unnamed';var title=h?h.label:'Ground Restriction';var note=h?h.note:'Check local rules before flying.';layer.bindPopup('<strong style="color:'+(h?h.color:'#999')+';">'+esc(title)+'</strong><br><span style="font-size:12px;">'+esc(name)+'</span><br><span style="font-size:11px;color:#888;line-p:1.5;">'+note+'</span>');}}).addTo(restrictHazardsLayer);}).catch(function(err){console.warn('Overpass error:',err);showToast('Could not load hazard data');});}
 function getHazardType(tags){if(tags.amenity==='school')return HAZARD_TYPES[0];if(tags.railway==='rail')return HAZARD_TYPES[1];if((tags.operator||'').indexOf('National Trust')>=0)return HAZARD_TYPES[2];if(tags.amenity==='prison')return HAZARD_TYPES[3];if(tags.landuse==='military')return HAZARD_TYPES[4];if(tags.amenity==='hospital')return HAZARD_TYPES[5];if(tags.leisure==='nature_reserve')return HAZARD_TYPES[6];if(tags.historic==='monument'||tags.historic==='castle')return HAZARD_TYPES[7];if(tags.amenity==='police')return HAZARD_TYPES[8];return null;}
-var natsFrzLayer=null;
+var natsFrzLayer=null,natsFilesLoaded=false;
 function loadNatsFrz(){
-  if(natsFrzLayer||!restrictMap)return;
+  if(natsFilesLoaded||!restrictMap)return;
+  natsFilesLoaded=true;
+
+  // Helper: style by type
+  function styleFor(color,fillOpacity){
+    return{color:color,weight:2,fillColor:color,fillOpacity:fillOpacity,opacity:0.9};
+  }
+  // Helper: popup
+  function bindPopup(layer,name,typeLabel,color){
+    layer.bindPopup(
+      '<strong style="color:'+color+';">'+esc(name)+'</strong>'+
+      '<br><span style="font-size:11px;color:'+color+';font-weight:600;">'+typeLabel+'</span>'
+    );
+  }
+
+  // 1. FRZ (red)
   fetch('/uas_frz.geojson')
-    .then(function(r){
-      if(!r.ok)throw new Error('FRZ file not found');
-      return r.json();
-    })
+    .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
     .then(function(data){
       natsFrzLayer=L.geoJSON(data,{
-        style:function(feature){
-          var name=(feature.properties&&(feature.properties.name||feature.properties.Name||''))||'';
-          var nameLower=name.toLowerCase();
-          if(nameLower.indexOf('frz')>=0||nameLower.indexOf('flight restriction')>=0){
-            return{color:'#ef4444',weight:2,fillColor:'#ef4444',fillOpacity:0.15,opacity:0.9};
-          }
-          if(nameLower.indexOf('danger')>=0||nameLower.indexOf('edr')>=0){
-            return{color:'#f97316',weight:2,fillColor:'#f97316',fillOpacity:0.1,opacity:0.8};
-          }
-          if(nameLower.indexOf('prohibited')>=0||nameLower.indexOf('egp')>=0){
-            return{color:'#7c3aed',weight:2,fillColor:'#7c3aed',fillOpacity:0.15,opacity:0.9};
-          }
-          if(nameLower.indexOf('restricted')>=0||nameLower.indexOf('egr')>=0){
-            return{color:'#f59e0b',weight:2,fillColor:'#f59e0b',fillOpacity:0.1,opacity:0.8};
-          }
-          return{color:'#ef4444',weight:1.5,fillColor:'#ef4444',fillOpacity:0.1,opacity:0.7};
-        },
+        style:function(){return styleFor('#ef4444',0.15);},
         onEachFeature:function(feature,layer){
           var p=feature.properties||{};
-          var name=p.name||p.Name||p.designation||'Unknown Restriction';
-          var desc=p.description||p.Description||'';
-          layer.bindPopup(
-            '<strong style="color:#ef4444;">'+esc(name)+'</strong>'+
-            (desc?'<br><span style="font-size:11px;color:#888;">'+esc(desc.substring(0,200))+'</span>':'')+
-            '<br><span style="font-size:11px;color:#ef4444;font-weight:600;">Official NATS FRZ/Restriction</span>'
-          );
+          var name=p.name||p.Name||'Flight Restriction Zone';
+          bindPopup(layer,name,'Flight Restriction Zone (FRZ)','#ef4444');
         }
       }).addTo(restrictMap);
-      showToast('NATS airspace restrictions loaded');
-    })
-    .catch(function(e){
-      console.log('NATS FRZ not loaded:',e.message,'- add uas_frz.geojson to your repo');
-    });
+    }).catch(function(){});
+
+  // 2. Prohibited (purple)
+  fetch('/Prohibited.geojson')
+    .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
+    .then(function(data){
+      L.geoJSON(data,{
+        style:function(){return styleFor('#7c3aed',0.15);},
+        onEachFeature:function(feature,layer){
+          var p=feature.properties||{};
+          var name=p.name||p.Name||'Prohibited Area';
+          bindPopup(layer,name,'Prohibited Area','#7c3aed');
+        }
+      }).addTo(restrictMap);
+    }).catch(function(){});
+
+  // 3. Danger (orange)
+  fetch('/Danger.geojson')
+    .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
+    .then(function(data){
+      L.geoJSON(data,{
+        style:function(){return styleFor('#f97316',0.1);},
+        onEachFeature:function(feature,layer){
+          var p=feature.properties||{};
+          var name=p.name||p.Name||'Danger Area';
+          bindPopup(layer,name,'Danger Area','#f97316');
+        }
+      }).addTo(restrictMap);
+    }).catch(function(){});
+
+  // 4. Restricted — EGR zones (amber)
+  fetch('/Restricted_drone.geojson')
+    .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
+    .then(function(data){
+      L.geoJSON(data,{
+        style:function(){return styleFor('#f59e0b',0.1);},
+        onEachFeature:function(feature,layer){
+          var p=feature.properties||{};
+          var name=p.Name||p.name||'Restricted Area';
+          bindPopup(layer,name,'Restricted Area (EGR)','#f59e0b');
+        }
+      }).addTo(restrictMap);
+      showToast('NATS airspace loaded');
+    }).catch(function(){});
 }
 function toggleHazardLayer(key,enabled){activeHazardKeys[key]=enabled;fetchGroundHazards();}
 function openNotamLink(){window.open('https://nats-uk.ead-it.com/cms-nats/opencms/en/News/Notams/','_blank','noopener,noreferrer');}

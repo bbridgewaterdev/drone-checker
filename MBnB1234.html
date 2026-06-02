@@ -2252,7 +2252,7 @@ function loadNatsFrz(){
   }
 
   // 1. FRZ (red)
-  fetch('/uas_frz.geojson')
+  fetch('/restricted_drone.geojson')
     .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
     .then(function(data){
       natsFrzLayer=L.geoJSON(data,{

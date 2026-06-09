@@ -230,7 +230,10 @@
     .log-empty-icon{font-size:36px;margin-bottom:12px;}
     .log-count{font-size:12px;color:var(--muted);padding:8px 12px 0;}
     .disclaimer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overscroll-behavior:none;}
-    .disclaimer-sheet{background:var(--bg2);border-radius:16px;padding:28px 20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);}
+    .disclaimer-sheet{background:var(--bg2);border-radius:16px;padding:24px 20px 20px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;border:1px solid var(--border);-webkit-overflow-scrolling:touch;}
+    @media(max-height:680px){.disclaimer-sheet{padding:16px 16px 16px;max-height:92vh;border-radius:12px;}}
+    @media(max-height:680px){.disclaimer-icon{display:none;}.disclaimer-title{margin-bottom:4px;}.disclaimer-sub{margin-bottom:12px;}.disclaimer-box{margin-bottom:12px;padding:10px;}.disclaimer-check{margin-bottom:14px;}}
+    @keyframes bounceY{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
     .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
     .disclaimer-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;}
     .disclaimer-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.5;}
@@ -304,10 +307,11 @@
       }
     }
     .onboard-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.95);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
-    .onboard-sheet{background:var(--bg2);border-radius:20px;padding:32px 24px 24px;width:100%;max-width:380px;border:1px solid var(--border);text-align:center;}
+    .onboard-sheet{background:var(--bg2);border-radius:20px;padding:28px 24px 20px;width:100%;max-width:380px;border:1px solid var(--border);text-align:center;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
     .onboard-slide{display:none;}
     .onboard-slide.on{display:block;}
-    .onboard-icon{font-size:56px;margin-bottom:20px;line-height:1;}
+    .onboard-icon{font-size:56px;margin-bottom:16px;line-height:1;}
+    @media(max-height:680px){.onboard-sheet{padding:16px 20px 16px;}.onboard-icon{font-size:36px;margin-bottom:10px;}.onboard-title{font-size:17px;margin-bottom:6px;}.onboard-desc{font-size:13px;margin-bottom:12px;}}
     .onboard-title{font-size:21px;font-weight:700;margin-bottom:10px;color:var(--text);}
     .onboard-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
     .onboard-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
@@ -443,11 +447,12 @@
     <div class="disclaimer-title">Before you fly</div>
     <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
     <div class="disclaimer-box">
-      <strong>Advisory use only.</strong> DroneChecker provides weather, wind and condition information to assist your pre-flight planning. All ratings and recommendations are <strong>advisory only</strong> and do not constitute official aviation guidance.<br><br>
-      <strong>You are responsible.</strong> The pilot in command is solely and legally responsible for safe and lawful drone operations at all times. Always verify conditions, airspace and restrictions independently before flying.<br><br>
-      <strong>No liability.</strong> DroneChecker and its developers accept no liability for loss, damage, injury or legal consequence arising from reliance on information provided by this app.<br><br>
-      <strong>Analytics.</strong> By accepting, you also consent to anonymous usage analytics (Google Analytics with IP anonymisation) that help us improve the app. No personally identifiable information is collected. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> for details.
+      <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and restrictions independently.<br><br>
+      <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times.<br><br>
+      <strong>No liability.</strong> DroneChecker accepts no liability for loss, damage or legal consequence from reliance on this app.<br><br>
+      <strong>Analytics.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). No personal data collected. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a>.
     </div>
+    <div id="disc-scroll-hint" style="text-align:center;padding:6px 0 10px;font-size:12px;color:var(--muted);animation:bounceY 1.4s ease-in-out infinite;">↓ Scroll to accept</div>
     <label class="disclaimer-check">
       <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
       <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
@@ -1067,11 +1072,12 @@ function manualRefresh(){
   var btn=document.getElementById('refresh-btn');
   if(btn){btn.textContent='↻ Refreshing...';btn.style.opacity='0.6';}
   showToast('Refreshing weather...');
-  fetchAll();
+  // Force fresh GPS fix (maximumAge:0) — user may have moved since last fix
+  getLoc(true);
   setTimeout(function(){
     if(btn){btn.textContent='↻ Refresh';btn.style.opacity='1';}
     _refreshing=false;
-  },2500);
+  },3000);
 }
 function useMyLocation(){
   document.getElementById('loc-inp').value='';
@@ -1088,8 +1094,7 @@ function useMyLocation(){
   navigator.geolocation.getCurrentPosition(
     function(p){
       uLat=p.coords.latitude;uLng=p.coords.longitude;
-      var locEl=document.getElementById('loc-name');
-      if(locEl)locEl.textContent='Your Location';
+      // Let revGeo resolve the real name — don't pre-set "Your Location"
       revGeo();fetchAll();
     },
     function(err){
@@ -1113,7 +1118,7 @@ function useMyLocation(){
         showToast('Could not get location — try searching a postcode');
       }
     },
-    {timeout:8000,maximumAge:60000,enableHighAccuracy:false}
+    {timeout:12000,maximumAge:0}
   );
 }
 function loadFavs(){try{return JSON.parse(localStorage.getItem('dc_favs'))||[];}catch(e){return[];}}
@@ -1121,7 +1126,7 @@ function saveFavs(favs){try{localStorage.setItem('dc_favs',JSON.stringify(favs))
 function toggleFavCurrent(){
   if(!uLat||!uLng)return;
   var name=document.getElementById('loc-name').textContent;
-  if(name==='Locating...'||name==='London (default)')return;
+  if(name==='Locating...'||name==='London (default)'||name==='Your Location')return;
   var favs=loadFavs();
   var idx=favs.findIndex(function(f){return f.name===name;});
   if(idx>=0){
@@ -1327,6 +1332,18 @@ function checkDisclaimer(){
   if(disclaimerAccepted){overlay.style.display='none';return;}
   overlay.style.display='flex';
   document.body.style.overflow='hidden';
+  // Hide scroll hint if content fits, or when user scrolls to the checkbox
+  var sheet=overlay.querySelector('.disclaimer-sheet');
+  var hint=document.getElementById('disc-scroll-hint');
+  if(sheet&&hint){
+    if(sheet.scrollHeight<=sheet.clientHeight){hint.style.display='none';}
+    else{
+      sheet.addEventListener('scroll',function(){
+        var remaining=sheet.scrollHeight-sheet.scrollTop-sheet.clientHeight;
+        if(remaining<60){hint.style.display='none';}
+      },{passive:true});
+    }
+  }
 }
 function updateDisclaimerBtn(){
   var cb=document.getElementById('disclaimer-cb');
@@ -1399,49 +1416,56 @@ function finishOnboarding(){
   var overlay=document.getElementById('onboard-overlay');
   if(overlay)overlay.style.display='none';
 }
-function getLoc(){
+function getLoc(forceFresh){
   if(!navigator.geolocation)return;
+  // forceFresh=true uses maximumAge:0 — forces a real hardware fix,
+  // prevents stale cached position from a previous location (e.g. different country).
+  var opts=forceFresh?{timeout:15000,maximumAge:0}:{timeout:15000,maximumAge:60000};
   navigator.geolocation.getCurrentPosition(
     function(p){
       var newLat=p.coords.latitude,newLng=p.coords.longitude;
       var moved=!uLat||!uLng||Math.abs(newLat-uLat)>0.01||Math.abs(newLng-uLng)>0.01;
       uLat=newLat;uLng=newLng;
-      // Show something immediately while Nominatim resolves the name
-      var locEl=document.getElementById('loc-name');
-      if(locEl&&(locEl.textContent==='Locating...'||locEl.textContent==='London')){
-        locEl.textContent='Your Location';
-      }
+      // Don't set "Your Location" here — let revGeo resolve the real name
       revGeo();
-      if(moved)fetchAll();
+      if(moved||forceFresh)fetchAll();
     },
     function(){}, // Silent failure — fetchAll() already fired from the load handler
-    {timeout:15000,maximumAge:300000}
+    opts
   );
 }
 function setLoc(lat,lng,name){uLat=lat;uLng=lng;document.getElementById('loc-name').textContent=name;renderFavBar();fetchAll();}
 function revGeo(){
-  // Immediately clear "Locating..." with a fallback in case Nominatim is slow or fails
+  // Keep "Locating..." visible — don't pre-set "Your Location" as a placeholder.
+  // Only save to lastLoc once a real place name is resolved.
   var locEl=document.getElementById('loc-name');
-  if(locEl&&locEl.textContent==='Locating...')locEl.textContent='Your Location';
-  // 6-second timeout — Nominatim is a free API and can be slow
+  if(locEl&&(locEl.textContent==='Locating...'||locEl.textContent==='London'))locEl.textContent='Locating...';
+  // 12-second timeout, then fall back to Open-Meteo reverse geocoding
   var done=false;
   var timer=setTimeout(function(){
-    if(done)return;done=true;
-    if(uLat&&uLng)saveLastLoc(uLat,uLng,(document.getElementById('loc-name')||{}).textContent||'Your Location');
-  },6000);
+    if(done)return;
+    fetch('https://geocoding-api.open-meteo.com/v1/search?name=&latitude='+uLat+'&longitude='+uLng+'&count=1&language=en&format=json')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(done)return;done=true;
+        var name=(d.results&&d.results[0]&&d.results[0].name)||null;
+        if(name){document.getElementById('loc-name').textContent=name;renderFavBar();saveLastLoc(uLat,uLng,name);}
+        else{document.getElementById('loc-name').textContent='Your Location';}
+      })
+      .catch(function(){if(done)return;done=true;document.getElementById('loc-name').textContent='Your Location';});
+  },12000);
   fetch('https://nominatim.openstreetmap.org/reverse?lat='+uLat+'&lon='+uLng+'&format=json')
     .then(function(r){return r.json();})
     .then(function(d){
       if(done)return;done=true;clearTimeout(timer);
       var a=d.address;
-      var name=(a&&(a.city||a.town||a.village||a.suburb||a.hamlet||a.locality||a.county||a.state))||'Your Location';
-      document.getElementById('loc-name').textContent=name;
-      renderFavBar();
-      saveLastLoc(uLat,uLng,name);
+      var name=(a&&(a.city||a.town||a.village||a.suburb||a.hamlet||a.locality||a.county||a.state))||null;
+      if(name){document.getElementById('loc-name').textContent=name;renderFavBar();saveLastLoc(uLat,uLng,name);}
+      else{document.getElementById('loc-name').textContent='Your Location';}
     })
     .catch(function(){
       if(done)return;done=true;clearTimeout(timer);
-      if(uLat&&uLng)saveLastLoc(uLat,uLng,(document.getElementById('loc-name')||{}).textContent||'Your Location');
+      // Nominatim failed — let the timeout fallback handle it
     });
 }
 function isPostcode(q){return /^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/i.test(q)||/^[A-Z]{1,2}\d{1,2}[A-Z]?$/i.test(q);}
@@ -1542,16 +1566,27 @@ function fetchAll(){
   if(cached){wxData=cached.data;hideSplash();renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);}
   fetchOpenMeteo(uLat,uLng)
     .then(function(data){
-      wxData=data;lastUpdated=new Date();saveWxCache(data);hideOfflineBanner();hideSplash();
+      wxData=data;
+      // Stamp lastUpdated only once live data confirmed for these coordinates
+      lastUpdated=new Date();
+      var updEl=document.getElementById('updated-txt');
+      if(updEl)updEl.textContent='Updated just now';
+      saveWxCache(data);hideOfflineBanner();hideSplash();
       renderDash();renderFc();renderGolden();
       fetchKp();
     })
     .catch(function(err){
       console.warn('Open-Meteo fetch failed:',err);
       hideSplash();
-      if(!wxData)document.getElementById('dash').innerHTML=
-        '<div class="err">Could not load weather data.<br><br>'+
-        '<button onclick="fetchAll()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
+      if(!wxData){
+        var isFileOrigin=window.location.protocol==='file:';
+        var msg=isFileOrigin
+          ? 'Open the app via a local server or deployed URL — browsers block API calls from file:// for security.<br><br><small style="color:var(--muted);">Run: <code>npx serve .</code> then open localhost</small>'
+          : 'Could not load weather data. Check your connection and try again.';
+        document.getElementById('dash').innerHTML=
+          '<div class="err">'+msg+'<br><br>'+
+          '<button onclick="fetchAll()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
+      }
     });
 }
 function hideSplash(){var s=document.getElementById('splash');if(s){s.classList.add('hidden');setTimeout(function(){s.style.display='none';},300);}}
@@ -1784,7 +1819,7 @@ function renderDash(){
   var tSecondary=unitMode==='mph'?Math.round(rawTemp)+'°C':Math.round(rawTemp*9/5+32)+'°F';
   var fPrimary=unitMode==='mph'?Math.round(c.apparent_temperature*9/5+32)+'°F':Math.round(c.apparent_temperature)+'°C';
   var fSecondary=unitMode==='mph'?Math.round(c.apparent_temperature)+'°C':Math.round(c.apparent_temperature*9/5+32)+'°F';
-  var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Just updated';
+  var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Loading...';
   var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
   var lipoWarnInner=rawTemp<10?
     '<div style="flex:1;min-width:0;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:flex-start;gap:8px;">'+
@@ -2058,6 +2093,22 @@ function switchWindAlt(alt){
   updateWindHrRows(alt);
   if(window._wAlt.relaunch)window._wAlt.relaunch();
 }
+function locateMeOnMap(){
+  if(!navigator.geolocation){showToast('Location not supported');return;}
+  showToast('Finding your location...');
+  navigator.geolocation.getCurrentPosition(
+    function(p){
+      var newLat=p.coords.latitude,newLng=p.coords.longitude;
+      var moved=!uLat||!uLng||Math.abs(newLat-uLat)>0.01||Math.abs(newLng-uLng)>0.01;
+      uLat=newLat;uLng=newLng;
+      if(windMap)windMap.setView([uLat,uLng],13);
+      if(moved){revGeo();fetchAll();}
+      else{showToast('Location confirmed');}
+    },
+    function(){showToast('Could not get location');},
+    {timeout:12000,maximumAge:0}
+  );
+}
 function initWindMap(){
   var windEl=document.getElementById('wind-display');
   if(!windEl)return;
@@ -2134,6 +2185,7 @@ function initWindMap(){
         '<div style="display:flex;align-items:center;gap:6px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">120m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw120)+';height:100%;background:'+col120+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col120+';text-align:right;flex-shrink:0;">'+spd(raw120)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col120+';flex-shrink:0;">'+aLbl(raw120)+'</div></div>'+
       '</div>'+
       '<button id="airspace-btn" onclick="toggleAirspace()" style="position:absolute;bottom:24px;right:48px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 11px;font-size:11px;font-weight:600;color:rgba(241,245,249,.7);cursor:pointer;font-family:inherit;white-space:nowrap;">✈ Airspace</button>'+
+      '<button onclick="locateMeOnMap()" title="Centre map on my location" aria-label="Centre map on my location" style="position:absolute;bottom:24px;right:10px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;width:34px;height:34px;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">📍</button>'+
     '</div>'+
     '<div style="font-size:11px;color:var(--muted);padding:5px 12px 0;line-height:1.4;">⚠ Airspace zones are indicative only. Always verify with the <a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">CAA</a> before flying.</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+
@@ -2359,7 +2411,7 @@ window.addEventListener('load',function(){
       // safe coordinate fallback so fetchAll/manualRefresh don't fail with null coords;
       // getLoc() will overwrite both as soon as GPS resolves.
       uLat=51.5074;uLng=-0.1278;
-      document.getElementById('loc-name').textContent='Your Location';
+      document.getElementById('loc-name').textContent='Locating...';
     }
     hideSplash();renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);
   } else if(lastLoc){
@@ -2368,7 +2420,7 @@ window.addEventListener('load',function(){
     renderFavBar();
   } else {
     uLat=51.5074;uLng=-0.1278;
-    document.getElementById('loc-name').textContent='London';
+    document.getElementById('loc-name').textContent='Locating...';
   }
 
   // Step 2: Always fetch fresh weather immediately with whatever coords we have.
@@ -2378,6 +2430,18 @@ window.addEventListener('load',function(){
 
   // Step 3: Try geolocation in the background to get accurate position.
   getLoc();
+
+  // Re-fetch with fresh GPS if app was backgrounded 10+ minutes
+  // (e.g. user just landed at a new airport and reopened the app)
+  var _hiddenAt=null;
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){
+      _hiddenAt=Date.now();
+    } else {
+      var away=_hiddenAt?Date.now()-_hiddenAt:0;
+      if(away>600000){showToast('Checking your location...');getLoc(true);}
+    }
+  });
 
   startIntervals();
   setTimeout(function(){hideSplash();},5000);

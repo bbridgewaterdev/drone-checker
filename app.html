@@ -868,8 +868,7 @@ function useMyLocation(){
     function(p){
       uLat=p.coords.latitude;uLng=p.coords.longitude;
       // Show something immediately while Nominatim resolves the real name
-      var locEl=document.getElementById('loc-name');
-      if(locEl)locEl.textContent='Your Location';
+      // Let revGeo resolve the real name — don't pre-set "Your Location"
       revGeo();fetchAll();
     },
     function(){showToast('Could not get location');}
@@ -880,7 +879,7 @@ function saveFavs(favs){try{localStorage.setItem('dc_favs',JSON.stringify(favs))
 function toggleFavCurrent(){
   if(!uLat||!uLng)return;
   var name=document.getElementById('loc-name').textContent;
-  if(name==='Locating...'||name==='London (default)')return;
+  if(name==='Locating...'||name==='London (default)'||name==='Your Location')return;
   var favs=loadFavs();
   var idx=favs.findIndex(function(f){return f.name===name;});
   if(idx>=0){
@@ -1168,10 +1167,8 @@ function getLoc(forceFresh){
       var moved=!uLat||!uLng||Math.abs(newLat-uLat)>0.01||Math.abs(newLng-uLng)>0.01;
       uLat=newLat;uLng=newLng;
       // Show something immediately while Nominatim resolves the name
-      var locEl=document.getElementById('loc-name');
-      if(locEl&&(locEl.textContent==='Locating...'||locEl.textContent==='London')){
-        locEl.textContent='Your Location';
-      }
+      // Keep showing "Locating..." until revGeo resolves a real place name.
+      // Setting "Your Location" here is what caused testers to get stuck with it.
       revGeo();
       if(moved||forceFresh)fetchAll();
     },
@@ -1181,28 +1178,52 @@ function getLoc(forceFresh){
 }
 function setLoc(lat,lng,name){uLat=lat;uLng=lng;document.getElementById('loc-name').textContent=name;renderFavBar();fetchAll();}
 function revGeo(){
-  // Immediately clear "Locating..." with a fallback in case Nominatim is slow or fails
+  // Show a neutral placeholder while we resolve the real place name.
+  // We deliberately don't save this placeholder to lastLoc.
   var locEl=document.getElementById('loc-name');
-  if(locEl&&locEl.textContent==='Locating...')locEl.textContent='Your Location';
-  // 6-second timeout — Nominatim is a free API and can be slow
+  if(locEl&&(locEl.textContent==='Locating...'||locEl.textContent==='London'))locEl.textContent='Locating...';
+  // 12-second timeout — Nominatim is a free API and can be slow on mobile networks.
+  // On timeout we retry once via Open-Meteo reverse geocoding as a fallback.
   var done=false;
   var timer=setTimeout(function(){
-    if(done)return;done=true;
-    if(uLat&&uLng)saveLastLoc(uLat,uLng,(document.getElementById('loc-name')||{}).textContent||'Your Location');
-  },6000);
+    if(done)return;
+    // First timeout: try Open-Meteo reverse geocoding as a faster fallback
+    fetch('https://geocoding-api.open-meteo.com/v1/search?name=&latitude='+uLat+'&longitude='+uLng+'&count=1&language=en&format=json')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(done)return;done=true;
+        var name=(d.results&&d.results[0]&&d.results[0].name)||null;
+        if(name){
+          document.getElementById('loc-name').textContent=name;
+          renderFavBar();
+          saveLastLoc(uLat,uLng,name);
+        } else {
+          // Genuine unknown — label honestly, don't save as a real name
+          document.getElementById('loc-name').textContent='Your Location';
+        }
+      })
+      .catch(function(){
+        if(done)return;done=true;
+        document.getElementById('loc-name').textContent='Your Location';
+      });
+  },12000);
   fetch('https://nominatim.openstreetmap.org/reverse?lat='+uLat+'&lon='+uLng+'&format=json')
     .then(function(r){return r.json();})
     .then(function(d){
       if(done)return;done=true;clearTimeout(timer);
       var a=d.address;
-      var name=(a&&(a.city||a.town||a.village||a.suburb||a.hamlet||a.locality||a.county||a.state))||'Your Location';
-      document.getElementById('loc-name').textContent=name;
-      renderFavBar();
-      saveLastLoc(uLat,uLng,name);
+      var name=(a&&(a.city||a.town||a.village||a.suburb||a.hamlet||a.locality||a.county||a.state))||null;
+      if(name){
+        document.getElementById('loc-name').textContent=name;
+        renderFavBar();
+        saveLastLoc(uLat,uLng,name);
+      } else {
+        document.getElementById('loc-name').textContent='Your Location';
+      }
     })
     .catch(function(){
       if(done)return;done=true;clearTimeout(timer);
-      if(uLat&&uLng)saveLastLoc(uLat,uLng,(document.getElementById('loc-name')||{}).textContent||'Your Location');
+      // Nominatim failed — let the timeout fallback handle it
     });
 }
 function isPostcode(q){return /^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/i.test(q)||/^[A-Z]{1,2}\d{1,2}[A-Z]?$/i.test(q);}
@@ -1989,7 +2010,7 @@ window.addEventListener('load',function(){
       // safe coordinate fallback so fetchAll/manualRefresh don't fail with null coords;
       // getLoc() will overwrite both as soon as GPS resolves.
       uLat=51.5074;uLng=-0.1278;
-      document.getElementById('loc-name').textContent='Your Location';
+      document.getElementById('loc-name').textContent='Locating...';
     }
     hideSplash();renderDash();renderFc();renderGolden();showOfflineBanner(cached.ts);
   } else if(lastLoc){
@@ -1998,7 +2019,7 @@ window.addEventListener('load',function(){
     renderFavBar();
   } else {
     uLat=51.5074;uLng=-0.1278;
-    document.getElementById('loc-name').textContent='London';
+    document.getElementById('loc-name').textContent='Locating...';
   }
 
   // Step 2: Always fetch fresh weather immediately with whatever coords we have.

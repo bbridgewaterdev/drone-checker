@@ -214,7 +214,10 @@
     .log-2col{display:flex;gap:8px;}
     .log-2col .log-field{flex:1;min-width:0;}
     .log-btn{width:100%;background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:2px;}
-    .log-actions{display:flex;gap:8px;padding:0 12px;margin-top:8px;}
+    .log-actions{display:flex;gap:8px;padding:0 12px;margin-top:8px;flex-wrap:wrap;}
+    .log-export-btn{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;}
+    .log-export-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .log-backup-row{display:flex;gap:8px;padding:0 12px;margin-top:6px;}
     .log-export{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;}
     .log-clear{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:10px 14px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
     .log-entry{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin:8px 12px 0;}
@@ -590,7 +593,7 @@
 
 <div id="app">
   <div class="header">
-    <!-- Row 1: Logo · DroneChecker [Pro] · BB pill -->
+    <!-- Row 1: Logo · DroneChecker [Pro] · 📍 location · Go Pro pill -->
     <div class="h-row1">
       <svg id="header-logo" width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
         <rect width="100" height="100" rx="20" fill="#0f172a"/>
@@ -611,16 +614,18 @@
         <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
       </svg>
       <span class="h-title">DroneChecker<span id="pro-title-badge" style="display:none;font-size:13px;font-weight:700;color:#f59e0b;margin-left:4px;letter-spacing:.5px;">Pro</span></span>
-      <div class="pro-pill" id="pro-header-pill" onclick="openProOverlay()" style="display:none;margin-left:auto;flex-shrink:0;" aria-label="Go Pro">
+      <!-- Location — margin-left:auto pushes it right; sits before pill in free mode, fills space in Pro mode -->
+      <div id="header-loc" style="display:flex;align-items:center;gap:3px;margin-left:auto;min-width:0;overflow:hidden;flex-shrink:1;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;flex-shrink:0;color:var(--muted);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span id="loc-name" class="h-loc-name" style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">Locating...</span>
+      </div>
+      <div class="pro-pill" id="pro-header-pill" onclick="openProOverlay()" style="display:none;flex-shrink:0;margin-left:6px;" aria-label="Go Pro">
         <svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>
         <span id="pro-pill-label">Go Pro</span>
       </div>
     </div>
-    <!-- Row 2: 📍 location · · updated · refresh (right-aligned) -->
+    <!-- Row 2: updated · refresh (right-aligned) -->
     <div class="h-row2">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;flex-shrink:0;color:var(--muted);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      <span id="loc-name" class="h-loc-name" style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;">Locating...</span>
-      <span style="color:var(--border);flex-shrink:0;">·</span>
       <span id="updated-txt" style="font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;">—</span>
       <button id="refresh-btn" onclick="manualRefresh()" aria-label="Refresh weather data" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:0 0 0 2px;font-family:inherit;line-height:1;white-space:nowrap;flex-shrink:0;">↻ Refresh</button>
     </div>
@@ -668,6 +673,9 @@
             </optgroup>
             <optgroup label="Pro" id="drone-custom-group" style="display:none;">
               <option value="custom" id="drone-custom-option">My Custom Drone</option>
+            </optgroup>
+            <optgroup label="──────────" id="drone-pro-teaser-group" style="display:none;">
+              <option value="__pro__" id="drone-pro-teaser">✦ Custom Drone (Pro only)</option>
             </optgroup>
           </select>
           <span class="drone-limits" id="drone-limits"></span>
@@ -764,13 +772,13 @@ function csvCell(v){
 var CAA_OPERATOR_FEE = '£12.34';
 var CAA_OPERATOR_FEE_NOTE = '£12.34/year — verify on caa.co.uk';
 var DRONES={
-  lito1:{name:'DJI Lito 1',windAmber:18,windRed:25,gustAmber:20,gustRed:25},
-  litox1:{name:'DJI Lito X1',windAmber:18,windRed:25,gustAmber:20,gustRed:25},
+  lito1:{name:'DJI Lito 1',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
+  litox1:{name:'DJI Lito X1',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   neo:{name:'DJI Neo',windAmber:18,windRed:29,gustAmber:21,gustRed:29},
-  neo2:{name:'DJI Neo 2',windAmber:18,windRed:29,gustAmber:21,gustRed:29},
+  neo2:{name:'DJI Neo 2',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   flip:{name:'DJI Flip',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  mini4k:{name:'DJI Mini 4K',windAmber:22,windRed:31,gustAmber:25,gustRed:31},
-  mini2:{name:'DJI Mini 2',windAmber:22,windRed:31,gustAmber:25,gustRed:31},
+  mini4k:{name:'DJI Mini 4K',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
+  mini2:{name:'DJI Mini 2',windAmber:22,windRed:38,gustAmber:25,gustRed:38},
   mini3pro:{name:'DJI Mini 3 Pro',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   mini4pro:{name:'DJI Mini 4 Pro',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   mini5pro:{name:'DJI Mini 5 Pro',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
@@ -779,8 +787,8 @@ var DRONES={
   mavic4pro:{name:'DJI Mavic 4 Pro',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
   avata2:{name:'DJI Avata 2',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   avata360:{name:'DJI Avata 360',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  autel_nano:{name:'Autel EVO Nano+',windAmber:22,windRed:31,gustAmber:25,gustRed:31},
-  autel_lite:{name:'Autel EVO Lite+',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
+  autel_nano:{name:'Autel EVO Nano+',windAmber:29,windRed:38,gustAmber:32,gustRed:38},
+  autel_lite:{name:'Autel EVO Lite+',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
@@ -822,7 +830,21 @@ var UK_FRZS=[
 ];
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
 function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])selectedDrone=s;}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;updateDroneLimits();}
-function saveDrone(){var sel=document.getElementById('drone-sel');if(!sel)return;selectedDrone=sel.value;try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}updateDroneLimits();if(wxData){renderDash();renderFc();}}
+function saveDrone(){
+  var sel=document.getElementById('drone-sel');
+  if(!sel)return;
+  // Intercept the Pro teaser option — open upgrade overlay instead
+  if(sel.value==='__pro__'){
+    openProOverlay();
+    // Revert selection to previous drone
+    sel.value=selectedDrone||'mini4pro';
+    return;
+  }
+  selectedDrone=sel.value;
+  try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}
+  updateDroneLimits();
+  if(wxData){renderDash();renderFc();}
+}
 function updateDroneLimits(){var el=document.getElementById('drone-limits');if(el)el.textContent='Max '+spd(getDrone().windRed)+' '+spdU();}
 function saveWxCache(data){try{localStorage.setItem('dc_wx',JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
 function loadWxCache(){try{var s=localStorage.getItem('dc_wx');if(s)return JSON.parse(s);}catch(e){}return null;}
@@ -1253,7 +1275,21 @@ function renderLog(){
   } else {
     var condColor={'Good to Fly':'green','Fly with Caution':'amber','Do Not Fly':'red'};
     entries='<div class="log-count">'+flights.length+' flight'+(flights.length!==1?'s':'')+' logged</div>';
-    entries+='<div class="log-actions"><button class="log-clear" onclick="clearFlights()">Clear all</button></div>';
+    var exportBtns=isPro()
+      ? '<button class="log-export-btn" onclick="exportXlsx()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Excel</button>'+
+        '<button class="log-export-btn" onclick="exportGoogleSheets()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Sheets</button>'
+      : '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Excel <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>'+
+        '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h8.5M14 2l5.5 5.5M14 2v5.5h5.5M20 13v6a2 2 0 01-2 2H6"/></svg>Sheets <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>';
+    var backupBtns='<div class="log-backup-row">'+
+      (isPro()
+        ? '<button class="log-export-btn" onclick="backupLog()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup JSON</button>'+
+          '<button class="log-export-btn" onclick="document.getElementById(\'restore-input\').click()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Restore</button>'+
+          '<input type="file" id="restore-input" accept=".json" style="display:none;" onchange="restoreLog(this)"/>'
+        : '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup JSON <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>'+
+          '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Restore <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>'
+      )+
+    '</div>';
+    entries+='<div class="log-actions">'+exportBtns+'<button class="log-clear" onclick="clearFlights()">Clear all</button></div>'+backupBtns;
     for(var i=flights.length-1;i>=0;i--){
       var f=flights[i];
       var cc=condColor[f.cond]||'';
@@ -1294,7 +1330,67 @@ function addFlight(){
     wxTemp:(document.getElementById('li-wxtemp')||{}).value||'',
     wxVis:(document.getElementById('li-wxvis')||{}).value||''
   });
-  saveFlights(flights);showToast('✈️ Flight logged');renderLog();
+  saveFlights(flights);
+  showToast('✈️ Flight logged');
+  renderLog();
+  // Auto-backup: silently update the rolling backup file
+  autoBackupLog(flights);
+}
+
+// Rolling auto-backup — writes to the same file handle every time.
+// On first use (or if handle lost), prompts user to pick a save location once.
+// Subsequent saves go directly to that file with no prompts.
+var _backupHandle=null; // FileSystemFileHandle, persisted across saves this session
+
+function autoBackupLog(flights){
+  if(!isPro())return; // backup is a Pro feature
+  var data={version:1,exported:new Date().toISOString(),flights:flights};
+  var json=JSON.stringify(data,null,2);
+
+  // Try File System Access API (Chrome 86+, Edge, Android Chrome)
+  if(window.showSaveFilePicker&&!_backupHandle){
+    // First time — ask user to pick a file location once
+    showToast('Choose where to save your rolling backup — you\'ll only be asked once');
+    setTimeout(function(){
+      window.showSaveFilePicker({
+        suggestedName:'dronechecker-backup.json',
+        types:[{description:'DroneChecker Backup',accept:{'application/json':['.json']}}]
+      }).then(function(handle){
+        _backupHandle=handle;
+        writeBackupToHandle(handle,json);
+      }).catch(function(){
+        // User cancelled — fall back to localStorage mirror
+        saveBackupToStorage(json);
+      });
+    },800); // delay so flight-logged toast reads first
+    return;
+  }
+
+  if(_backupHandle){
+    // Subsequent saves — silent, no prompt
+    writeBackupToHandle(_backupHandle,json);
+    return;
+  }
+
+  // Fallback: keep a mirror in localStorage (retrievable via Restore)
+  saveBackupToStorage(json);
+}
+
+function writeBackupToHandle(handle,json){
+  handle.createWritable().then(function(writable){
+    writable.write(json);
+    return writable.close();
+  }).then(function(){
+    // Silent success — no toast needed
+  }).catch(function(){
+    _backupHandle=null; // handle lost (e.g. file deleted) — will re-prompt next time
+    saveBackupToStorage(json);
+  });
+}
+
+function saveBackupToStorage(json){
+  // Mirror in localStorage as a fallback — retrievable via Restore button
+  try{localStorage.setItem('dc_flights_backup',json);}catch(e){}
 }
 function deleteFlight(idx){
   if(!confirm('Delete this flight log entry?'))return;
@@ -1304,22 +1400,138 @@ function clearFlights(){
   if(!confirm('Delete all flight logs? This cannot be undone.'))return;
   saveFlights([]);renderLog();
 }
-function exportFlights(){
+// ── Flight Log Export Functions ──────────────────────────────
+
+// Build the CSV rows (shared by xlsx and sheets)
+function buildCsvRows(flights){
+  var bom='\uFEFF';
+  var hdr='Date,Location,Drone,Duration (mins),Flight Type,Conditions,Wind,Temperature,Visibility,Notes\n';
+  var rows='';
+  flights.forEach(function(f){
+    rows+=[csvCell(f.date),csvCell(f.loc),csvCell(f.drone),csvCell(f.dur),
+           csvCell(f.type),csvCell(f.cond),csvCell(f.wxWind),csvCell(f.wxTemp),
+           csvCell(f.wxVis),csvCell(f.notes)].join(',')+'\n';
+  });
+  return bom+hdr+rows;
+}
+
+// Excel export — uses SpreadsheetML XML format which Excel, Numbers
+// and Google Sheets all open natively with proper formatting.
+function exportXlsx(){
+  if(!isPro()){openProOverlay();return;}
   var flights=loadFlights();
   if(!flights.length){showToast('No flights to export');return;}
-  var bom='\uFEFF';
-  var csv=bom+'Date,Location,Drone,Duration (mins),Flight Type,Conditions,Wind,Temperature,Visibility,Notes\n';
+  var condColour={'Good to Fly':'FF22C55E','Fly with Caution':'FFF59E0B','Do Not Fly':'FFEF4444'};
+  var hdrs=['Date','Location','Drone','Duration (mins)','Flight Type','Conditions','Wind','Temperature','Visibility','Notes'];
+  function xt(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function cell(v,bold,bg){
+    var s=bold?'s=\"1\"':'';
+    if(bg)s='s=\"2\" ';
+    return '<Cell '+s+'><Data ss:Type=\"String\">'+ xt(v)+'</Data></Cell>';
+  }
+  var headerRow='<Row ss:StyleID=\"1\">'+ hdrs.map(function(h){return cell(h,true);}).join('')+'</Row>\n';
+  var dataRows='';
   flights.forEach(function(f){
-    csv+=[csvCell(f.date),csvCell(f.loc),csvCell(f.drone),csvCell(f.dur),
-          csvCell(f.type),csvCell(f.cond),csvCell(f.wxWind),csvCell(f.wxTemp),
-          csvCell(f.wxVis),csvCell(f.notes)].join(',')+'\n';
+    var bg=condColour[f.cond]||'';
+    dataRows+='<Row>'+
+      cell(f.date)+cell(f.loc)+cell(f.drone)+cell(f.dur||'')+
+      cell(f.type)+'<Cell ss:StyleID=\"'+( bg?'cond_'+f.cond.replace(/ /g,'_'):'' )+'\"><Data ss:Type=\"String\">'+ xt(f.cond)+'</Data></Cell>'+
+      cell(f.wxWind)+cell(f.wxTemp)+cell(f.wxVis)+cell(f.notes)+
+    '</Row>\n';
   });
-  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var xml='<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n'+
+    '<?mso-application progid=\"Excel.Sheet\"?>\n'+
+    '<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n'+
+    ' xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\">\n'+
+    '<Styles>\n'+
+    '<Style ss:ID=\"1\"><Font ss:Bold=\"1\" ss:Color=\"#FFFFFF\" ss:Size=\"11\"/><Interior ss:Color=\"#0F172A\" ss:Pattern=\"Solid\"/></Style>\n'+
+    '<Style ss:ID=\"green\"><Interior ss:Color=\"#DCFCE7\" ss:Pattern=\"Solid\"/></Style>\n'+
+    '<Style ss:ID=\"amber\"><Interior ss:Color=\"#FEF9C3\" ss:Pattern=\"Solid\"/></Style>\n'+
+    '<Style ss:ID=\"red\"><Interior ss:Color=\"#FEE2E2\" ss:Pattern=\"Solid\"/></Style>\n'+
+    '</Styles>\n'+
+    '<Worksheet ss:Name=\"Flight Log\">\n<Table>\n'+
+    headerRow+dataRows+
+    '</Table></Worksheet></Workbook>';
+  // Fix style IDs to use simple names
+  xml=xml.replace(/ss:StyleID=\"cond_Good_to_Fly\"/g,'ss:StyleID=\"green\"')
+         .replace(/ss:StyleID=\"cond_Fly_with_Caution\"/g,'ss:StyleID=\"amber\"')
+         .replace(/ss:StyleID=\"cond_Do_Not_Fly\"/g,'ss:StyleID=\"red\"')
+         .replace(/ss:StyleID=\"\"/g,'');
+  var blob=new Blob([xml],{type:'application/vnd.ms-excel;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='dronechecker-flights.xls';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('📊 Exported to Excel');
+}
+
+// Google Sheets — encode CSV and open in Google Sheets import URL
+function exportGoogleSheets(){
+  if(!isPro()){openProOverlay();return;}
+  var flights=loadFlights();
+  if(!flights.length){showToast('No flights to export');return;}
+  var csv=buildCsvRows(flights);
+  // Encode as data URI — Sheets can import a pasted CSV via the import dialog
+  // Best we can do without a server: download CSV and open Sheets side-by-side
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');a.href=url;a.download='dronechecker-flights.csv';
-  document.body.appendChild(a);a.click();
-  document.body.removeChild(a);URL.revokeObjectURL(url);
-  showToast('📊 Exported to CSV');
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  // Open Google Sheets import page after short delay
+  setTimeout(function(){
+    window.open('https://sheets.new','_blank');
+    showToast('CSV saved — import it in Sheets via File → Import');
+  },600);
+}
+
+// JSON backup — full fidelity, can be restored on any device
+function backupLog(){
+  if(!isPro()){openProOverlay();return;}
+  var flights=loadFlights();
+  if(!flights.length){showToast('No flights to backup');return;}
+  var data={version:1,exported:new Date().toISOString(),flights:flights};
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;
+  a.download='dronechecker-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('💾 Backup saved ('+flights.length+' flights)');
+}
+
+// JSON restore — merges with existing log (no duplicates by date+loc+dur)
+function restoreLog(input){
+  if(!isPro()){openProOverlay();return;}
+  var file=input.files[0];
+  if(!file){
+    // Try localStorage mirror as fallback
+    try{
+      var mirror=localStorage.getItem('dc_flights_backup');
+      if(mirror){mergeRestoredFlights(JSON.parse(mirror));}
+      else{showToast('No backup file or mirror found');}
+    }catch(e){showToast('Could not read backup');}
+    return;
+  }
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      mergeRestoredFlights(JSON.parse(e.target.result));
+    }catch(err){showToast('Could not read backup file');}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+function mergeRestoredFlights(data){
+  var incoming=Array.isArray(data)?data:(data.flights||[]);
+  if(!incoming.length){showToast('No flights found in backup');return;}
+  var existing=loadFlights();
+  var merged=existing.slice();
+  var added=0;
+  incoming.forEach(function(f){
+    var dup=existing.some(function(e){return e.date===f.date&&e.loc===f.loc&&e.dur===f.dur;});
+    if(!dup){merged.push(f);added++;}
+  });
+  saveFlights(merged);renderLog();
+  showToast(added+' flight'+(added!==1?'s':'')+' restored');
 }
 var disclaimerAccepted=false;
 function checkDisclaimer(){
@@ -2438,13 +2650,34 @@ function saveProUser(u){proUser=u;try{localStorage.setItem('dc_pro_user',u?JSON.
 function isPro(){return PAID_FEATURES_ENABLED&&proUser&&proUser.isPro;}
 function openProOverlay(){if(!PAID_FEATURES_ENABLED)return;var o=document.getElementById('pro-overlay');if(!o)return;if(isPro()){showProSignedIn();}else{showProUpgrade();}o.style.display='flex';document.body.style.overflow='hidden';}
 function closeProOverlay(){var o=document.getElementById('pro-overlay');if(o)o.style.display='none';document.body.style.overflow='';}
-function showProUpgrade(){var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');if(u)u.style.display='';if(s)s.style.display='none';}
+function showProUpgrade(){
+  var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');
+  if(u)u.style.display='';
+  if(s)s.style.display='none';
+  // Always reset the sign-in button so it's never stuck greyed out after sign-out
+  var btn=document.getElementById('pro-google-signin-btn');
+  if(btn){btn.style.opacity='1';btn.disabled=false;}
+}
 function showProSignin(){var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');if(u)u.style.display='none';if(s)s.style.display='';}
 function showProSignedIn(){var sheet=document.getElementById('pro-sheet');if(!sheet||!proUser)return;var initials=(proUser.name||proUser.email||'U').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();sheet.innerHTML='<div class="pro-sheet-header"><div style="width:24px;"></div><div style="font-size:13px;font-weight:600;color:var(--muted);">Your Pro Account</div><button class="pro-close" onclick="closeProOverlay()">&times;</button></div><div class="pro-body" style="padding-top:12px;"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--text);">'+esc(proUser.name||'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(proUser.email||'')+'</div><div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;">DroneChecker Pro</div></div></div><div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Subscription: <strong style="color:var(--green);">Active</strong></div><button onclick="signOutPro()" style="width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:12px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;">Sign out</button><button onclick="closeProOverlay()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button></div>';}
 var GOOGLE_CLIENT_ID='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
-function handleGoogleSignIn(){var btn=document.getElementById('pro-google-signin-btn');if(btn){btn.style.opacity='0.6';btn.disabled=true;}if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'){setTimeout(function(){onGoogleSignInSuccess({name:'Ben Bridgewater',email:'bbridgewater.dev@gmail.com',photoUrl:'',isPro:true});},1200);return;}showToast('Connect your Google Client ID to enable sign-in.');if(btn){btn.style.opacity='1';btn.disabled=false;}}
+function handleGoogleSignIn(){
+  var btn=document.getElementById('pro-google-signin-btn');
+  if(btn){btn.style.opacity='0.6';btn.disabled=true;}
+  if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'){
+    setTimeout(function(){
+      // Reset button before success handler fires (in case sheet stays open)
+      if(btn){btn.style.opacity='1';btn.disabled=false;}
+      onGoogleSignInSuccess({name:'Ben Bridgewater',email:'bbridgewater.dev@gmail.com',photoUrl:'',isPro:true});
+    },1200);
+    return;
+  }
+  showToast('Connect your Google Client ID to enable sign-in.');
+  if(btn){btn.style.opacity='1';btn.disabled=false;}
+}
 function onGoogleSignInSuccess(user){saveProUser(user);updateProUI();initCustomDroneUI();closeProOverlay();showToast('Welcome to Pro, '+(user.name.split(' ')[0]||'there')+'!');if(wxData){renderDash();renderFc();}}
-function signOutPro(){if(!confirm('Sign out of Pro?\n\nYour free features continue to work.'))return;saveProUser(null);updateProUI();var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();var cg=document.getElementById('drone-custom-group');if(cg)cg.style.display='none';closeProOverlay();showToast('Signed out of Pro');if(wxData){renderDash();renderFc();}}
+function signOutPro(){if(!confirm('Sign out of Pro?\n\nYour free features continue to work.'))return;saveProUser(null);updateProUI();var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();var cg=document.getElementById('drone-custom-group');if(cg)cg.style.display='none';// Re-add teaser if it was removed
+var sel=document.getElementById('drone-sel');if(sel&&!document.getElementById('drone-pro-teaser-group')){var tg=document.createElement('optgroup');tg.label='──────────';tg.id='drone-pro-teaser-group';var to=document.createElement('option');to.value='__pro__';to.id='drone-pro-teaser';to.textContent='✦ Custom Drone (Pro only)';tg.appendChild(to);sel.appendChild(tg);}closeProOverlay();showToast('Signed out of Pro');if(wxData){renderDash();renderFc();}}
 function updateProUI(){
   // Swap header logo — gold border for Pro, plain for free
   var logo=document.getElementById('header-logo');
@@ -2463,10 +2696,15 @@ function updateProUI(){
     // Pro — pill hidden, gold logo + "Pro" badge communicates status
     pill.style.display='none';
     if(badge)badge.style.display='inline';
+    // Location can use more space with no pill
+    var locWrap=document.getElementById('header-loc');
+    if(locWrap){var ln=document.getElementById('loc-name');if(ln)ln.style.maxWidth='180px';}
   } else {
-    // Free — show Go Pro CTA
+    // Free — show Go Pro CTA, keep location narrower
     pill.style.display='flex';
     if(badge)badge.style.display='none';
+    var locWrap=document.getElementById('header-loc');
+    if(locWrap){var ln=document.getElementById('loc-name');if(ln)ln.style.maxWidth='100px';}
     pill.innerHTML='<svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg><span id="pro-pill-label">Go Pro</span>';
     pill.title='Upgrade to DroneChecker Pro';
   }
@@ -2481,11 +2719,169 @@ function loadCustomDrone(){try{var s=localStorage.getItem('dc_custom_drone');if(
 function saveCustomDrone(d){customDrone=d;try{localStorage.setItem('dc_custom_drone',JSON.stringify(d));}catch(e){}}
 function openCustomDroneEditor(){if(!isPro()){openProOverlay();return;}var d=customDrone;var overlay=document.createElement('div');overlay.id='custom-drone-overlay';overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';overlay.innerHTML='<div style="background:var(--bg2);border-radius:16px;padding:24px 20px;width:100%;max-width:380px;border:1px solid var(--border);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><div style="font-size:15px;font-weight:700;">Custom Drone Profile</div><button onclick="document.getElementById(\'custom-drone-overlay\').remove()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;">&times;</button></div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Drone name</div><input id="cd-name" class="log-input" value="'+esc(d.name)+'" placeholder="e.g. My FPV Quad" style="margin-bottom:12px;"/><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;"><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind amber (km/h)</div><input id="cd-wa" class="log-input" type="number" value="'+d.windAmber+'" style="margin-bottom:0;"/></div><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind red (km/h)</div><input id="cd-wr" class="log-input" type="number" value="'+d.windRed+'" style="margin-bottom:0;"/></div><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust amber (km/h)</div><input id="cd-ga" class="log-input" type="number" value="'+d.gustAmber+'" style="margin-bottom:0;"/></div><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust red (km/h)</div><input id="cd-gr" class="log-input" type="number" value="'+d.gustRed+'" style="margin-bottom:0;"/></div></div><div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Values in km/h regardless of your display unit.</div><button onclick="applyCustomDrone()" class="log-btn">Save Profile</button></div>';document.body.appendChild(overlay);}
 function applyCustomDrone(){var name=document.getElementById('cd-name').value.trim()||'My Custom Drone';var wa=parseInt(document.getElementById('cd-wa').value)||22;var wr=parseInt(document.getElementById('cd-wr').value)||31;var ga=parseInt(document.getElementById('cd-ga').value)||25;var gr=parseInt(document.getElementById('cd-gr').value)||31;var d={name:name,windAmber:wa,windRed:wr,gustAmber:ga,gustRed:gr};saveCustomDrone(d);DRONES['custom']=d;var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=name;selectedDrone='custom';try{localStorage.setItem('dc_drone','custom');}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value='custom';updateDroneLimits();if(wxData){renderDash();renderFc();}document.getElementById('custom-drone-overlay').remove();showToast('Custom profile saved');}
-function initCustomDroneUI(){if(!PAID_FEATURES_ENABLED)return;loadCustomDrone();DRONES['custom']=customDrone;if(isPro()){var g=document.getElementById('drone-custom-group');if(g)g.style.display='';var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=customDrone.name;var bar=document.querySelector('.drone-bar');if(bar&&!document.getElementById('custom-drone-btn')){var btn=document.createElement('button');btn.id='custom-drone-btn';btn.textContent='+ Custom';btn.style.cssText='background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);padding:7px 8px;color:#f59e0b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;';btn.onclick=openCustomDroneEditor;bar.appendChild(btn);}}}
+function initCustomDroneUI(){
+  if(!PAID_FEATURES_ENABLED)return;
+  loadCustomDrone();DRONES['custom']=customDrone;
+  var customGrp=document.getElementById('drone-custom-group');
+  var teaserGrp=document.getElementById('drone-pro-teaser-group');
+  if(isPro()){
+    // Pro — show real custom drone option, remove teaser entirely
+    if(customGrp)customGrp.style.display='';
+    var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=customDrone.name;
+    if(teaserGrp)teaserGrp.remove();
+    var bar=document.querySelector('.drone-bar');
+    if(bar&&!document.getElementById('custom-drone-btn')){
+      var btn=document.createElement('button');btn.id='custom-drone-btn';btn.textContent='+ Custom';
+      btn.style.cssText='background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);padding:7px 8px;color:#f59e0b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;';
+      btn.onclick=openCustomDroneEditor;bar.appendChild(btn);
+    }
+  } else {
+    // Free — hide real custom group, show teaser
+    if(customGrp)customGrp.style.display='none';
+    if(teaserGrp)teaserGrp.style.display='';
+  }
+}
 function proFavNudge(favs){if(!PAID_FEATURES_ENABLED)return'';if(!isPro()&&favs.length>=2){return'<button class="fav-add" onclick="openProOverlay()" style="border-color:rgba(245,158,11,.4);color:#f59e0b;">+ More spots</button>';}if(isPro()){return'<button class="fav-add" onclick="toggleFavCurrent()">+ Add</button>';}return'';}
 function shareConditions(){if(!wxData||!wxData.current){showToast('No data to share yet');return;}var c=wxData.current;var cond=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15,c.wind_speed_80m||0,c.wind_speed_120m||0);var loc=document.getElementById('loc-name').textContent;var info=wmoInfo(c.weather_code||0);if(isPro()){shareProCard(cond,loc,c,info);return;}var text='DroneChecker - Flying Conditions\n'+cond.label+' in '+loc+'\n\n'+info.desc+'\nWind: '+spd(c.wind_speed_10m||0)+' '+spdU()+' Gusts: '+spd(c.wind_gusts_10m||0)+' '+spdU()+'\n'+Math.round(c.temperature_2m||0)+'C\n\ndronechecker.co.uk';if(navigator.share){navigator.share({text:text}).catch(function(){});}else{navigator.clipboard.writeText(text).then(function(){showToast('Copied to clipboard');}).catch(function(){showToast('Could not share');});}}
-function shareProCard(cond,loc,c,info){var canvas=document.createElement('canvas');canvas.width=800;canvas.height=420;var ctx=canvas.getContext('2d');var accentCol=cond.lvl==='green'?'#22c55e':cond.lvl==='amber'?'#f59e0b':'#ef4444';ctx.fillStyle='#0f172a';ctx.beginPath();ctx.roundRect(0,0,800,420,20);ctx.fill();ctx.fillStyle=accentCol;ctx.fillRect(0,0,6,420);ctx.fillStyle='#f1f5f9';ctx.font='bold 18px sans-serif';ctx.fillText('DroneChecker',32,40);ctx.fillStyle='#f59e0b';ctx.font='bold 11px sans-serif';ctx.fillText('PRO',32+ctx.measureText('DroneChecker').width+8,36);ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.fillText(loc,32,66);ctx.fillStyle=accentCol;ctx.font='bold 48px sans-serif';ctx.fillText(cond.label,32,140);ctx.fillStyle='#94a3b8';ctx.font='14px sans-serif';ctx.fillText(info.desc,32,168);var stats=[{label:'Wind',val:spd(c.wind_speed_10m||0)+' '+spdU()},{label:'Gusts',val:spd(c.wind_gusts_10m||0)+' '+spdU()},{label:'Temp',val:Math.round(c.temperature_2m||0)+'C'},{label:'KP',val:currentKp.toFixed(1)}];stats.forEach(function(s,i){var x=32+i*185;ctx.fillStyle='#1e293b';ctx.beginPath();ctx.roundRect(x,200,170,80,10);ctx.fill();ctx.fillStyle='#64748b';ctx.font='10px sans-serif';ctx.fillText(s.label.toUpperCase(),x+10,222);ctx.fillStyle='#f1f5f9';ctx.font='bold 22px sans-serif';ctx.fillText(s.val,x+10,254);});ctx.fillStyle='#334155';ctx.font='11px sans-serif';var ts=new Date().toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});ctx.fillText(ts+' - dronechecker.co.uk',32,390);canvas.toBlob(function(blob){if(!blob){doTxtShare();return;}var file=new File([blob],'dronechecker-conditions.png',{type:'image/png'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'DroneChecker '+cond.label,text:'Flying conditions in '+loc}).catch(function(){doImgDl(blob);});}else{doImgDl(blob);}function doImgDl(b){var url=URL.createObjectURL(b);var a=document.createElement('a');a.href=url;a.download='dronechecker-conditions.png';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Conditions card saved');}function doTxtShare(){var text='DroneChecker Pro - '+cond.label+' in '+loc;if(navigator.share){navigator.share({text:text}).catch(function(){});}else{navigator.clipboard.writeText(text).then(function(){showToast('Copied');});}}},'image/png');}
-function exportFlights(){if(!isPro()){showToast('Export is a Pro feature');openProOverlay();return;}var flights=loadFlights();if(!flights.length){showToast('No flights to export');return;}var bom='\uFEFF';var csv=bom+'Date,Location,Drone,Duration (mins),Flight Type,Conditions,Wind,Temperature,Visibility,Notes\n';flights.forEach(function(f){csv+=[csvCell(f.date),csvCell(f.loc),csvCell(f.drone),csvCell(f.dur),csvCell(f.type),csvCell(f.cond),csvCell(f.wxWind),csvCell(f.wxTemp),csvCell(f.wxVis),csvCell(f.notes)].join(',')+'\n';});var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='dronechecker-flights.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Exported to CSV');}
+function shareProCard(cond,loc,c,info){
+  var W=800,H=460;
+  var canvas=document.createElement('canvas');
+  canvas.width=W;canvas.height=H;
+  var ctx=canvas.getContext('2d');
+  var accentCol=cond.lvl==='green'?'#22c55e':cond.lvl==='amber'?'#f59e0b':'#ef4444';
+  var accentDim=cond.lvl==='green'?'rgba(34,197,94,0.12)':cond.lvl==='amber'?'rgba(245,158,11,0.12)':'rgba(239,68,68,0.12)';
+
+  // Background
+  ctx.fillStyle='#0a1628';
+  ctx.beginPath();ctx.roundRect(0,0,W,H,20);ctx.fill();
+
+  // Radial glow
+  var grd=ctx.createRadialGradient(160,200,10,160,200,280);
+  grd.addColorStop(0,accentDim);grd.addColorStop(1,'transparent');
+  ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+
+  // Left accent bar with gradient
+  var barGrd=ctx.createLinearGradient(0,0,0,H);
+  barGrd.addColorStop(0,accentCol);barGrd.addColorStop(1,'transparent');
+  ctx.fillStyle=barGrd;
+  ctx.beginPath();ctx.roundRect(0,0,5,H,4);ctx.fill();
+
+  // DroneChecker wordmark
+  ctx.fillStyle='#f1f5f9';
+  ctx.font='bold 20px system-ui,sans-serif';
+  ctx.fillText('DroneChecker',40,48);
+  var dcW=ctx.measureText('DroneChecker').width;
+
+  // PRO badge
+  ctx.fillStyle='rgba(245,158,11,0.15)';
+  ctx.beginPath();ctx.roundRect(40+dcW+8,30,44,20,4);ctx.fill();
+  ctx.fillStyle='#f59e0b';
+  ctx.font='bold 10px system-ui,sans-serif';
+  ctx.fillText('PRO',40+dcW+16,44);
+
+  // Location pill
+  var locText=loc.length>32?loc.slice(0,30)+'…':loc;
+  ctx.font='13px system-ui,sans-serif';
+  var locW=ctx.measureText('⊙ '+locText).width;
+  ctx.fillStyle='rgba(148,163,184,0.1)';
+  ctx.beginPath();ctx.roundRect(40,60,locW+16,24,12);ctx.fill();
+  ctx.fillStyle='#94a3b8';
+  ctx.fillText('⊙ '+locText,48,76);
+
+  // Timestamp top-right
+  ctx.fillStyle='#475569';
+  ctx.font='11px system-ui,sans-serif';
+  ctx.textAlign='right';
+  var ts=new Date().toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  ctx.fillText(ts,W-40,48);
+  ctx.textAlign='left';
+
+  // Rating circle
+  ctx.fillStyle=accentDim;
+  ctx.beginPath();ctx.arc(80,182,36,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=accentCol;ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(80,182,36,0,Math.PI*2);ctx.stroke();
+  var icon=cond.lvl==='green'?'✓':cond.lvl==='amber'?'⚠':'✕';
+  ctx.fillStyle=accentCol;
+  ctx.font='bold 28px system-ui,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText(icon,80,192);
+  ctx.textAlign='left';
+
+  // Rating label
+  ctx.fillStyle=accentCol;
+  ctx.font='bold 52px system-ui,sans-serif';
+  ctx.fillText(cond.label,130,200);
+
+  // Weather description
+  ctx.fillStyle='#64748b';
+  ctx.font='15px system-ui,sans-serif';
+  ctx.fillText(info.desc,130,228);
+
+  // Divider
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(40,258);ctx.lineTo(W-40,258);ctx.stroke();
+
+  // Stat tiles
+  var wind=c.wind_speed_10m||0;
+  var gust=c.wind_gusts_10m||0;
+  var temp=Math.round(c.temperature_2m||0);
+  var vis=c.visibility||10000;
+  var vd=visDisp(vis);
+  var d=getDrone();
+  var rWind=wind>=d.windRed?'red':wind>=d.windAmber?'amber':'green';
+  var rGust=gust>=d.gustRed?'red':gust>=d.gustAmber?'amber':'green';
+  function tileCol(r){return r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';}
+  function tileBg(r){return r==='red'?'rgba(239,68,68,0.1)':r==='amber'?'rgba(245,158,11,0.1)':'rgba(34,197,94,0.08)';}
+  var kpC=currentKp>=5?'red':currentKp>=4?'amber':'green';
+  var stats=[
+    {label:'WIND',val:spd(wind),unit:spdU(),col:tileCol(rWind),bg:tileBg(rWind)},
+    {label:'GUSTS',val:spd(gust),unit:spdU(),col:tileCol(rGust),bg:tileBg(rGust)},
+    {label:'TEMP',val:temp+'°',unit:'C',col:'#f1f5f9',bg:'rgba(255,255,255,0.05)'},
+    {label:'VISIBILITY',val:vd.val,unit:vd.unit,col:'#f1f5f9',bg:'rgba(255,255,255,0.05)'},
+    {label:'KP INDEX',val:currentKp.toFixed(1),unit:'',col:tileCol(kpC),bg:tileBg(kpC)},
+  ];
+  var tW=136,tH=90,tGap=14;
+  stats.forEach(function(s,i){
+    var x=40+i*(tW+tGap),y=272;
+    ctx.fillStyle=s.bg;
+    ctx.beginPath();ctx.roundRect(x,y,tW,tH,10);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect(x,y,tW,tH,10);ctx.stroke();
+    ctx.fillStyle='#475569';
+    ctx.font='10px system-ui,sans-serif';
+    ctx.fillText(s.label,x+12,y+20);
+    ctx.fillStyle=s.col;
+    ctx.font='bold 26px system-ui,sans-serif';
+    ctx.fillText(s.val,x+12,y+56);
+    if(s.unit){
+      ctx.fillStyle='#64748b';
+      ctx.font='12px system-ui,sans-serif';
+      ctx.fillText(s.unit,x+12,y+74);
+    }
+  });
+
+  // Footer bar
+  ctx.fillStyle='rgba(255,255,255,0.04)';
+  ctx.fillRect(0,H-38,W,38);
+  ctx.fillStyle='#334155';
+  ctx.font='12px system-ui,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('dronechecker.co.uk  —  Always verify airspace with the CAA before flying',W/2,H-14);
+  ctx.textAlign='left';
+
+  canvas.toBlob(function(blob){
+    if(!blob){doTxtShare();return;}
+    var file=new File([blob],'dronechecker-conditions.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'DroneChecker '+cond.label,text:'Flying conditions in '+loc}).catch(function(){doImgDl(blob);});
+    } else {doImgDl(blob);}
+    function doImgDl(b){var url=URL.createObjectURL(b);var a=document.createElement('a');a.href=url;a.download='dronechecker-conditions.png';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Conditions card saved');}
+    function doTxtShare(){var text='DroneChecker Pro - '+cond.label+' in '+loc;if(navigator.share){navigator.share({text:text}).catch(function(){});}else{navigator.clipboard.writeText(text).then(function(){showToast('Copied');});}}
+  },'image/png');
+}
+// exportFlights legacy stub — replaced by exportXlsx/exportGoogleSheets above
+function exportFlights(){exportXlsx();}
 function renderBestTimeCard(){if(!isPro()||!wxData||!wxData.hourly)return'';var hours=wxData.hourly,now=new Date(),today=now.toDateString(),candidates=[],todayHours=[],greenCount=0,amberCount=0;var sun=uLat&&uLng?calcSunTimes(uLat,uLng,now):null;for(var i=0;i<hours.time.length;i++){var t=new Date(hours.time[i]);if(t.toDateString()!==today||t<=now)continue;var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;var r=flyRating(w,g,v,wmo,getKpForTime(t),tp,w80,w120);var isGolden=sun&&((sun.goldMornS&&sun.goldMornE&&t>=sun.goldMornS&&t<=sun.goldMornE)||(sun.goldEveS&&sun.goldEveE&&t>=sun.goldEveS&&t<=sun.goldEveE));if(r.lvl==='green')greenCount++;else if(r.lvl==='amber')amberCount++;todayHours.push({t:t,rating:r.lvl,wind:w,gust:g,temp:tp,isGolden:isGolden});}if(!todayHours.length)return'';var total=todayHours.length;var verdictLine,verdictCol;if(greenCount>=Math.floor(total*.6)){verdictLine='Most of the day looks good to fly.';verdictCol='var(--green)';}else if(greenCount+amberCount>=Math.floor(total*.5)){verdictLine='Mixed conditions today - some good windows available.';verdictCol='var(--amber)';}else{verdictLine='Challenging conditions for most of today.';verdictCol='var(--red)';}var firstThird=todayHours.slice(0,Math.ceil(todayHours.length/3));var lastThird=todayHours.slice(Math.floor(todayHours.length*2/3));var avgFirst=firstThird.reduce(function(s,h){return s+h.wind;},0)/(firstThird.length||1);var avgLast=lastThird.reduce(function(s,h){return s+h.wind;},0)/(lastThird.length||1);var windTrend=avgLast-avgFirst;var trendStr=windTrend>3?'easing later':windTrend<-3?'picking up later':'staying consistent';var goldenHours=todayHours.filter(function(h){return h.isGolden;});var bestGolden=goldenHours.length?goldenHours[0]:null;var narrative='Wind is '+trendStr+' today.';var morningGreen=todayHours.filter(function(h){return h.t.getHours()<13&&h.rating==='green';}).length;var afternoonGreen=todayHours.filter(function(h){return h.t.getHours()>=13&&h.rating==='green';}).length;if(morningGreen>afternoonGreen)narrative+=' Conditions look better in the morning.';else if(afternoonGreen>morningGreen)narrative+=' Conditions look better in the afternoon.';if(bestGolden&&bestGolden.rating==='green')narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 looks flyable - good for photography.';else if(bestGolden&&bestGolden.rating==='amber')narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 is marginal.';else narrative+=' No golden hour overlap today.';return'<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div class="card-ttl" style="margin-bottom:0;">Today\'s conditions summary</div><span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div><div style="font-size:13px;font-weight:600;color:'+verdictCol+';margin-bottom:8px;">'+verdictLine+'</div><div style="font-size:12px;color:var(--muted);line-height:1.7;">'+narrative+'</div></div>';}
 function renderFlightStats(flights){if(!isPro()||flights.length<3)return'';var now=new Date(),months=[];for(var m=5;m>=0;m--){var d=new Date(now.getFullYear(),now.getMonth()-m,1);var label=d.toLocaleDateString('en-GB',{month:'short'});var mf=flights.filter(function(f){var fd=new Date(f.date);return fd.getMonth()===d.getMonth()&&fd.getFullYear()===d.getFullYear();});months.push({label:label,count:mf.length});}var maxCount=Math.max.apply(null,months.map(function(m){return m.count;}));if(maxCount===0)return'';var locMap={};flights.forEach(function(f){if(f.loc)locMap[f.loc]=(locMap[f.loc]||0)+1;});var topLocs=Object.keys(locMap).sort(function(a,b){return locMap[b]-locMap[a];}).slice(0,3);var good=flights.filter(function(f){return f.cond==='Good to Fly';}).length;var caution=flights.filter(function(f){return f.cond==='Fly with Caution';}).length;var avoid=flights.filter(function(f){return f.cond==='Do Not Fly';}).length;var bars=months.map(function(m){var h=maxCount>0?Math.max(4,Math.round((m.count/maxCount)*60)):4;return'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;"><div style="font-size:10px;color:var(--muted);">'+(m.count||'')+'</div><div style="width:100%;background:var(--accent);border-radius:3px 3px 0 0;height:'+h+'px;min-height:4px;opacity:'+(m.count?'1':'0.15')+';display:flex;"></div><div style="font-size:9px;color:var(--muted);">'+m.label+'</div></div>';}).join('');return'<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="card-ttl" style="margin-bottom:0;">Flight statistics</div><span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Flights per month</div><div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:16px;">'+bars+'</div>'+(topLocs.length?'<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Top locations</div>'+topLocs.map(function(l){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="color:var(--text);">'+esc(l)+'</span><span style="color:var(--muted);">'+locMap[l]+' flight'+(locMap[l]!==1?'s':'')+'</span></div>';}).join(''):'')+'<div style="display:flex;gap:8px;margin-top:12px;"><div style="flex:1;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--green);">'+good+'</div><div style="font-size:10px;color:var(--muted);">Good</div></div><div style="flex:1;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--amber);">'+caution+'</div><div style="font-size:10px;color:var(--muted);">Caution</div></div><div style="flex:1;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--red);">'+avoid+'</div><div style="font-size:10px;color:var(--muted);">Avoided</div></div></div></div>';}
 function prefetchSavedLocations(){

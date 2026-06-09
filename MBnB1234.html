@@ -785,7 +785,7 @@ var APP_VERSION='1.5.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',lastUpdated=null,windMap=null,windAnimFrame=null,airspaceLayer=null,airspaceVisible=false;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',lastUpdated=null,windMap=null,windAnimFrame=null;
 var UK_FRZS=[
   {n:'Heathrow',i:'EGLL',lat:51.4775,lng:-0.4614,r:5000},
   {n:'Gatwick',i:'EGKK',lat:51.1537,lng:-0.1821,r:5000},
@@ -2034,23 +2034,6 @@ function renderFc(){
     renderWeekPlanner(wxData.daily)+
     '<div style="height:14px;"></div>';
 }
-function toggleAirspace(){
-  airspaceVisible=!airspaceVisible;
-  var btn=document.getElementById('airspace-btn');
-  if(!windMap)return;
-  if(airspaceVisible){
-    airspaceLayer=L.layerGroup();
-    UK_FRZS.forEach(function(a){
-      L.circle([a.lat,a.lng],{radius:a.r,color:'#ef4444',fillColor:'#ef4444',fillOpacity:0.12,weight:1.5,opacity:0.7}).addTo(airspaceLayer);
-      L.marker([a.lat,a.lng],{icon:L.divIcon({html:'<div style="background:rgba(239,68,68,.85);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;white-space:nowrap;backdrop-filter:blur(4px);">✈ '+a.i+'</div>',className:'',iconAnchor:[20,10]}),interactive:false}).addTo(airspaceLayer);
-    });
-    airspaceLayer.addTo(windMap);
-    if(btn){btn.style.background='rgba(239,68,68,.3)';btn.style.borderColor='rgba(239,68,68,.6)';btn.style.color='#fca5a5';}
-  } else {
-    if(airspaceLayer){windMap.removeLayer(airspaceLayer);airspaceLayer=null;}
-    if(btn){btn.style.background='rgba(15,23,42,.88)';btn.style.borderColor='rgba(255,255,255,.1)';btn.style.color='rgba(241,245,249,.7)';}
-  }
-}
 function updateWindHrRows(alt){
   var d=getDrone();
   document.querySelectorAll('.wind-hr-row').forEach(function(row){
@@ -2161,7 +2144,6 @@ function initWindMap(){
     '</div>';
     count++;
   }
-  airspaceVisible=false;airspaceLayer=null;
   windEl.innerHTML=
     '<div style="display:flex;gap:6px;padding:10px 12px 4px;align-items:center;">'+
       '<div style="font-size:11px;color:var(--muted);font-weight:600;margin-right:2px;">ALTITUDE</div>'+
@@ -2184,10 +2166,8 @@ function initWindMap(){
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">80m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw80)+';height:100%;background:'+col80+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col80+';text-align:right;flex-shrink:0;">'+spd(raw80)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col80+';flex-shrink:0;">'+aLbl(raw80)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:6px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">120m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw120)+';height:100%;background:'+col120+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col120+';text-align:right;flex-shrink:0;">'+spd(raw120)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col120+';flex-shrink:0;">'+aLbl(raw120)+'</div></div>'+
       '</div>'+
-      '<button id="airspace-btn" onclick="toggleAirspace()" style="position:absolute;bottom:24px;right:48px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 11px;font-size:11px;font-weight:600;color:rgba(241,245,249,.7);cursor:pointer;font-family:inherit;white-space:nowrap;">✈ Airspace</button>'+
       '<button onclick="locateMeOnMap()" title="Centre map on my location" aria-label="Centre map on my location" style="position:absolute;bottom:24px;right:10px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;width:34px;height:34px;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">📍</button>'+
     '</div>'+
-    '<div style="font-size:11px;color:var(--muted);padding:5px 12px 0;line-height:1.4;">⚠ Airspace zones are indicative only. Always verify with the <a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">CAA</a> before flying.</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+
       '<div class="wx-tile"><div class="wx-lbl">Wind</div><div id="wtile-spd" class="wx-val" style="font-size:16px;">'+wind+'</div><div id="wtile-unit" class="wx-sub">'+spdU()+'</div></div>'+
       '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val" style="font-size:16px;">'+gust+'</div><div class="wx-sub">'+spdU()+' · 10m only</div></div>'+

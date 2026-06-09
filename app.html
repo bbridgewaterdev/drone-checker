@@ -850,11 +850,13 @@ function manualRefresh(){
   var btn=document.getElementById('refresh-btn');
   if(btn){btn.textContent='↻ Refreshing...';btn.style.opacity='0.6';}
   showToast('Refreshing weather...');
-  fetchAll();
+  // Force fresh GPS (maximumAge:0) — user may have moved since last fix.
+  // getLoc(true) will call fetchAll() once position is confirmed.
+  getLoc(true);
   setTimeout(function(){
     if(btn){btn.textContent='↻ Refresh';btn.style.opacity='1';}
     _refreshing=false;
-  },2500);
+  },3000);
 }
 function useMyLocation(){
   document.getElementById('loc-inp').value='';
@@ -1155,8 +1157,11 @@ function finishOnboarding(){
   var overlay=document.getElementById('onboard-overlay');
   if(overlay)overlay.style.display='none';
 }
-function getLoc(){
+function getLoc(forceFresh){
   if(!navigator.geolocation)return;
+  // forceFresh=true bypasses the GPS cache entirely (maximumAge:0) so users who
+  // have moved significantly (e.g. landed at a new airport) get the correct location.
+  var opts=forceFresh?{timeout:15000,maximumAge:0}:{timeout:15000,maximumAge:60000};
   navigator.geolocation.getCurrentPosition(
     function(p){
       var newLat=p.coords.latitude,newLng=p.coords.longitude;
@@ -1168,10 +1173,10 @@ function getLoc(){
         locEl.textContent='Your Location';
       }
       revGeo();
-      if(moved)fetchAll();
+      if(moved||forceFresh)fetchAll();
     },
     function(){}, // Silent failure — fetchAll() already fired from the load handler
-    {timeout:15000,maximumAge:300000}
+    opts
   );
 }
 function setLoc(lat,lng,name){uLat=lat;uLng=lng;document.getElementById('loc-name').textContent=name;renderFavBar();fetchAll();}
@@ -1296,7 +1301,14 @@ function fetchAll(){
       return r.json();
     })
     .then(function(data){
-      wxData=data;lastUpdated=new Date();saveWxCache(data);hideOfflineBanner();hideSplash();
+      wxData=data;
+      // Bug 2 fix: stamp lastUpdated only once live data is confirmed for
+      // these exact coordinates — prevents a stale "Just updated" from a
+      // GPS fix that belongs to a different location (e.g. previous country).
+      lastUpdated=new Date();
+      var updEl=document.getElementById('updated-txt');
+      if(updEl)updEl.textContent='Updated just now';
+      saveWxCache(data);hideOfflineBanner();hideSplash();
       renderDash();renderFc();renderGolden();
       fetchKp();
     })
@@ -1517,7 +1529,7 @@ function renderDash(){
   var tSecondary=unitMode==='mph'?Math.round(rawTemp)+'°C':Math.round(rawTemp*9/5+32)+'°F';
   var fPrimary=unitMode==='mph'?Math.round(c.apparent_temperature*9/5+32)+'°F':Math.round(c.apparent_temperature)+'°C';
   var fSecondary=unitMode==='mph'?Math.round(c.apparent_temperature)+'°C':Math.round(c.apparent_temperature*9/5+32)+'°F';
-  var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Just updated';
+  var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Loading...';
   var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
   var lipoWarnInner=rawTemp<10?
     '<div style="flex:1;min-width:0;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:flex-start;gap:8px;">'+
@@ -1996,6 +2008,21 @@ window.addEventListener('load',function(){
 
   // Step 3: Try geolocation in the background to get accurate position.
   getLoc();
+
+  // Re-fetch with fresh GPS if the app was backgrounded for 10+ minutes.
+  // Catches the "landed at a new airport and reopened the app" scenario.
+  var _hiddenAt=null;
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){
+      _hiddenAt=Date.now();
+    } else {
+      var away=_hiddenAt?Date.now()-_hiddenAt:0;
+      if(away>600000){
+        showToast('Checking your location...');
+        getLoc(true);
+      }
+    }
+  });
 
   startIntervals();
   setTimeout(function(){hideSplash();},5000);

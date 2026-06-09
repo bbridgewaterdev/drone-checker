@@ -181,7 +181,10 @@
     .log-empty-icon{font-size:36px;margin-bottom:12px;}
     .log-count{font-size:12px;color:var(--muted);padding:8px 12px 0;}
     .disclaimer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overscroll-behavior:none;}
-    .disclaimer-sheet{background:var(--bg2);border-radius:16px;padding:28px 20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;border:1px solid var(--border);}
+    .disclaimer-sheet{background:var(--bg2);border-radius:16px;padding:24px 20px 20px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;border:1px solid var(--border);-webkit-overflow-scrolling:touch;}
+    @media(max-height:680px){.disclaimer-sheet{padding:16px 16px 16px;max-height:92vh;border-radius:12px;}}
+    @media(max-height:680px){.disclaimer-icon{display:none;}.disclaimer-title{margin-bottom:4px;}.disclaimer-sub{margin-bottom:12px;}.disclaimer-box{margin-bottom:12px;padding:10px;}.disclaimer-check{margin-bottom:14px;}}
+    @keyframes bounceY{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
     .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
     .disclaimer-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;}
     .disclaimer-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;line-height:1.5;}
@@ -255,10 +258,11 @@
       }
     }
     .onboard-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.95);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
-    .onboard-sheet{background:var(--bg2);border-radius:20px;padding:32px 24px 24px;width:100%;max-width:380px;border:1px solid var(--border);text-align:center;}
+    .onboard-sheet{background:var(--bg2);border-radius:20px;padding:28px 24px 20px;width:100%;max-width:380px;border:1px solid var(--border);text-align:center;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
     .onboard-slide{display:none;}
     .onboard-slide.on{display:block;}
-    .onboard-icon{font-size:56px;margin-bottom:20px;line-height:1;}
+    .onboard-icon{font-size:56px;margin-bottom:16px;line-height:1;}
+    @media(max-height:680px){.onboard-sheet{padding:16px 20px 16px;}.onboard-icon{font-size:36px;margin-bottom:10px;}.onboard-title{font-size:17px;margin-bottom:6px;}.onboard-desc{font-size:13px;margin-bottom:12px;}}
     .onboard-title{font-size:21px;font-weight:700;margin-bottom:10px;color:var(--text);}
     .onboard-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;}
     .onboard-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px;}
@@ -304,11 +308,12 @@
     <div class="disclaimer-title">Before you fly</div>
     <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
     <div class="disclaimer-box">
-      <strong>Advisory use only.</strong> DroneChecker provides weather, wind and condition information to assist your pre-flight planning. All ratings and recommendations are <strong>advisory only</strong> and do not constitute official aviation guidance.<br><br>
-      <strong>You are responsible.</strong> The pilot in command is solely and legally responsible for safe and lawful drone operations at all times. Always verify conditions, airspace and restrictions independently before flying.<br><br>
-      <strong>No liability.</strong> DroneChecker and its developers accept no liability for loss, damage, injury or legal consequence arising from reliance on information provided by this app.<br><br>
-      <strong>Analytics.</strong> By accepting, you also consent to anonymous usage analytics (Google Analytics with IP anonymisation) that help us improve the app. No personally identifiable information is collected. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> for details.
+      <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and restrictions independently.<br><br>
+      <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times.<br><br>
+      <strong>No liability.</strong> DroneChecker accepts no liability for loss, damage or legal consequence from reliance on this app.<br><br>
+      <strong>Analytics.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). No personal data collected. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a>.
     </div>
+    <div id="disc-scroll-hint" style="text-align:center;padding:6px 0 10px;font-size:12px;color:var(--muted);animation:bounceY 1.4s ease-in-out infinite;">↓ Scroll to accept</div>
     <label class="disclaimer-check">
       <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
       <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
@@ -867,11 +872,10 @@ function useMyLocation(){
   navigator.geolocation.getCurrentPosition(
     function(p){
       uLat=p.coords.latitude;uLng=p.coords.longitude;
-      // Show something immediately while Nominatim resolves the real name
-      // Let revGeo resolve the real name — don't pre-set "Your Location"
       revGeo();fetchAll();
     },
-    function(){showToast('Could not get location');}
+    function(){showToast('Could not get location');},
+    {timeout:12000,maximumAge:0}
   );
 }
 function loadFavs(){try{return JSON.parse(localStorage.getItem('dc_favs'))||[];}catch(e){return[];}}
@@ -1084,6 +1088,19 @@ function checkDisclaimer(){
   if(disclaimerAccepted){overlay.style.display='none';return;}
   overlay.style.display='flex';
   document.body.style.overflow='hidden';
+  // Hide the scroll hint once the user scrolls down enough to see the checkbox
+  var sheet=overlay.querySelector('.disclaimer-sheet');
+  var hint=document.getElementById('disc-scroll-hint');
+  if(sheet&&hint){
+    // If content fits without scrolling, hide hint immediately
+    if(sheet.scrollHeight<=sheet.clientHeight){hint.style.display='none';}
+    else{
+      sheet.addEventListener('scroll',function(){
+        var remaining=sheet.scrollHeight-sheet.scrollTop-sheet.clientHeight;
+        if(remaining<60){hint.style.display='none';}
+      },{passive:true});
+    }
+  }
 }
 function updateDisclaimerBtn(){
   var cb=document.getElementById('disclaimer-cb');
@@ -1712,6 +1729,22 @@ function switchWindAlt(alt){
   updateWindHrRows(alt);
   if(window._wAlt.relaunch)window._wAlt.relaunch();
 }
+function locateMeOnMap(){
+  if(!navigator.geolocation){showToast('Location not supported');return;}
+  showToast('Finding your location...');
+  navigator.geolocation.getCurrentPosition(
+    function(p){
+      var newLat=p.coords.latitude,newLng=p.coords.longitude;
+      var moved=!uLat||!uLng||Math.abs(newLat-uLat)>0.01||Math.abs(newLng-uLng)>0.01;
+      uLat=newLat;uLng=newLng;
+      if(windMap)windMap.setView([uLat,uLng],13);
+      if(moved){revGeo();fetchAll();}
+      else{showToast('Location confirmed');}
+    },
+    function(){showToast('Could not get location');},
+    {timeout:12000,maximumAge:0}
+  );
+}
 function initWindMap(){
   var windEl=document.getElementById('wind-display');
   if(!windEl)return;
@@ -1788,6 +1821,7 @@ function initWindMap(){
         '<div style="display:flex;align-items:center;gap:6px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">120m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw120)+';height:100%;background:'+col120+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col120+';text-align:right;flex-shrink:0;">'+spd(raw120)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col120+';flex-shrink:0;">'+aLbl(raw120)+'</div></div>'+
       '</div>'+
       '<button id="airspace-btn" onclick="toggleAirspace()" style="position:absolute;bottom:24px;right:48px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:7px 11px;font-size:11px;font-weight:600;color:rgba(241,245,249,.7);cursor:pointer;font-family:inherit;white-space:nowrap;">✈ Airspace</button>'+
+      '<button onclick="locateMeOnMap()" title="Centre map on my location" aria-label="Centre map on my location" style="position:absolute;bottom:24px;right:10px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;width:34px;height:34px;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">📍</button>'+
     '</div>'+
     '<div style="font-size:11px;color:var(--muted);padding:5px 12px 0;line-height:1.4;">⚠ Airspace zones are indicative only. Always verify with the <a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">CAA</a> before flying.</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+

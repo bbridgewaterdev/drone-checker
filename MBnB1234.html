@@ -673,7 +673,7 @@
         <div class="search">
           <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. SW1 or London" aria-label="Search postcode or town" onkeydown="if(event.key==='Enter')doSearch()"/>
           <button onclick="doSearch()" aria-label="Search">Search</button>
-          <button class="myloc-btn" onclick="useMyLocation()" title="Use my location" aria-label="Use my current location">📍</button>
+          <button class="myloc-btn" onclick="useMyLocation()" title="Use my location" aria-label="Use my current location" style="color:var(--text);display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg></button>
           <button onclick="toggleFavCurrent()" id="fav-btn" aria-label="Save as favourite" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:16px;cursor:pointer;line-height:1;flex-shrink:0;">☆</button>
         </div>
         <div class="fav-bar" id="fav-bar"></div>
@@ -1841,7 +1841,7 @@ function renderDash(){
   var warningsRow=(lipoWarnInner||nightWarnInner)?'<div style="display:flex;gap:8px;margin-top:8px;">'+lipoWarnInner+nightWarnInner+'</div>':'';
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">🔗 Share</button></div>'+
-    renderFlightWindowCard()+renderBestTimeCard()+
+    renderBestTimeCard()+renderFlightWindowCard()+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tPrimary+' <span style="font-size:22px;font-weight:600;color:var(--muted);">/ '+tSecondary+'</span></div><div class="wx-desc">'+info.desc+' &middot; feels '+fPrimary+' / '+fSecondary+'</div></div></div>'+
     '<div class="wx-grid">'+
     '<div class="wx-tile '+rWind+'"><div class="wx-lbl"><span>Wind</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rWind+'">'+spd(wind)+' <span style="font-size:11px;font-weight:400;">'+spdU()+'</span></div><div class="wx-sub">'+dirLabel(c.wind_direction_10m||0)+' &middot; '+(wind*0.54).toFixed(1)+' kt</div><div class="wx-info-panel">Wind speed at 10m above ground. This directly determines whether your drone can hold position and return home safely. Above your drone\'s rated limit it may struggle to resist being pushed sideways or downwind.</div></div>'+
@@ -1925,49 +1925,49 @@ function buildFcHourDetail(wind,gust,vis,wmo,rawTemp,w80,w120,precip,kpVal){
     '<div class="fcd-grid">'+
       // Wind
       '<div class="fcd-tile">'+
-        '<div class="fcd-lbl">🌬 Wind (10m)</div>'+
+        '<div class="fcd-lbl">Wind (10m)</div>'+
         '<div class="fcd-val">'+spd(wind)+'<span> '+spdU()+'</span></div>'+
         '<div class="fcd-sub">'+(rWind==='green'?'Within limits':rWind==='amber'?'Approaching limit':'Exceeds limit')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rWind+'" style="width:'+barW(wind,drone.windRed)+';"></div></div>'+
       '</div>'+
       // Gusts
       '<div class="fcd-tile">'+
-        '<div class="fcd-lbl">💨 Gusts</div>'+
+        '<div class="fcd-lbl">Gusts</div>'+
         '<div class="fcd-val">'+spd(gust)+'<span> '+spdU()+'</span></div>'+
         '<div class="fcd-sub">'+(rGust==='green'?'Stable':rGust==='amber'?'Moderate':'Strong')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rGust+'" style="width:'+barW(gust,drone.gustRed)+';"></div></div>'+
       '</div>'+
       // Air smoothness
       '<div class="fcd-tile">'+
-        '<div class="fcd-lbl">〰 Air Smoothness</div>'+
+        '<div class="fcd-lbl">Air Smoothness</div>'+
         '<div class="fcd-val">'+smoothLbl+'</div>'+
         '<div class="fcd-sub">'+(rSmooth==='green'?'Steady — great for footage':rSmooth==='amber'?'Some variation — fly with care':'Gusty — expect jerky footage')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rSmooth+'" style="width:'+(ratio>=0.75?'100':ratio>=0.35?'55':'20')+'%;"></div></div>'+
       '</div>'+
       // Rain
       '<div class="fcd-tile">'+
-        '<div class="fcd-lbl">💧 Rain Chance</div>'+
+        '<div class="fcd-lbl">Rain Chance</div>'+
         '<div class="fcd-val">'+precip+'<span>%</span></div>'+
         '<div class="fcd-sub">'+(precip>=70?'Avoid flying':precip>=50?'High — stay grounded':precip>=30?'Moderate — be cautious':precip>0?'Low chance':'Unlikely')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+precipColor+'" style="width:'+precip+'%;"></div></div>'+
       '</div>'+
       // Visibility
       '<div class="fcd-tile">'+
-        '<div class="fcd-lbl">👁 Visibility</div>'+
+        '<div class="fcd-lbl">Visibility</div>'+
         '<div class="fcd-val">'+vd.val+'<span> '+vd.unit+'</span></div>'+
         '<div class="fcd-sub">'+(rVis==='green'?'Clear — no restrictions':rVis==='amber'?'Reduced — stay cautious':'Poor — do not fly')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rVis+'" style="width:'+barW(Math.min(vis,10000),10000)+';"></div></div>'+
       '</div>'+
       // KP
       '<div class="fcd-tile">'+
-        '<div class="fcd-lbl">🧲 KP Index</div>'+
+        '<div class="fcd-lbl">KP Index</div>'+
         '<div class="fcd-val">'+kpVal.toFixed(1)+'</div>'+
         '<div class="fcd-sub">'+(kpC==='red'?'GPS unreliable — do not fly':kpC==='amber'?'GPS drift possible — fly with care':'No geomagnetic activity')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+kpC+'" style="width:'+barW(kpVal,9)+';"></div></div>'+
       '</div>'+
       // Wind at altitude — full width
       '<div class="fcd-tile fcd-tile-wide">'+
-        '<div class="fcd-lbl">📡 Wind at Altitude</div>'+
+        '<div class="fcd-lbl">Wind at Altitude</div>'+
         '<div class="fcd-alt-row">'+
           ['10m','80m','120m'].map(function(h,idx){
             var vals=[wind,w80,w120];var rs=[rWind,rW80,rW120];
@@ -2166,7 +2166,7 @@ function initWindMap(){
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">80m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw80)+';height:100%;background:'+col80+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col80+';text-align:right;flex-shrink:0;">'+spd(raw80)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col80+';flex-shrink:0;">'+aLbl(raw80)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:6px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">120m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw120)+';height:100%;background:'+col120+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col120+';text-align:right;flex-shrink:0;">'+spd(raw120)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col120+';flex-shrink:0;">'+aLbl(raw120)+'</div></div>'+
       '</div>'+
-      '<button onclick="locateMeOnMap()" title="Centre map on my location" aria-label="Centre map on my location" style="position:absolute;bottom:24px;right:10px;z-index:1000;background:rgba(15,23,42,.88);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;width:34px;height:34px;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">📍</button>'+
+      '<button onclick="locateMeOnMap()" title="Centre map on my location" aria-label="Centre map on my location" style="position:absolute;bottom:90px;right:10px;z-index:1000;background:#334155;border:1px solid rgba(255,255,255,.2);border-radius:9px;width:34px;height:34px;cursor:pointer;color:#f1f5f9;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg></button>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+
       '<div class="wx-tile"><div class="wx-lbl">Wind</div><div id="wtile-spd" class="wx-val" style="font-size:16px;">'+wind+'</div><div id="wtile-unit" class="wx-sub">'+spdU()+'</div></div>'+
@@ -2497,8 +2497,8 @@ function initRestrictMap(){var mapEl=document.getElementById('restrict-map-el');
   locBtn.id='restrict-locate-btn';
   locBtn.title='Go to my location';
   locBtn.setAttribute('aria-label','Centre map on my location');
-  locBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>';
-  locBtn.style.cssText='position:absolute;bottom:60px;right:10px;z-index:1000;width:36px;height:36px;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(241,245,249,.85);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:color .15s,border-color .15s;';
+  locBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>';
+  locBtn.style.cssText='position:absolute;bottom:60px;right:10px;z-index:1000;width:36px;height:36px;background:#334155;border:1px solid rgba(255,255,255,.2);border-radius:9px;color:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:color .15s,border-color .15s;';
   locBtn.onclick=locateOnRestrictMap;
   mapEl.style.position='relative';
   mapEl.appendChild(locBtn);

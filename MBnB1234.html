@@ -521,12 +521,15 @@
               isPro:isProStatus
             });
             // Returning from sign-in redirect:
-            // If not yet Pro, reopen the overlay so they can complete payment.
-            // If already Pro, onGoogleSignInSuccess will show the welcome toast.
-            if(!isProStatus){
-              setTimeout(function(){
-                if(typeof openProOverlay==='function')openProOverlay();
-              },800);
+            // Call onGoogleSignInSuccess to update UI properly
+            if(typeof onGoogleSignInSuccess==='function'){
+              onGoogleSignInSuccess({
+                uid:fbUser.uid,
+                name:fbUser.displayName||fbUser.email,
+                email:fbUser.email,
+                photoUrl:fbUser.photoURL||'',
+                isPro:isProStatus
+              });
             }
           });
         } else {
@@ -2882,7 +2885,7 @@ var CHECKOUT_URL='https://createcheckoutsession-5cv3lc72vq-uc.a.run.app';
 
 function handleSubscribe(){
   // If not signed in, go to sign-in screen first
-  if(!proUser){
+  if(!proUser||!proUser.uid||!proUser.email){
     showProSignin();
     return;
   }
@@ -2957,9 +2960,19 @@ function showProUpgrade(){
   var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');
   if(u)u.style.display='';
   if(s)s.style.display='none';
-  // Always reset the sign-in button so it's never stuck greyed out after sign-out
+  // Reset the sign-in button
   var btn=document.getElementById('pro-google-signin-btn');
   if(btn){btn.style.opacity='1';btn.disabled=false;}
+  // If already signed in, update the subscribe button to go straight to checkout
+  var subBtn=document.getElementById('pro-subscribe-btn');
+  if(subBtn){
+    if(proUser&&!proUser.isPro){
+      subBtn.textContent='Subscribe as '+((proUser.name||'').split(' ')[0]||proUser.email||'you')+' · £2.99/month';
+    } else {
+      subBtn.textContent='Get Pro · £2.99/month';
+    }
+    subBtn.disabled=false;
+  }
 }
 function showProSignin(){var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');if(u)u.style.display='none';if(s)s.style.display='';}
 function showProSignedIn(){var sheet=document.getElementById('pro-sheet');if(!sheet||!proUser)return;var initials=(proUser.name||proUser.email||'U').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();sheet.innerHTML='<div class="pro-sheet-header"><div style="width:24px;"></div><div style="font-size:13px;font-weight:600;color:var(--muted);">Your Pro Account</div><button class="pro-close" onclick="closeProOverlay()">&times;</button></div><div class="pro-body" style="padding-top:12px;"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--text);">'+esc(proUser.name||'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(proUser.email||'')+'</div><div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;">DroneChecker Pro</div></div></div><div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Subscription: <strong style="color:var(--green);">Active</strong></div><button onclick="signOutPro()" style="width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:12px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;">Sign out</button><button onclick="closeProOverlay()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button></div>';}

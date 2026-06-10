@@ -14,7 +14,7 @@ const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
 const PRICE_ID = 'price_1TgjvDBwELWfTObfoMWjvt6N';
 
 // ---- App URL — where Stripe redirects after checkout ----
-const APP_URL = 'https://dronechecker.co.uk/app.html';
+const APP_URL = 'https://dronechecker.co.uk/MBnB1234.html';
 
 // ----------------------------------------------------------------
 // createCheckoutSession

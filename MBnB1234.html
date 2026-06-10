@@ -2970,7 +2970,11 @@ function handleStripeReturn(){
   }catch(e){}
 }
 
-function restoreOverlayZ(){var o=document.getElementById('pro-overlay');if(o)o.style.zIndex='';}
+function restoreOverlay(){
+  var o=document.getElementById('pro-overlay');
+  if(o){o.style.display='flex';o.style.zIndex='';}
+  document.body.style.overflow='hidden';
+}
 function openProOverlay(){if(!PAID_FEATURES_ENABLED)return;var o=document.getElementById('pro-overlay');if(!o)return;if(isPro()){showProSignedIn();}else{showProUpgrade();}o.style.display='flex';document.body.style.overflow='hidden';}
 function closeProOverlay(){var o=document.getElementById('pro-overlay');if(o)o.style.display='none';document.body.style.overflow='';}
 function showProUpgrade(){
@@ -3033,9 +3037,10 @@ function handleGoogleSignIn(){
   var btn=document.getElementById('pro-google-signin-btn');
   if(btn){btn.style.opacity='0.6';btn.disabled=true;}
 
-  // Hide the overlay so the Google popup appears on top
+  // Close the overlay so the Google popup appears on top unobstructed
   var overlay=document.getElementById('pro-overlay');
-  if(overlay)overlay.style.zIndex='0';
+  if(overlay)overlay.style.display='none';
+  document.body.style.overflow='';
 
   // DEV MODE
   if(GSI_DEV_MODE){
@@ -3063,7 +3068,7 @@ function handleGoogleSignIn(){
             var googleCred=firebase.auth.GoogleAuthProvider.credential(response.credential);
             firebase.auth().signInWithCredential(googleCred).then(function(result){
               var fbUser=result.user;
-              restoreOverlayZ();
+              restoreOverlay();
               fetchProStatus(fbUser.uid,function(isProStatus){
                 if(btn){btn.style.opacity='1';btn.disabled=false;}
                 onGoogleSignInSuccess({
@@ -3075,7 +3080,7 @@ function handleGoogleSignIn(){
                 });
               });
             }).catch(function(e){
-              restoreOverlayZ();
+              restoreOverlay();
               if(btn){btn.style.opacity='1';btn.disabled=false;}
               showToast('Sign-in failed. Please try again.');
               console.error('[DC] signInWithCredential error:',e);

@@ -2939,7 +2939,7 @@ function handleStripeReturn(){
     var pro=params.get('pro');
     if(!pro)return;
     // Clean the URL
-    window.history.replaceState({},'','/app.html');
+    window.history.replaceState({},'','/MBnB1234.html');
     if(pro==='success'){
       // Payment succeeded — refresh Pro status from Firestore
       showToast('Payment successful! Activating Pro…');
@@ -2950,14 +2950,21 @@ function handleStripeReturn(){
               proUser.isPro=true;
               saveProUser(proUser);
               updateProUI();
+              if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
               if(wxData){renderDash();renderFc();}
               showToast('Pro is now active. Welcome!');
             } else {
               // Webhook may not have fired yet — retry once after 3s
               setTimeout(function(){
                 fetchProStatus(proUser.uid,function(s){
-                  if(s){proUser.isPro=true;saveProUser(proUser);updateProUI();if(wxData){renderDash();renderFc();}showToast('Pro is now active. Welcome!');}
-                  else{showToast('Payment received — Pro will activate shortly.');}
+                  if(s){
+                    proUser.isPro=true;saveProUser(proUser);updateProUI();
+                    if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
+                    if(wxData){renderDash();renderFc();}
+                    showToast('Pro is now active. Welcome!');
+                  } else {
+                    showToast('Payment received — Pro will activate shortly.');
+                  }
                 });
               },3000);
             }
@@ -3124,6 +3131,7 @@ function onGoogleSignInSuccess(user){
     // Already Pro — close overlay and welcome them
     closeProOverlay();
     showToast('Welcome back, '+firstName+'! Pro is active.');
+    if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
     if(wxData){renderDash();renderFc();}
   } else {
     // Signed in but not yet Pro — keep overlay open on upgrade screen

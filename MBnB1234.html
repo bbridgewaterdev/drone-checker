@@ -2828,10 +2828,14 @@ window.addEventListener('load',function(){
   if(_returningFromSignIn){
     try{sessionStorage.removeItem('dc_signin_pending');}catch(e){}
     showToast('Signing you in…');
+    console.log('[DC] Returning from sign-in redirect, loading Firebase...');
     // Load Firebase immediately and process redirect result
     loadFirebase(function(){
+      console.log('[DC] Firebase loaded, calling getRedirectResult...');
       firebase.auth().getRedirectResult().then(function(result){
+        console.log('[DC] getRedirectResult result:', result);
         if(result&&result.user){
+          console.log('[DC] Got user from redirect:', result.user.email);
           var fbUser=result.user;
           fetchProStatus(fbUser.uid,function(isProStatus){
             var user={
@@ -3073,7 +3077,10 @@ function handleGoogleSignIn(){
       provider.addScope('email');
       provider.addScope('profile');
       // Store a flag so we can show a "signing you in..." message on return
-      try{sessionStorage.setItem('dc_signin_pending','1');}catch(e){}
+      try{
+        sessionStorage.setItem('dc_signin_pending','1');
+        console.log('[DC] Set dc_signin_pending, redirecting to Google...');
+      }catch(e){console.error('[DC] sessionStorage error:',e);}
       firebase.auth().signInWithRedirect(provider);
       // Page will navigate away — button state doesn't matter after this
     }catch(e){

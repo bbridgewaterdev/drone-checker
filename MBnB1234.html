@@ -3147,24 +3147,24 @@ function handleGoogleSignIn(){
       }
   }
 
-  // Detect Safari — it blocks GSI popups reliably, use Firebase redirect instead
+  // Detect Safari — Firebase Auth is blocked by Safari ITP
   var isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   if(isSafari){
-    // Safari: use signInWithRedirect — most reliable cross-browser fallback
-    loadFirebase(function(){
-      try{
-        var provider=new firebase.auth.GoogleAuthProvider();
-        provider.addScope('email');
-        provider.addScope('profile');
-        firebase.auth().signInWithRedirect(provider);
-      }catch(e){
-        if(btn){btn.style.opacity='1';btn.disabled=false;}
-        restoreOverlay();
-        showToast('Sign-in error. Please try again.');
-        console.error('[DC] Safari redirect error:',e);
+    if(btn){btn.style.opacity='1';btn.disabled=false;}
+    restoreOverlay();
+    // Show a helpful browser recommendation
+    var signinScreen=document.getElementById('pro-screen-signin');
+    if(signinScreen){
+      var notice=document.createElement('div');
+      notice.style.cssText='background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px 14px;margin:12px 20px 0;font-size:12px;color:var(--text);line-height:1.5;text-align:center;';
+      notice.innerHTML='<strong style="color:#f59e0b;">Safari tip:</strong> For the best sign-in experience, open DroneChecker in <strong>Chrome</strong> or <strong>Edge</strong>. Tap the share button ⧉ and select "Open in Chrome".';
+      var existingNotice=signinScreen.querySelector('.safari-notice');
+      if(!existingNotice){
+        notice.className='safari-notice';
+        signinScreen.insertBefore(notice,signinScreen.firstChild);
       }
-    });
+    }
     return;
   }
 

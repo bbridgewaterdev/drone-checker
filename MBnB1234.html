@@ -674,8 +674,8 @@
             <optgroup label="Pro" id="drone-custom-group" style="display:none;">
               <option value="custom" id="drone-custom-option">My Custom Drone</option>
             </optgroup>
-            <optgroup label="──────────" id="drone-pro-teaser-group" style="display:none;">
-              <option value="__pro__" id="drone-pro-teaser">✦ Custom Drone (Pro only)</option>
+            <optgroup label="Pro" id="drone-pro-teaser-group">
+              <option value="__pro__" id="drone-pro-teaser">My Custom Drone (Pro only)</option>
             </optgroup>
           </select>
           <span class="drone-limits" id="drone-limits"></span>
@@ -833,10 +833,8 @@ function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])
 function saveDrone(){
   var sel=document.getElementById('drone-sel');
   if(!sel)return;
-  // Intercept the Pro teaser option — open upgrade overlay instead
   if(sel.value==='__pro__'){
     openProOverlay();
-    // Revert selection to previous drone
     sel.value=selectedDrone||'mini4pro';
     return;
   }
@@ -1584,18 +1582,98 @@ function shareConditions(){
   var cond=flyRating(c.wind_speed_10m||0,c.wind_gusts_10m||0,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m||15,c.wind_speed_80m||0,c.wind_speed_120m||0);
   var loc=document.getElementById('loc-name').textContent;
   var info=wmoInfo(c.weather_code||0);
-  if(isPro()){shareProCard(cond,loc,c,info);return;}
-  // Free tier — text share
   var emoji=cond.lvl==='green'?'🟢':cond.lvl==='amber'?'🟡':'🔴';
-  var text=
-    'DroneChecker — Flying Conditions\n'+
-    emoji+' '+cond.label+' in '+loc+'\n\n'+
-    '🌤️ '+info.desc+'\n'+
-    '💨 Wind: '+spd(c.wind_speed_10m||0)+' '+spdU()+' · Gusts: '+spd(c.wind_gusts_10m||0)+' '+spdU()+'\n'+
-    '🌡️ '+Math.round(c.temperature_2m||0)+'°C / '+Math.round((c.temperature_2m||0)*9/5+32)+'°F\n\n'+
-    '🔗 dronechecker.co.uk';
+  var wind=spd(c.wind_speed_10m||0),gust=spd(c.wind_gusts_10m||0),u=spdU();
+  var temp=Math.round(c.temperature_2m||0),tempF=Math.round(temp*9/5+32);
+  var text;
+  if(isPro()){
+    var vis=visDisp(c.visibility||10000);
+    var kpStr=currentKp>=5?'⚠ KP '+currentKp.toFixed(1)+' — possible GPS drift':currentKp>=4?'⚠ KP '+currentKp.toFixed(1)+' — monitor closely':'KP '+currentKp.toFixed(1)+' — stable';
+    var w80=spd(c.wind_speed_80m||0),w120=spd(c.wind_speed_120m||0);
+    var next24=getNext24hRatings(),wins=getFlightWindows(next24),now=new Date();
+    var nextWin=null;for(var i=0;i<wins.length;i++){if(wins[i].start>now&&!nextWin){nextWin=wins[i];}}
+    var winLine=nextWin?'🕐 Next window: '+pad(nextWin.start.getHours())+':00 – '+pad(new Date(nextWin.end.getTime()+3600000).getHours())+':00':'🕐 No flyable windows in next 24h';
+    text=
+      'DroneChecker Pro — Flying Conditions\n'+
+      emoji+' '+cond.label+' in '+loc+'\n\n'+
+      '🌤️ '+info.desc+'\n'+
+      '💨 Wind: '+wind+' '+u+' · Gusts: '+gust+' '+u+'\n'+
+      '📡 80m: '+w80+' '+u+' · 120m: '+w120+' '+u+'\n'+
+      '🌡️ '+temp+'°C / '+tempF+'°F\n'+
+      '👁 Visibility: '+vis.val+' '+vis.unit+'\n'+
+      '🧲 '+kpStr+'\n'+
+      winLine+'\n\n'+
+      '🔗 dronechecker.co.uk';
+  } else {
+    text=
+      'DroneChecker — Flying Conditions\n'+
+      emoji+' '+cond.label+' in '+loc+'\n\n'+
+      '🌤️ '+info.desc+'\n'+
+      '💨 Wind: '+wind+' '+u+' · Gusts: '+gust+' '+u+'\n'+
+      '🌡️ '+temp+'°C / '+tempF+'°F\n\n'+
+      '🔗 dronechecker.co.uk';
+  }
+  doTextShare(text);
+}
+
+function doTextShare(text){
   if(navigator.share){navigator.share({text:text}).catch(function(){});}
   else{navigator.clipboard.writeText(text).then(function(){showToast('📋 Copied to clipboard');}).catch(function(){showToast('Could not share');});}
+}
+
+function shareFlightWindow(){
+  if(!wxData||!wxData.hourly)return;
+  var loc=document.getElementById('loc-name')?document.getElementById('loc-name').textContent:'';
+  var next24=getNext24hRatings(),wins=getFlightWindows(next24),now=new Date();
+  var currentWin=null,nextWin=null;
+  for(var i=0;i<wins.length;i++){
+    var w=wins[i],wEnd=new Date(w.end.getTime()+3600000);
+    if(now>=w.start&&now<=wEnd){currentWin=w;}
+    else if(w.start>now&&!nextWin){nextWin=w;}
+  }
+  var primaryWin=currentWin||nextWin;
+  var isOpen=!!currentWin;
+  var text;
+  if(isPro()){
+    var goodHours=next24.filter(function(r){return r.rating==='green';}).length;
+    var cautionHours=next24.filter(function(r){return r.rating==='amber';}).length;
+    var winLine,subLine='';
+    if(!primaryWin){
+      winLine='✈ No flyable windows in the next 24h';
+    } else {
+      var wEnd2=new Date(primaryWin.end.getTime()+3600000);
+      var startStr=pad(primaryWin.start.getHours())+':00',endStr=pad(wEnd2.getHours())+':00';
+      if(isOpen){
+        var minsLeft=Math.round((wEnd2-now)/60000);
+        winLine='✅ Window open now — until '+endStr;
+        subLine=(minsLeft>=60?Math.floor(minsLeft/60)+'h '+(minsLeft%60)+'m':minsLeft+'m')+' remaining';
+      } else {
+        var isTomorrow=primaryWin.start.getDate()!==now.getDate();
+        winLine='🕐 Next window: '+startStr+' – '+endStr;
+        subLine=isTomorrow?'Tomorrow':countdown(primaryWin.start).replace('in ','Opens in ');
+      }
+    }
+    if(nextWin&&isOpen){
+      var nEnd=new Date(nextWin.end.getTime()+3600000);
+      subLine+=(subLine?'\n':'')+'🕐 Then: '+pad(nextWin.start.getHours())+':00 – '+pad(nEnd.getHours())+':00';
+    }
+    text=
+      'DroneChecker Pro — Best Flight Window\n'+
+      '📍 '+loc+'\n\n'+
+      winLine+'\n'+
+      (subLine?subLine+'\n':'')+'\n'+
+      '📊 Next 24h: '+goodHours+'h good · '+cautionHours+'h caution\n\n'+
+      '🔗 dronechecker.co.uk';
+  } else {
+    var winTxt=primaryWin?
+      pad(primaryWin.start.getHours())+':00 – '+pad(new Date(primaryWin.end.getTime()+3600000).getHours())+':00':
+      'No flyable windows';
+    text=
+      'DroneChecker — Best Flight Window\n'+
+      '✈ '+winTxt+' in '+loc+'\n\n'+
+      '🔗 dronechecker.co.uk';
+  }
+  doTextShare(text);
 }
 
 function startIntervals(){
@@ -2679,8 +2757,7 @@ function handleGoogleSignIn(){
   if(btn){btn.style.opacity='1';btn.disabled=false;}
 }
 function onGoogleSignInSuccess(user){saveProUser(user);updateProUI();initCustomDroneUI();closeProOverlay();showToast('Welcome to Pro, '+(user.name.split(' ')[0]||'there')+'!');if(wxData){renderDash();renderFc();}}
-function signOutPro(){if(!confirm('Sign out of Pro?\n\nYour free features continue to work.'))return;saveProUser(null);updateProUI();var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();var cg=document.getElementById('drone-custom-group');if(cg)cg.style.display='none';// Re-add teaser if it was removed
-var sel=document.getElementById('drone-sel');if(sel&&!document.getElementById('drone-pro-teaser-group')){var tg=document.createElement('optgroup');tg.label='──────────';tg.id='drone-pro-teaser-group';var to=document.createElement('option');to.value='__pro__';to.id='drone-pro-teaser';to.textContent='✦ Custom Drone (Pro only)';tg.appendChild(to);sel.appendChild(tg);}closeProOverlay();showToast('Signed out of Pro');if(wxData){renderDash();renderFc();}}
+function signOutPro(){if(!confirm('Sign out of Pro?\n\nYour free features continue to work.'))return;saveProUser(null);updateProUI();var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();initCustomDroneUI();closeProOverlay();showToast('Signed out of Pro');if(wxData){renderDash();renderFc();}}
 function updateProUI(){
   // Swap header logo — gold border for Pro, plain for free
   var logo=document.getElementById('header-logo');
@@ -2739,322 +2816,26 @@ function initCustomDroneUI(){
       btn.onclick=openCustomDroneEditor;bar.appendChild(btn);
     }
   } else {
-    // Free — hide real custom group, show teaser
+    // Free — hide real custom group, show teaser entry
     if(customGrp)customGrp.style.display='none';
-    if(teaserGrp)teaserGrp.style.display='';
+    if(teaserGrp){
+      teaserGrp.style.display='';
+    } else {
+      var sel2=document.getElementById('drone-sel');
+      if(sel2){
+        teaserGrp=document.createElement('optgroup');
+        teaserGrp.label='Pro';
+        teaserGrp.id='drone-pro-teaser-group';
+        var to=document.createElement('option');
+        to.value='__pro__';to.id='drone-pro-teaser';
+        to.textContent='My Custom Drone (Pro only)';
+        teaserGrp.appendChild(to);
+        sel2.appendChild(teaserGrp);
+      }
+    }
   }
 }
 function proFavNudge(favs){if(!PAID_FEATURES_ENABLED)return'';if(!isPro()&&favs.length>=2){return'<button class="fav-add" onclick="openProOverlay()" style="border-color:rgba(245,158,11,.4);color:#f59e0b;">+ More spots</button>';}if(isPro()){return'<button class="fav-add" onclick="toggleFavCurrent()">+ Add</button>';}return'';}
-function shareProCard(cond,loc,c,info){
-  var W=800,H=460;
-  var canvas=document.createElement('canvas');
-  canvas.width=W;canvas.height=H;
-  var ctx=canvas.getContext('2d');
-  var accentCol=cond.lvl==='green'?'#22c55e':cond.lvl==='amber'?'#f59e0b':'#ef4444';
-  var accentDim=cond.lvl==='green'?'rgba(34,197,94,0.12)':cond.lvl==='amber'?'rgba(245,158,11,0.12)':'rgba(239,68,68,0.12)';
-
-  // Background
-  ctx.fillStyle='#0a1628';
-  ctx.beginPath();ctx.roundRect(0,0,W,H,20);ctx.fill();
-
-  // Radial glow
-  var grd=ctx.createRadialGradient(160,200,10,160,200,280);
-  grd.addColorStop(0,accentDim);grd.addColorStop(1,'transparent');
-  ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
-
-  // Left accent bar with gradient
-  var barGrd=ctx.createLinearGradient(0,0,0,H);
-  barGrd.addColorStop(0,accentCol);barGrd.addColorStop(1,'transparent');
-  ctx.fillStyle=barGrd;
-  ctx.beginPath();ctx.roundRect(0,0,5,H,4);ctx.fill();
-
-  // DroneChecker wordmark
-  ctx.fillStyle='#f1f5f9';
-  ctx.font='bold 20px system-ui,sans-serif';
-  ctx.fillText('DroneChecker',40,48);
-  var dcW=ctx.measureText('DroneChecker').width;
-
-  // PRO badge
-  ctx.fillStyle='rgba(245,158,11,0.15)';
-  ctx.beginPath();ctx.roundRect(40+dcW+8,30,44,20,4);ctx.fill();
-  ctx.fillStyle='#f59e0b';
-  ctx.font='bold 10px system-ui,sans-serif';
-  ctx.fillText('PRO',40+dcW+16,44);
-
-  // Location pill
-  var locText=loc.length>32?loc.slice(0,30)+'…':loc;
-  ctx.font='13px system-ui,sans-serif';
-  var locW=ctx.measureText('⊙ '+locText).width;
-  ctx.fillStyle='rgba(148,163,184,0.1)';
-  ctx.beginPath();ctx.roundRect(40,60,locW+16,24,12);ctx.fill();
-  ctx.fillStyle='#94a3b8';
-  ctx.fillText('⊙ '+locText,48,76);
-
-  // Timestamp top-right
-  ctx.fillStyle='#94a3b8';
-  ctx.font='11px system-ui,sans-serif';
-  ctx.textAlign='right';
-  var ts=new Date().toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  ctx.fillText(ts,W-40,48);
-  ctx.textAlign='left';
-
-  // Rating circle
-  ctx.fillStyle=accentDim;
-  ctx.beginPath();ctx.arc(80,182,36,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle=accentCol;ctx.lineWidth=2;
-  ctx.beginPath();ctx.arc(80,182,36,0,Math.PI*2);ctx.stroke();
-  var icon=cond.lvl==='green'?'✓':cond.lvl==='amber'?'⚠':'✕';
-  ctx.fillStyle=accentCol;
-  ctx.font='bold 28px system-ui,sans-serif';
-  ctx.textAlign='center';
-  ctx.fillText(icon,80,192);
-  ctx.textAlign='left';
-
-  // Rating label
-  ctx.fillStyle=accentCol;
-  ctx.font='bold 52px system-ui,sans-serif';
-  ctx.fillText(cond.label.replace(/^[✓⚠✕] /,''),130,200);
-
-  // Weather description
-  ctx.fillStyle='#94a3b8';
-  ctx.font='15px system-ui,sans-serif';
-  ctx.fillText(info.desc,130,228);
-
-  // Divider
-  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(40,258);ctx.lineTo(W-40,258);ctx.stroke();
-
-  // Stat tiles
-  var wind=c.wind_speed_10m||0;
-  var gust=c.wind_gusts_10m||0;
-  var temp=Math.round(c.temperature_2m||0);
-  var vis=c.visibility||10000;
-  var vd=visDisp(vis);
-  var d=getDrone();
-  var rWind=wind>=d.windRed?'red':wind>=d.windAmber?'amber':'green';
-  var rGust=gust>=d.gustRed?'red':gust>=d.gustAmber?'amber':'green';
-  function tileCol(r){return r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';}
-  function tileBg(r){return r==='red'?'rgba(239,68,68,0.1)':r==='amber'?'rgba(245,158,11,0.1)':'rgba(34,197,94,0.08)';}
-  var kpC=currentKp>=5?'red':currentKp>=4?'amber':'green';
-  var stats=[
-    {label:'WIND',val:spd(wind),unit:spdU(),col:tileCol(rWind),bg:tileBg(rWind)},
-    {label:'GUSTS',val:spd(gust),unit:spdU(),col:tileCol(rGust),bg:tileBg(rGust)},
-    {label:'TEMP',val:temp+'°',unit:'C',col:'#f1f5f9',bg:'rgba(255,255,255,0.05)'},
-    {label:'VISIBILITY',val:vd.val,unit:vd.unit,col:'#f1f5f9',bg:'rgba(255,255,255,0.05)'},
-    {label:'KP INDEX',val:currentKp.toFixed(1),unit:'',col:tileCol(kpC),bg:tileBg(kpC)},
-  ];
-  var tW=136,tH=90,tGap=14;
-  stats.forEach(function(s,i){
-    var x=40+i*(tW+tGap),y=272;
-    ctx.fillStyle=s.bg;
-    ctx.beginPath();ctx.roundRect(x,y,tW,tH,10);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.roundRect(x,y,tW,tH,10);ctx.stroke();
-    ctx.fillStyle='#94a3b8';
-    ctx.font='10px system-ui,sans-serif';
-    ctx.fillText(s.label,x+12,y+20);
-    ctx.fillStyle=s.col;
-    ctx.font='bold 26px system-ui,sans-serif';
-    ctx.fillText(s.val,x+12,y+56);
-    if(s.unit){
-      ctx.fillStyle='#94a3b8';
-      ctx.font='12px system-ui,sans-serif';
-      ctx.fillText(s.unit,x+12,y+74);
-    }
-  });
-
-  // Footer bar
-  ctx.fillStyle='rgba(255,255,255,0.04)';
-  ctx.fillRect(0,H-38,W,38);
-  ctx.fillStyle='#334155';
-  ctx.font='12px system-ui,sans-serif';
-  ctx.textAlign='center';
-  ctx.fillText('dronechecker.co.uk  —  Always verify airspace with the CAA before flying',W/2,H-14);
-  ctx.textAlign='left';
-
-  canvas.toBlob(function(blob){
-    if(!blob){doTxtShare();return;}
-    var file=new File([blob],'dronechecker-conditions.png',{type:'image/png'});
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:'DroneChecker '+cond.label,text:'Flying conditions in '+loc}).catch(function(){doImgDl(blob);});
-    } else {doImgDl(blob);}
-    function doImgDl(b){var url=URL.createObjectURL(b);var a=document.createElement('a');a.href=url;a.download='dronechecker-conditions.png';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Conditions card saved');}
-    function doTxtShare(){var text='DroneChecker Pro - '+cond.label+' in '+loc;if(navigator.share){navigator.share({text:text}).catch(function(){});}else{navigator.clipboard.writeText(text).then(function(){showToast('Copied');});}}
-  },'image/png');
-}
-// exportFlights legacy stub — replaced by exportXlsx/exportGoogleSheets above
-function shareFlightWindow(){
-  if(!wxData||!wxData.hourly)return;
-  // Free tier — text share
-  if(!isPro()){
-    var loc2=document.getElementById('loc-name')?document.getElementById('loc-name').textContent:'';
-    var next24t=getNext24hRatings(),wins=getFlightWindows(next24t),now2=new Date();
-    var win=null;for(var wi=0;wi<wins.length;wi++){if(wins[wi].start>now2&&!win){win=wins[wi];}}win=win||wins[0];
-    var winTxt=win?pad(win.start.getHours())+':00 – '+pad(new Date(win.end.getTime()+3600000).getHours())+':00':'No flyable windows';
-    var text='DroneChecker — Best Flight Window\n✈ '+winTxt+' in '+loc2+'\n\n🔗 dronechecker.co.uk';
-    if(navigator.share){navigator.share({text:text}).catch(function(){});}
-    else{navigator.clipboard.writeText(text).then(function(){showToast('📋 Copied');}).catch(function(){showToast('Could not share');});}
-    return;
-  }
-  var W=800,H=400;
-  var canvas=document.createElement('canvas');
-  canvas.width=W;canvas.height=H;
-  var ctx=canvas.getContext('2d');
-  var loc=document.getElementById('loc-name')?document.getElementById('loc-name').textContent:'';
-
-  // ── Data ──────────────────────────────────────────────────
-  var now=new Date();
-  var next24=getNext24hRatings();
-  var windows=getFlightWindows(next24);
-  var currentWin=null,nextWin=null;
-  for(var i=0;i<windows.length;i++){
-    var w=windows[i];var wEnd=new Date(w.end.getTime()+3600000);
-    if(now>=w.start&&now<=wEnd){currentWin=w;break;}
-    if(w.start>now&&!nextWin){nextWin=w;}
-  }
-  var primaryWin=currentWin||nextWin;
-  var isOpen=!!currentWin;
-  var isTomorrow=primaryWin&&primaryWin.start.getDate()!==now.getDate();
-  var winCol=isOpen?'#22c55e':'#06b6d4';
-  var winDim=isOpen?'rgba(34,197,94,0.12)':'rgba(6,182,212,0.12)';
-
-  // ── Background ──────────────────────────────────────────
-  ctx.fillStyle='#0a1628';
-  ctx.beginPath();ctx.roundRect(0,0,W,H,20);ctx.fill();
-
-  // Glow
-  if(primaryWin){
-    var grd=ctx.createRadialGradient(W/2,180,20,W/2,180,300);
-    grd.addColorStop(0,winDim);grd.addColorStop(1,'transparent');
-    ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
-  }
-
-  // Left bar
-  var barGrd=ctx.createLinearGradient(0,0,0,H);
-  barGrd.addColorStop(0,winCol);barGrd.addColorStop(1,'transparent');
-  ctx.fillStyle=barGrd;
-  ctx.beginPath();ctx.roundRect(0,0,5,H,4);ctx.fill();
-
-  // ── Header ──────────────────────────────────────────────
-  ctx.fillStyle='#f1f5f9';
-  ctx.font='bold 20px system-ui,sans-serif';
-  ctx.fillText('DroneChecker',40,48);
-  var dcW=ctx.measureText('DroneChecker').width;
-  ctx.fillStyle='rgba(245,158,11,0.15)';
-  ctx.beginPath();ctx.roundRect(40+dcW+8,30,44,20,4);ctx.fill();
-  ctx.fillStyle='#f59e0b';
-  ctx.font='bold 10px system-ui,sans-serif';
-  ctx.fillText('PRO',40+dcW+16,44);
-
-  var locText=loc.length>32?loc.slice(0,30)+'\u2026':loc;
-  ctx.font='13px system-ui,sans-serif';
-  var locW=ctx.measureText('\u2299 '+locText).width;
-  ctx.fillStyle='rgba(148,163,184,0.1)';
-  ctx.beginPath();ctx.roundRect(40,60,locW+16,24,12);ctx.fill();
-  ctx.fillStyle='#94a3b8';
-  ctx.fillText('\u2299 '+locText,48,76);
-
-  ctx.fillStyle='#94a3b8';
-  ctx.font='11px system-ui,sans-serif';
-  ctx.textAlign='right';
-  var ts=now.toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-  ctx.fillText(ts,W-40,48);
-  ctx.textAlign='left';
-
-  // Section label
-  ctx.fillStyle='#94a3b8';
-  ctx.font='11px system-ui,sans-serif';
-  ctx.fillText('BEST FLIGHT WINDOW',40,110);
-
-  // ── Window time ─────────────────────────────────────────
-  if(!primaryWin){
-    ctx.fillStyle='#94a3b8';
-    ctx.font='bold 32px system-ui,sans-serif';
-    ctx.fillText('No flyable windows in 48hrs',40,162);
-  } else {
-    var wEnd=new Date(primaryWin.end.getTime()+3600000);
-    var startStr=pad(primaryWin.start.getHours())+':00';
-    var endStr=pad(wEnd.getHours())+':00';
-    var label=isOpen?'Open now \u2014 until '+endStr:startStr+' \u2013 '+endStr;
-    var sub=isOpen?
-      (Math.floor((wEnd-now)/3600000))+'h '+(Math.floor(((wEnd-now)%3600000)/60000))+'m remaining':
-      isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ',''));
-
-    ctx.fillStyle=winCol;
-    ctx.font='bold 48px system-ui,sans-serif';
-    ctx.fillText(label,40,162);
-    ctx.fillStyle='#94a3b8';
-    ctx.font='15px system-ui,sans-serif';
-    ctx.fillText(sub,40,190);
-
-    // Next window if open
-    if(isOpen&&nextWin){
-      var nEnd=new Date(nextWin.end.getTime()+3600000);
-      ctx.fillStyle='#334155';
-      ctx.font='12px system-ui,sans-serif';
-      ctx.fillText('Next: '+pad(nextWin.start.getHours())+':00 \u2013 '+pad(nEnd.getHours())+':00',40,212);
-    }
-  }
-
-  // ── Hour strip ─────────────────────────────────────────
-  var stripY=228,stripH=36,segW=(W-80)/next24.length;
-  var nowHour=now.getHours();
-  next24.forEach(function(r,i){
-    var col=r.rating==='green'?'#22c55e':r.rating==='amber'?'#f59e0b':r.rating==='red'?'#ef4444':'#1e293b';
-    var rx=40+i*segW;
-    ctx.fillStyle=col;
-    if(i===0)ctx.beginPath(),ctx.roundRect(rx,stripY,segW-1,stripH,[4,0,0,4]),ctx.fill();
-    else if(i===next24.length-1)ctx.beginPath(),ctx.roundRect(rx,stripY,segW,stripH,[0,4,4,0]),ctx.fill();
-    else{ctx.fillRect(rx,stripY,segW-1,stripH);}
-    // Current time marker
-    if(r.hour===nowHour){
-      ctx.fillStyle='rgba(255,255,255,0.9)';
-      ctx.beginPath();ctx.roundRect(rx+segW/2-2,stripY-4,4,stripH+8,2);ctx.fill();
-    }
-  });
-
-  // Hour labels
-  ctx.fillStyle='#94a3b8';
-  ctx.font='10px system-ui,sans-serif';
-  ctx.textAlign='center';
-  next24.forEach(function(r,i){
-    if(i%6===0){
-      ctx.fillText(pad(r.hour),40+i*segW+segW/2,stripY+stripH+14);
-    }
-  });
-  ctx.textAlign='left';
-
-  // Legend
-  var lgY=stripY+stripH+24;
-  var lgItems=[{col:'#22c55e',label:'Good'},{col:'#f59e0b',label:'Caution'},{col:'#ef4444',label:'Avoid'},{col:'#1e293b',label:'No data'}];
-  var lgX=40;
-  lgItems.forEach(function(l){
-    ctx.fillStyle=l.col;
-    ctx.fillRect(lgX,lgY,10,10);
-    ctx.fillStyle='#94a3b8';
-    ctx.font='11px system-ui,sans-serif';
-    ctx.fillText(l.label,lgX+14,lgY+9);
-    lgX+=ctx.measureText(l.label).width+34;
-  });
-
-  // ── Footer ─────────────────────────────────────────────
-  ctx.fillStyle='rgba(255,255,255,0.04)';
-  ctx.fillRect(0,H-38,W,38);
-  ctx.fillStyle='#334155';
-  ctx.font='12px system-ui,sans-serif';
-  ctx.textAlign='center';
-  ctx.fillText('dronechecker.co.uk  \u2014  Always verify airspace with the CAA before flying',W/2,H-14);
-  ctx.textAlign='left';
-
-  canvas.toBlob(function(blob){
-    if(!blob){showToast('Could not create share image');return;}
-    var file=new File([blob],'dronechecker-window.png',{type:'image/png'});
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:'Best Flight Window \u2014 DroneChecker',text:'Flight window for '+loc}).catch(function(){doImgDl(blob);});
-    } else {doImgDl(blob);}
-    function doImgDl(b){var url=URL.createObjectURL(b);var a=document.createElement('a');a.href=url;a.download='dronechecker-window.png';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);showToast('Flight window card saved');}
-  },'image/png');
-}
 function exportFlights(){exportXlsx();}
 function renderBestTimeCard(){if(!isPro()||!wxData||!wxData.hourly)return'';var hours=wxData.hourly,now=new Date(),today=now.toDateString(),candidates=[],todayHours=[],greenCount=0,amberCount=0;var sun=uLat&&uLng?calcSunTimes(uLat,uLng,now):null;for(var i=0;i<hours.time.length;i++){var t=new Date(hours.time[i]);if(t.toDateString()!==today||t<=now)continue;var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;var r=flyRating(w,g,v,wmo,getKpForTime(t),tp,w80,w120);var isGolden=sun&&((sun.goldMornS&&sun.goldMornE&&t>=sun.goldMornS&&t<=sun.goldMornE)||(sun.goldEveS&&sun.goldEveE&&t>=sun.goldEveS&&t<=sun.goldEveE));if(r.lvl==='green')greenCount++;else if(r.lvl==='amber')amberCount++;todayHours.push({t:t,rating:r.lvl,wind:w,gust:g,temp:tp,isGolden:isGolden});}if(!todayHours.length)return'';var total=todayHours.length;var verdictLine,verdictCol;if(greenCount>=Math.floor(total*.6)){verdictLine='Most of the day looks good to fly.';verdictCol='var(--green)';}else if(greenCount+amberCount>=Math.floor(total*.5)){verdictLine='Mixed conditions today - some good windows available.';verdictCol='var(--amber)';}else{verdictLine='Challenging conditions for most of today.';verdictCol='var(--red)';}var firstThird=todayHours.slice(0,Math.ceil(todayHours.length/3));var lastThird=todayHours.slice(Math.floor(todayHours.length*2/3));var avgFirst=firstThird.reduce(function(s,h){return s+h.wind;},0)/(firstThird.length||1);var avgLast=lastThird.reduce(function(s,h){return s+h.wind;},0)/(lastThird.length||1);var windTrend=avgLast-avgFirst;var trendStr=windTrend>3?'easing later':windTrend<-3?'picking up later':'staying consistent';var goldenHours=todayHours.filter(function(h){return h.isGolden;});var bestGolden=goldenHours.length?goldenHours[0]:null;var narrative='Wind is '+trendStr+' today.';var morningGreen=todayHours.filter(function(h){return h.t.getHours()<13&&h.rating==='green';}).length;var afternoonGreen=todayHours.filter(function(h){return h.t.getHours()>=13&&h.rating==='green';}).length;if(morningGreen>afternoonGreen)narrative+=' Conditions look better in the morning.';else if(afternoonGreen>morningGreen)narrative+=' Conditions look better in the afternoon.';if(bestGolden&&bestGolden.rating==='green')narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 looks flyable - good for photography.';else if(bestGolden&&bestGolden.rating==='amber')narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 is marginal.';else narrative+=' No golden hour overlap today.';return'<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div class="card-ttl" style="margin-bottom:0;">Today\'s conditions summary</div><span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div><div style="font-size:13px;font-weight:600;color:'+verdictCol+';margin-bottom:8px;">'+verdictLine+'</div><div style="font-size:12px;color:var(--muted);line-height:1.7;">'+narrative+'</div></div>';}
 function renderFlightStats(flights){if(!isPro()||flights.length<3)return'';var now=new Date(),months=[];for(var m=5;m>=0;m--){var d=new Date(now.getFullYear(),now.getMonth()-m,1);var label=d.toLocaleDateString('en-GB',{month:'short'});var mf=flights.filter(function(f){var fd=new Date(f.date);return fd.getMonth()===d.getMonth()&&fd.getFullYear()===d.getFullYear();});months.push({label:label,count:mf.length});}var maxCount=Math.max.apply(null,months.map(function(m){return m.count;}));if(maxCount===0)return'';var locMap={};flights.forEach(function(f){if(f.loc)locMap[f.loc]=(locMap[f.loc]||0)+1;});var topLocs=Object.keys(locMap).sort(function(a,b){return locMap[b]-locMap[a];}).slice(0,3);var good=flights.filter(function(f){return f.cond==='Good to Fly';}).length;var caution=flights.filter(function(f){return f.cond==='Fly with Caution';}).length;var avoid=flights.filter(function(f){return f.cond==='Do Not Fly';}).length;var bars=months.map(function(m){var h=maxCount>0?Math.max(4,Math.round((m.count/maxCount)*60)):4;return'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;"><div style="font-size:10px;color:var(--muted);">'+(m.count||'')+'</div><div style="width:100%;background:var(--accent);border-radius:3px 3px 0 0;height:'+h+'px;min-height:4px;opacity:'+(m.count?'1':'0.15')+';display:flex;"></div><div style="font-size:9px;color:var(--muted);">'+m.label+'</div></div>';}).join('');return'<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="card-ttl" style="margin-bottom:0;">Flight statistics</div><span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Flights per month</div><div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:16px;">'+bars+'</div>'+(topLocs.length?'<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Top locations</div>'+topLocs.map(function(l){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="color:var(--text);">'+esc(l)+'</span><span style="color:var(--muted);">'+locMap[l]+' flight'+(locMap[l]!==1?'s':'')+'</span></div>';}).join(''):'')+'<div style="display:flex;gap:8px;margin-top:12px;"><div style="flex:1;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--green);">'+good+'</div><div style="font-size:10px;color:var(--muted);">Good</div></div><div style="flex:1;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--amber);">'+caution+'</div><div style="font-size:10px;color:var(--muted);">Caution</div></div><div style="flex:1;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--red);">'+avoid+'</div><div style="font-size:10px;color:var(--muted);">Avoided</div></div></div></div>';}

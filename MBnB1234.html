@@ -2982,7 +2982,33 @@ function restoreOverlay(){
   if(o){o.style.display='flex';o.style.zIndex='';}
   document.body.style.overflow='hidden';
 }
-function openProOverlay(){if(!PAID_FEATURES_ENABLED)return;var o=document.getElementById('pro-overlay');if(!o)return;if(isPro()){showProSignedIn();}else{showProUpgrade();}o.style.display='flex';document.body.style.overflow='hidden';}
+function openProOverlay(){
+  if(!PAID_FEATURES_ENABLED)return;
+  var o=document.getElementById('pro-overlay');
+  if(!o)return;
+  if(isPro()){showProSignedIn();}else{showProUpgrade();}
+  o.style.display='flex';
+  document.body.style.overflow='hidden';
+  // Preload Firebase and GSI in the background so they're ready
+  // when the user taps "Continue with Google" — avoids Safari popup blocking
+  if(!GSI_DEV_MODE){
+    loadFirebase(function(){
+      loadGSI(function(){
+        // Pre-initialise GSI so the callback is registered and ready
+        try{
+          if(window.google&&window.google.accounts&&window.google.accounts.id){
+            google.accounts.id.initialize({
+              client_id: GOOGLE_CLIENT_ID,
+              callback: window._gsiCallback||function(){},
+              ux_mode: 'popup',
+              cancel_on_tap_outside: false
+            });
+          }
+        }catch(e){}
+      });
+    });
+  }
+}
 function closeProOverlay(){var o=document.getElementById('pro-overlay');if(o)o.style.display='none';document.body.style.overflow='';}
 function showProUpgrade(){
   var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');
@@ -3059,13 +3085,13 @@ function handleGoogleSignIn(){
   }
 
   // PRODUCTION: Use GSI to get a Google ID token, then exchange for Firebase session.
-  // This approach works in Safari, Edge, Chrome, and the Android TWA.
-  loadFirebase(function(){
-    loadGSI(function(){
-      try{
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: function(response){
+  // Firebase and GSI are preloaded when the overlay opens, so this fires synchronously
+  // within the user gesture window — required for Safari popup support.
+  function _doGSISignIn(){
+    try{
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: function(response){
             if(!response||!response.credential){
               if(btn){btn.style.opacity='1';btn.disabled=false;}
               showToast('Sign-in cancelled.');
@@ -3115,11 +3141,23 @@ function handleGoogleSignIn(){
         });
       }catch(e){
         if(btn){btn.style.opacity='1';btn.disabled=false;}
+        restoreOverlay();
         showToast('Sign-in error. Please try again.');
         console.error('[DC] GSI error:',e);
       }
+  }
+
+  // If already loaded, call directly (synchronous — stays within Safari gesture window)
+  if(_fbLoaded && window.google && window.google.accounts){
+    _doGSISignIn();
+  } else {
+    // Not preloaded yet — load then call
+    loadFirebase(function(){
+      loadGSI(function(){
+        _doGSISignIn();
+      });
     });
-  });
+  }
 }
 
 function onGoogleSignInSuccess(user){

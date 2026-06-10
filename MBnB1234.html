@@ -3016,6 +3016,7 @@ function handleStripeReturn(){
               saveProUser(proUser);
               updateProUI();
               if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
+              renderFavBar();
               if(wxData){renderDash();renderFc();}
               showToast('Pro is now active. Welcome!');
             } else {
@@ -3025,6 +3026,7 @@ function handleStripeReturn(){
                   if(s){
                     proUser.isPro=true;saveProUser(proUser);updateProUI();
                     if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
+                    renderFavBar();
                     if(wxData){renderDash();renderFc();}
                     showToast('Pro is now active. Welcome!');
                   } else {
@@ -3367,6 +3369,7 @@ function onGoogleSignInSuccess(user){
     closeProOverlay();
     showToast('Welcome back, '+firstName+'! Pro is active.');
     if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
+    renderFavBar();
     if(wxData){renderDash();renderFc();}
   } else {
     // Signed in but not yet Pro — keep overlay open on upgrade screen
@@ -3383,6 +3386,7 @@ function signOutPro(){
     firebase.auth().signOut().catch(function(){});
   }
   updateProUI();
+  renderFavBar();
   var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();
   initCustomDroneUI();
   closeProOverlay();

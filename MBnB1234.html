@@ -2819,48 +2819,8 @@ function applyDeepLink(){
 window.addEventListener('load',function(){
   checkDisclaimer();
   handleStripeReturn();
-
-  // Always load Firebase on startup and check for redirect result first.
-  // sessionStorage can't be used here because Firebase redirects through
-  // dronechecker.firebaseapp.com which clears cross-origin sessionStorage.
-  loadFirebase(function(){
-    firebase.auth().getRedirectResult().then(function(result){
-      if(result&&result.user){
-        // Returning from Google sign-in redirect
-        var fbUser=result.user;
-        showToast('Signing you in…');
-        fetchProStatus(fbUser.uid,function(isProStatus){
-          var user={
-            uid:fbUser.uid,
-            name:fbUser.displayName||fbUser.email,
-            email:fbUser.email,
-            photoUrl:fbUser.photoURL||'',
-            isPro:isProStatus
-          };
-          saveProUser(user);
-          proUser=user;
-          updateProUI();
-          initCustomDroneUI();
-          if(isProStatus){
-            showToast('Welcome back! Pro is active.');
-            if(wxData){renderDash();renderFc();}
-          } else {
-            setTimeout(function(){
-              openProOverlay();
-              showProUpgrade();
-            },600);
-          }
-        });
-      } else {
-        // No redirect result — normal startup, restore existing session
-        loadProUser();updateProUI();initCustomDroneUI();
-        if(isPro())setTimeout(prefetchSavedLocations,3000);
-      }
-    }).catch(function(e){
-      console.error('[DC] getRedirectResult error:',e);
-      loadProUser();updateProUI();initCustomDroneUI();
-    });
-  });
+  loadProUser();updateProUI();initCustomDroneUI();
+  if(isPro())setTimeout(prefetchSavedLocations,3000);
   loadDrone();loadChecklist();loadUnits();renderFavBar();
 
   var cached=loadWxCache();
@@ -3065,8 +3025,35 @@ function handleGoogleSignIn(){
       provider.addScope('email');
       provider.addScope('profile');
       // Store a flag so we can show a "signing you in..." message on return
-      firebase.auth().signInWithRedirect(provider);
-      // Page will navigate away — button state doesn't matter after this
+      firebase.auth().signInWithPopup(provider).then(function(result){
+        if(result&&result.user){
+          var fbUser=result.user;
+          fetchProStatus(fbUser.uid,function(isProStatus){
+            if(btn){btn.style.opacity='1';btn.disabled=false;}
+            onGoogleSignInSuccess({
+              uid:fbUser.uid,
+              name:fbUser.displayName||fbUser.email,
+              email:fbUser.email,
+              photoUrl:fbUser.photoURL||'',
+              isPro:isProStatus
+            });
+          });
+        }
+      }).catch(function(e){
+        if(btn){btn.style.opacity='1';btn.disabled=false;}
+        if(e.code==='auth/popup-blocked'){
+          // Popup was blocked — fall back to redirect
+          showToast('Popup blocked — redirecting to Google…');
+          setTimeout(function(){
+            firebase.auth().signInWithRedirect(provider);
+          },1500);
+        } else if(e.code==='auth/popup-closed-by-user'){
+          showToast('Sign-in cancelled.');
+        } else {
+          showToast('Sign-in error. Please try again.');
+          console.error('[DC] signInWithPopup error:',e);
+        }
+      });
     }catch(e){
       if(btn){btn.style.opacity='1';btn.disabled=false;}
       showToast('Sign-in error. Please try again.');

@@ -425,6 +425,132 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
+  <!-- Firebase + Google Identity Services — loaded lazily on first sign-in attempt -->
+  <script>
+    // ---- Firebase config ----
+    var FIREBASE_CONFIG={
+      apiKey:"AIzaSyB701OaJgb68Kct39Y7rfgQkw4fHSFsUb8",
+      authDomain:"dronechecker.firebaseapp.com",
+      projectId:"dronechecker",
+      storageBucket:"dronechecker.firebasestorage.app",
+      messagingSenderId:"62546050100",
+      appId:"1:62546050100:web:2236074e078a8eb4cbde61"
+    };
+
+    // ---- Lazy loader: Firebase App + Auth + Firestore ----
+    var _fbLoaded=false;
+    var _fbLoading=false;
+    var _fbQueue=[];
+    function loadFirebase(callback){
+      if(_fbLoaded){callback();return;}
+      _fbQueue.push(callback);
+      if(_fbLoading)return;
+      _fbLoading=true;
+      var scripts=[
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js'
+      ];
+      var loaded=0;
+      function next(i){
+        if(i>=scripts.length){
+          firebase.initializeApp(FIREBASE_CONFIG);
+          // Persist session across page reloads / app restarts
+          firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+          _fbLoaded=true;
+          _fbLoading=false;
+          _fbQueue.forEach(function(cb){try{cb();}catch(e){}});
+          _fbQueue=[];
+          return;
+        }
+        var s=document.createElement('script');
+        s.src=scripts[i];
+        s.onload=function(){next(i+1);};
+        s.onerror=function(){
+          _fbLoading=false;
+          showToast('Could not load sign-in library. Check your connection.');
+          var btn=document.getElementById('pro-google-signin-btn');
+          if(btn){btn.style.opacity='1';btn.disabled=false;}
+        };
+        document.head.appendChild(s);
+      }
+      next(0);
+    }
+
+    // ---- Lazy loader: Google Identity Services ----
+    function loadGSI(callback){
+      if(window.google&&window.google.accounts){callback();return;}
+      var s=document.createElement('script');
+      s.src='https://accounts.google.com/gsi/client';
+      s.async=true;s.defer=true;
+      s.onload=callback;
+      s.onerror=function(){
+        showToast('Could not load Google sign-in. Check your connection.');
+        var btn=document.getElementById('pro-google-signin-btn');
+        if(btn){btn.style.opacity='1';btn.disabled=false;}
+      };
+      document.head.appendChild(s);
+    }
+
+    // ---- Decode a JWT payload (no library needed) ----
+    function decodeJWT(token){
+      try{
+        var base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+        var json=decodeURIComponent(atob(base64).split('').map(function(c){
+          return'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(json);
+      }catch(e){return null;}
+    }
+
+    // ---- Firestore: fetch isPro for a UID, create doc if new user ----
+    function fetchProStatus(uid, callback){
+      var db=firebase.firestore();
+      var ref=db.collection('users').doc(uid);
+      ref.get().then(function(snap){
+        if(snap.exists){
+          callback(snap.data().isPro===true);
+        } else {
+          // New user — create their document with isPro:false
+          ref.set({isPro:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()})
+            .then(function(){callback(false);})
+            .catch(function(){callback(false);});
+        }
+      }).catch(function(e){
+        console.error('Firestore fetch error:',e);
+        callback(false); // fail safe — treat as free user
+      });
+    }
+
+    // ---- Restore Firebase session on app load ----
+    // Called from loadProUser() — checks if Firebase has a persisted auth session
+    function restoreFirebaseSession(onRestored){
+      if(_fbLoaded){
+        _doRestoreSession(onRestored);
+      } else {
+        // Load Firebase silently in the background on startup
+        loadFirebase(function(){_doRestoreSession(onRestored);});
+      }
+    }
+    function _doRestoreSession(onRestored){
+      firebase.auth().onAuthStateChanged(function(fbUser){
+        if(fbUser){
+          fetchProStatus(fbUser.uid,function(isPro){
+            var restored={
+              uid:fbUser.uid,
+              name:fbUser.displayName||fbUser.email,
+              email:fbUser.email,
+              photoUrl:fbUser.photoURL||'',
+              isPro:isPro
+            };
+            onRestored(restored);
+          });
+        } else {
+          onRestored(null);
+        }
+      });
+    }
+  </script>
 </head>
 <body>
 <div id="disclaimer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
@@ -2725,10 +2851,7 @@ window.addEventListener('load',function(){
   setTimeout(applyDeepLink,600);
 });
 var PAID_FEATURES_ENABLED=true;
-var proUser=null;
-function loadProUser(){try{var s=localStorage.getItem('dc_pro_user');if(s)proUser=JSON.parse(s);}catch(e){}}
-function saveProUser(u){proUser=u;try{localStorage.setItem('dc_pro_user',u?JSON.stringify(u):'');}catch(e){}}
-function isPro(){return PAID_FEATURES_ENABLED&&proUser&&proUser.isPro;}
+// proUser, loadProUser, saveProUser, isPro — defined below with Firebase integration
 function openProOverlay(){if(!PAID_FEATURES_ENABLED)return;var o=document.getElementById('pro-overlay');if(!o)return;if(isPro()){showProSignedIn();}else{showProUpgrade();}o.style.display='flex';document.body.style.overflow='hidden';}
 function closeProOverlay(){var o=document.getElementById('pro-overlay');if(o)o.style.display='none';document.body.style.overflow='';}
 function showProUpgrade(){
@@ -2741,23 +2864,145 @@ function showProUpgrade(){
 }
 function showProSignin(){var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');if(u)u.style.display='none';if(s)s.style.display='';}
 function showProSignedIn(){var sheet=document.getElementById('pro-sheet');if(!sheet||!proUser)return;var initials=(proUser.name||proUser.email||'U').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();sheet.innerHTML='<div class="pro-sheet-header"><div style="width:24px;"></div><div style="font-size:13px;font-weight:600;color:var(--muted);">Your Pro Account</div><button class="pro-close" onclick="closeProOverlay()">&times;</button></div><div class="pro-body" style="padding-top:12px;"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--text);">'+esc(proUser.name||'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(proUser.email||'')+'</div><div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;">DroneChecker Pro</div></div></div><div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Subscription: <strong style="color:var(--green);">Active</strong></div><button onclick="signOutPro()" style="width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:12px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;">Sign out</button><button onclick="closeProOverlay()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button></div>';}
-var GOOGLE_CLIENT_ID='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+var GOOGLE_CLIENT_ID='62546050100-qkdhvc5g77a1kn423u44jrisgmakgigg.apps.googleusercontent.com';
+
+// ---- DEV MODE: bypasses real Google/Firebase sign-in for local testing ----
+var GSI_DEV_MODE=false; // Set to true to use mock sign-in without a real Google account
+
+var proUser=null;
+
+function loadProUser(){
+  // First restore from localStorage for instant UI (no flicker)
+  try{var s=localStorage.getItem('dc_pro_user');if(s)proUser=JSON.parse(s);}catch(e){}
+  // Then silently restore Firebase session in the background and re-check isPro from Firestore
+  // This ensures isPro is always fresh from the server, not just from localStorage
+  try{
+    restoreFirebaseSession(function(restored){
+      if(restored){
+        proUser=restored;
+        try{localStorage.setItem('dc_pro_user',JSON.stringify(restored));}catch(e){}
+        updateProUI();
+        if(isPro())setTimeout(prefetchSavedLocations,1000);
+      } else if(proUser){
+        // Firebase says no session — clear stale localStorage
+        proUser=null;
+        try{localStorage.removeItem('dc_pro_user');}catch(e){}
+        updateProUI();
+      }
+    });
+  }catch(e){}
+}
+
+function saveProUser(u){
+  proUser=u;
+  try{localStorage.setItem('dc_pro_user',u?JSON.stringify(u):'');}catch(e){}
+}
+
+function isPro(){return PAID_FEATURES_ENABLED&&proUser&&proUser.isPro;}
+
 function handleGoogleSignIn(){
   var btn=document.getElementById('pro-google-signin-btn');
   if(btn){btn.style.opacity='0.6';btn.disabled=true;}
-  if(GOOGLE_CLIENT_ID==='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'){
+
+  // DEV MODE: simulate a successful sign-in without a real Google account
+  if(GSI_DEV_MODE){
     setTimeout(function(){
-      // Reset button before success handler fires (in case sheet stays open)
       if(btn){btn.style.opacity='1';btn.disabled=false;}
-      onGoogleSignInSuccess({name:'Ben Bridgewater',email:'bbridgewater.dev@gmail.com',photoUrl:'',isPro:true});
-    },1200);
+      onGoogleSignInSuccess({name:'Ben Bridgewater',email:'bbridgewater.dev@gmail.com',photoUrl:'',uid:'dev-uid-001',isPro:true});
+    },800);
     return;
   }
-  showToast('Connect your Google Client ID to enable sign-in.');
-  if(btn){btn.style.opacity='1';btn.disabled=false;}
+
+  // PRODUCTION: load Firebase + GSI, then sign in
+  loadFirebase(function(){
+    loadGSI(function(){
+      try{
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: function(response){
+            if(!response||!response.credential){
+              if(btn){btn.style.opacity='1';btn.disabled=false;}
+              showToast('Sign-in cancelled.');
+              return;
+            }
+            var payload=decodeJWT(response.credential);
+            if(!payload||!payload.email){
+              if(btn){btn.style.opacity='1';btn.disabled=false;}
+              showToast('Sign-in failed \u2014 could not read account details.');
+              return;
+            }
+            // Sign into Firebase Auth using the Google credential
+            var googleCred=firebase.auth.GoogleAuthProvider.credential(response.credential);
+            firebase.auth().signInWithCredential(googleCred).then(function(result){
+              var fbUser=result.user;
+              // Fetch isPro from Firestore (creates doc if new user)
+              fetchProStatus(fbUser.uid,function(isProStatus){
+                if(btn){btn.style.opacity='1';btn.disabled=false;}
+                onGoogleSignInSuccess({
+                  uid:      fbUser.uid,
+                  name:     fbUser.displayName||payload.name||fbUser.email,
+                  email:    fbUser.email,
+                  photoUrl: fbUser.photoURL||payload.picture||'',
+                  isPro:    isProStatus
+                });
+              });
+            }).catch(function(e){
+              if(btn){btn.style.opacity='1';btn.disabled=false;}
+              showToast('Sign-in failed. Please try again.');
+              console.error('Firebase sign-in error:',e);
+            });
+          },
+          ux_mode: 'popup',
+          cancel_on_tap_outside: false
+        });
+        google.accounts.id.prompt(function(notification){
+          if(notification.isNotDisplayed()||notification.isSkippedMoment()){
+            google.accounts.id.renderButton(
+              document.getElementById('pro-google-signin-btn'),
+              {theme:'filled_black',size:'large',width:320,text:'continue_with',shape:'rectangular'}
+            );
+            var rendered=document.querySelector('#pro-google-signin-btn iframe');
+            if(rendered){rendered.click();}
+          }
+        });
+      }catch(e){
+        if(btn){btn.style.opacity='1';btn.disabled=false;}
+        showToast('Sign-in error. Please try again.');
+        console.error('GSI error:',e);
+      }
+    });
+  });
+
 }
-function onGoogleSignInSuccess(user){saveProUser(user);updateProUI();initCustomDroneUI();closeProOverlay();showToast('Welcome to Pro, '+(user.name.split(' ')[0]||'there')+'!');if(wxData){renderDash();renderFc();}}
-function signOutPro(){if(!confirm('Sign out of Pro?\n\nYour free features continue to work.'))return;saveProUser(null);updateProUI();var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();initCustomDroneUI();closeProOverlay();showToast('Signed out of Pro');if(wxData){renderDash();renderFc();}}
+
+function onGoogleSignInSuccess(user){
+  saveProUser(user);
+  updateProUI();
+  initCustomDroneUI();
+  closeProOverlay();
+  var firstName=user.name?(user.name.split(' ')[0]||'there'):'there';
+  if(user.isPro){
+    showToast('Welcome back, '+firstName+'! Pro is active.');
+  } else {
+    showToast('Signed in as '+firstName+'. Complete checkout to activate Pro.');
+  }
+  if(wxData){renderDash();renderFc();}
+}
+
+function signOutPro(){
+  if(!confirm('Sign out of Pro?\n\nYour free features continue to work.'))return;
+  saveProUser(null);
+  try{localStorage.removeItem('dc_pro_user');}catch(e){}
+  if(_fbLoaded){
+    firebase.auth().signOut().catch(function(){});
+  }
+  updateProUI();
+  var cb=document.getElementById('custom-drone-btn');if(cb)cb.remove();
+  initCustomDroneUI();
+  closeProOverlay();
+  showToast('Signed out of Pro');
+  if(wxData){renderDash();renderFc();}
+}
 function updateProUI(){
   // Swap header logo — gold border for Pro, plain for free
   var logo=document.getElementById('header-logo');

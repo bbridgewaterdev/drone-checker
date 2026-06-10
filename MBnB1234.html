@@ -1482,10 +1482,10 @@ function renderLog(){
         '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h8.5M14 2l5.5 5.5M14 2v5.5h5.5M20 13v6a2 2 0 01-2 2H6"/></svg>Sheets <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>';
     var backupBtns='<div class="log-backup-row">'+
       (isPro()
-        ? '<button class="log-export-btn" onclick="backupLog()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup JSON</button>'+
+        ? '<button class="log-export-btn" onclick="backupLog()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup data</button>'+
           '<button class="log-export-btn" onclick="document.getElementById(\'restore-input\').click()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Restore</button>'+
           '<input type="file" id="restore-input" accept=".json" style="display:none;" onchange="restoreLog(this)"/>'
-        : '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup JSON <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>'+
+        : '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Backup data <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>'+
           '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Restore <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>'
       )+
     '</div>';
@@ -1553,7 +1553,7 @@ function autoBackupLog(flights){
     showToast('Choose where to save your rolling backup — you\'ll only be asked once');
     setTimeout(function(){
       window.showSaveFilePicker({
-        suggestedName:'dronechecker-backup.json',
+        suggestedName:'dronechecker-flight-log-backup.json',
         types:[{description:'DroneChecker Backup',accept:{'application/json':['.json']}}]
       }).then(function(handle){
         _backupHandle=handle;

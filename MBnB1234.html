@@ -2818,15 +2818,56 @@ function applyDeepLink(){
 }
 window.addEventListener('load',function(){
   checkDisclaimer();
-  // Show a brief message if user is returning from Google sign-in redirect
-  try{
-    if(sessionStorage.getItem('dc_signin_pending')){
-      sessionStorage.removeItem('dc_signin_pending');
-      setTimeout(function(){showToast('Signing you in…');},800);
-    }
-  }catch(e){}
   handleStripeReturn();
-  loadProUser();updateProUI();initCustomDroneUI();
+
+  // Check if returning from Google sign-in redirect
+  // If so, load Firebase immediately and handle the result before anything else
+  var _returningFromSignIn=false;
+  try{_returningFromSignIn=!!sessionStorage.getItem('dc_signin_pending');}catch(e){}
+
+  if(_returningFromSignIn){
+    try{sessionStorage.removeItem('dc_signin_pending');}catch(e){}
+    showToast('Signing you in…');
+    // Load Firebase immediately and process redirect result
+    loadFirebase(function(){
+      firebase.auth().getRedirectResult().then(function(result){
+        if(result&&result.user){
+          var fbUser=result.user;
+          fetchProStatus(fbUser.uid,function(isProStatus){
+            var user={
+              uid:fbUser.uid,
+              name:fbUser.displayName||fbUser.email,
+              email:fbUser.email,
+              photoUrl:fbUser.photoURL||'',
+              isPro:isProStatus
+            };
+            saveProUser(user);
+            proUser=user;
+            updateProUI();
+            initCustomDroneUI();
+            if(isProStatus){
+              showToast('Welcome! Pro is active.');
+              if(wxData){renderDash();renderFc();}
+            } else {
+              // Signed in but not yet Pro — open upgrade screen for payment
+              setTimeout(function(){
+                openProOverlay();
+                showProUpgrade();
+              },500);
+            }
+          });
+        } else {
+          // No redirect result — fall back to normal session restore
+          loadProUser();updateProUI();initCustomDroneUI();
+        }
+      }).catch(function(e){
+        console.error('getRedirectResult error:',e);
+        loadProUser();updateProUI();initCustomDroneUI();
+      });
+    });
+  } else {
+    loadProUser();updateProUI();initCustomDroneUI();
+  }
   if(isPro())setTimeout(prefetchSavedLocations,3000);
   loadDrone();loadChecklist();loadUnits();renderFavBar();
 

@@ -1127,7 +1127,7 @@ function renderChecklist(){
     else{var c=!!clState[item.id];html+='<div class="cl-item" onclick="toggleCheck(\''+item.id+'\')"><div class="cl-box'+(c?' checked':'')+'"><svg class="cl-tick" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3"/></svg></div><span class="cl-label'+(c?' checked':'')+'">'+item.label+'</span></div>';}
   });
   html+='<button class="cl-reset" onclick="resetChecklist()">&#x21BA; Reset checklist</button></div><div style="height:14px;"></div>';
-  document.getElementById('cl-body').innerHTML=html;
+  document.getElementById('cl-body').innerHTML=html+proAccountCard();
 }
 function renderRules(){
   var html='<div class="card">'+
@@ -1512,7 +1512,7 @@ function renderLog(){
         '</div>';
     }
   }
-  document.getElementById('log-body').innerHTML=stats+form+entries+'<div style="height:14px;"></div>';
+  document.getElementById('log-body').innerHTML=stats+form+entries+'<div style="height:14px;"></div>'+proAccountCard();
 }
 function addFlight(){
   var loc=document.getElementById('li-loc').value.trim();
@@ -2531,6 +2531,7 @@ function renderFc(){
     '<div class="card"><div class="card-ttl">Next 24 Hours <span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">— tap any hour for full conditions</span></div>'+rows+
     '<div style="display:flex;gap:16px;margin-top:10px;font-size:12px;"><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot green" style="display:inline-block;"></div><span style="color:var(--muted);">✓ Good</span></div><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot amber" style="display:inline-block;"></div><span style="color:var(--muted);">⚠ Caution</span></div><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot red" style="display:inline-block;"></div><span style="color:var(--muted);">✕ Avoid</span></div></div></div>'+
     renderWeekPlanner(wxData.daily)+
+    proAccountCard()+
     '<div style="height:14px;"></div>';
 }
 function updateWindHrRows(alt){
@@ -2832,7 +2833,7 @@ function renderGolden(){
     tmTile('🌑 Blue Dawn','#818cf8',tm.nautDawn)+tmTile('🌅 Golden Morning','#f59e0b',tm.goldMornS)+
     tmTile('☀️ Sunrise','#f97316',tm.sunrise)+tmTile('🌇 Sunset','#f97316',tm.sunset)+
     tmTile('🌆 Golden Evening','#f59e0b',tm.goldEveS)+tmTile('🌃 Blue Dusk','#818cf8',tm.blueEveS)+
-    '</div></div><div style="height:14px;"></div>';
+    '</div></div><div style="height:14px;"></div>'+proAccountCard();
   }catch(e){
     document.getElementById('gh-body').innerHTML='<div class="err">Could not calculate golden hour for this location.<br><br><button onclick="renderGolden()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
   }

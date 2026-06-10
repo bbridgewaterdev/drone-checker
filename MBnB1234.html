@@ -3147,11 +3147,31 @@ function handleGoogleSignIn(){
       }
   }
 
-  // If already loaded, call directly (synchronous — stays within Safari gesture window)
+  // Detect Safari — it blocks GSI popups reliably, use Firebase redirect instead
+  var isSafari=/^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  if(isSafari){
+    // Safari: use signInWithRedirect — most reliable cross-browser fallback
+    loadFirebase(function(){
+      try{
+        var provider=new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        firebase.auth().signInWithRedirect(provider);
+      }catch(e){
+        if(btn){btn.style.opacity='1';btn.disabled=false;}
+        restoreOverlay();
+        showToast('Sign-in error. Please try again.');
+        console.error('[DC] Safari redirect error:',e);
+      }
+    });
+    return;
+  }
+
+  // Non-Safari: use GSI popup (works in Edge, Chrome, Android TWA)
   if(_fbLoaded && window.google && window.google.accounts){
     _doGSISignIn();
   } else {
-    // Not preloaded yet — load then call
     loadFirebase(function(){
       loadGSI(function(){
         _doGSISignIn();

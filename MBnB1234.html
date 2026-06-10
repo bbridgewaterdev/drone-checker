@@ -649,8 +649,8 @@
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title" style="color:var(--muted);">Fly alerts <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Notify me when saved spots turn flyable</div></div></div>
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title" style="color:var(--muted);">Cloud flight log sync <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Access your log across all your devices</div></div></div>
         <div style="height:16px;"></div>
-        <button class="pro-cta-btn" onclick="showProSignin()">Get Pro &middot; &pound;2.99/month</button>
-        <div class="pro-cta-sub">7-day free trial &middot; Cancel anytime</div>
+        <button class="pro-cta-btn" id="pro-subscribe-btn" onclick="handleSubscribe()">Get Pro &middot; &pound;2.99/month</button>
+        <div class="pro-cta-sub">Cancel anytime &middot; Secure payment via Stripe</div>
       </div>
     </div>
     <div id="pro-screen-signin" style="display:none;">
@@ -2822,6 +2822,7 @@ window.addEventListener('load',function(){
       setTimeout(function(){showToast('Signing you in…');},800);
     }
   }catch(e){}
+  handleStripeReturn();
   loadProUser();updateProUI();initCustomDroneUI();
   if(isPro())setTimeout(prefetchSavedLocations,3000);
   loadDrone();loadChecklist();loadUnits();renderFavBar();
@@ -2876,6 +2877,80 @@ window.addEventListener('load',function(){
 });
 var PAID_FEATURES_ENABLED=true;
 // proUser, loadProUser, saveProUser, isPro — defined below with Firebase integration
+// ---- Stripe checkout ----
+var CHECKOUT_URL='https://createcheckoutsession-5cv3lc72vq-uc.a.run.app';
+
+function handleSubscribe(){
+  // If not signed in, go to sign-in screen first
+  if(!proUser){
+    showProSignin();
+    return;
+  }
+  // Already signed in — go straight to Stripe checkout
+  startStripeCheckout();
+}
+
+function startStripeCheckout(){
+  var btn=document.getElementById('pro-subscribe-btn');
+  if(btn){btn.textContent='Loading…';btn.disabled=true;}
+  fetch(CHECKOUT_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({uid:proUser.uid,email:proUser.email})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.url){
+      window.location.href=data.url; // redirect to Stripe Checkout
+    } else {
+      showToast('Could not start checkout. Please try again.');
+      if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
+    }
+  })
+  .catch(function(){
+    showToast('Could not start checkout. Check your connection.');
+    if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
+  });
+}
+
+// Handle return from Stripe Checkout
+function handleStripeReturn(){
+  try{
+    var params=new URLSearchParams(window.location.search);
+    var pro=params.get('pro');
+    if(!pro)return;
+    // Clean the URL
+    window.history.replaceState({},'','/app.html');
+    if(pro==='success'){
+      // Payment succeeded — refresh Pro status from Firestore
+      showToast('Payment successful! Activating Pro…');
+      setTimeout(function(){
+        if(_fbLoaded&&proUser){
+          fetchProStatus(proUser.uid,function(isProStatus){
+            if(isProStatus){
+              proUser.isPro=true;
+              saveProUser(proUser);
+              updateProUI();
+              if(wxData){renderDash();renderFc();}
+              showToast('Pro is now active. Welcome!');
+            } else {
+              // Webhook may not have fired yet — retry once after 3s
+              setTimeout(function(){
+                fetchProStatus(proUser.uid,function(s){
+                  if(s){proUser.isPro=true;saveProUser(proUser);updateProUI();if(wxData){renderDash();renderFc();}showToast('Pro is now active. Welcome!');}
+                  else{showToast('Payment received — Pro will activate shortly.');}
+                });
+              },3000);
+            }
+          });
+        }
+      },1500);
+    } else if(pro==='cancelled'){
+      showToast('Checkout cancelled — no charge made.');
+    }
+  }catch(e){}
+}
+
 function openProOverlay(){if(!PAID_FEATURES_ENABLED)return;var o=document.getElementById('pro-overlay');if(!o)return;if(isPro()){showProSignedIn();}else{showProUpgrade();}o.style.display='flex';document.body.style.overflow='hidden';}
 function closeProOverlay(){var o=document.getElementById('pro-overlay');if(o)o.style.display='none';document.body.style.overflow='';}
 function showProUpgrade(){

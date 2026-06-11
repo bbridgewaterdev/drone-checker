@@ -14,7 +14,7 @@ const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
 const PRICE_ID = 'price_1TgjvDBwELWfTObfoMWjvt6N';
 
 // ---- App URL — where Stripe redirects after checkout ----
-const APP_URL = 'https://dronechecker.co.uk/MBnB1234.html';
+const APP_URL = 'https://dronechecker.co.uk/app.html';
 
 // ----------------------------------------------------------------
 // createCheckoutSession
@@ -47,7 +47,7 @@ exports.createCheckoutSession = onRequest(
         line_items: [{price: PRICE_ID, quantity: 1}],
         success_url: APP_URL + '?pro=success',
         cancel_url:  APP_URL + '?pro=cancelled',
-        metadata: {uid}, // pass Firebase UID so webhook can find the user
+        metadata: {uid},
         subscription_data: {
           metadata: {uid},
         },
@@ -146,7 +146,6 @@ exports.stripeWebhook = onRequest(
       }
 
       default:
-        // Ignore other event types
         break;
     }
 

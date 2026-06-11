@@ -1057,6 +1057,14 @@ function saveDrone(){
   try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}
   updateDroneLimits();
   if(wxData){renderDash();renderFc();}
+  renderFavBar();
+  // Refresh threshold UI if Pro account screen is open
+  var proSheet=document.getElementById('pro-sheet');
+  var proOverlay=document.getElementById('pro-overlay');
+  if(proSheet&&proOverlay&&proOverlay.style.display!=='none'&&isPro()){
+    var thrSection=proSheet.querySelector('.threshold-section');
+    if(thrSection)thrSection.outerHTML=buildThresholdUI();
+  }
 }
 function updateDroneLimits(){var el=document.getElementById('drone-limits');if(el)el.textContent='Max '+spd(getDrone().windRed)+' '+spdU();}
 function saveWxCache(data){try{localStorage.setItem('dc_wx',JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
@@ -2146,14 +2154,35 @@ function tilePres(v){return v<980?'red':v<1000?'amber':'green';}
 function tileTemp(v){return v<-10||v>40?'red':v<0||v>35?'amber':'green';}
 function tileCol(r){return r==='green'?'var(--green)':r==='amber'?'var(--amber)':'var(--red)';}
 // ---- Pro: configurable fly rating thresholds ----
-var _proThresholds=null;
-function loadProThresholds(){try{var s=localStorage.getItem('dc_pro_thresholds');_proThresholds=s?JSON.parse(s):null;}catch(e){_proThresholds=null;}}
-function saveProThresholds(t){_proThresholds=t;try{localStorage.setItem('dc_pro_thresholds',JSON.stringify(t));}catch(e){}}
-function getThresholds(){if(isPro()&&_proThresholds)return _proThresholds;var d=getDrone();return{windAmber:d.windAmber,windRed:d.windRed,gustAmber:d.gustAmber,gustRed:d.gustRed};}
-function resetProThresholds(){_proThresholds=null;try{localStorage.removeItem('dc_pro_thresholds');}catch(e){}if(wxData){renderDash();renderFc();}renderFavBar();if(typeof showProSignedIn==='function')showProSignedIn();showToast('Thresholds reset to drone defaults');}
+var _allProThresholds={};
+function _thrKey(){return'dc_pro_thr_'+(selectedDrone||'mini4pro');}
+function loadProThresholds(){try{var s=localStorage.getItem('dc_all_pro_thresholds');_allProThresholds=s?JSON.parse(s):{};}catch(e){_allProThresholds={};}}
+function saveProThresholds(t){
+  var key=selectedDrone||'mini4pro';
+  _allProThresholds[key]=t;
+  try{localStorage.setItem('dc_all_pro_thresholds',JSON.stringify(_allProThresholds));}catch(e){}
+}
+function getThresholds(){
+  var key=selectedDrone||'mini4pro';
+  if(isPro()&&_allProThresholds[key])return _allProThresholds[key];
+  var d=getDrone();
+  return{windAmber:d.windAmber,windRed:d.windRed,gustAmber:d.gustAmber,gustRed:d.gustRed};
+}
+function hasCustomThresholds(){
+  var key=selectedDrone||'mini4pro';
+  return isPro()&&!!_allProThresholds[key];
+}
+function resetProThresholds(){
+  var key=selectedDrone||'mini4pro';
+  delete _allProThresholds[key];
+  try{localStorage.setItem('dc_all_pro_thresholds',JSON.stringify(_allProThresholds));}catch(e){}
+  if(wxData){renderDash();renderFc();}renderFavBar();
+  if(typeof showProSignedIn==='function')showProSignedIn();
+  showToast('Thresholds reset to '+getDrone().name+' defaults');
+}
 function thrDisp(kmh){return spd(kmh)+' '+spdU();}
 function buildThresholdUI(){
-  var t=getThresholds();var d=getDrone();var isCustom=isPro()&&_proThresholds!==null;
+  var t=getThresholds();var d=getDrone();var isCustom=hasCustomThresholds();
   function row(id,label,val,max,cls){
     var pct=Math.round(val/max*100);
     return '<div class="threshold-row">'+

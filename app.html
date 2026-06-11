@@ -1031,7 +1031,7 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.5.0';
+var APP_VERSION='1.5.1';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -3428,9 +3428,10 @@ function handleGoogleSignIn(){
               console.error('[DC] signInWithCredential error:',e);
             });
           },
-          ux_mode: 'popup',
+          ux_mode: isStandalone ? 'redirect' : 'popup',
+          redirect_uri: 'https://dronechecker.co.uk/app.html',
           cancel_on_tap_outside: false,
-          use_fedcm_for_prompt: true
+          use_fedcm_for_prompt: false
         });
         // Show the Google One Tap / sign-in button
         google.accounts.id.prompt(function(notification){

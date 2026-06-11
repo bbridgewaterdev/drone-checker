@@ -111,13 +111,32 @@ exports.stripeWebhook = onRequest(
       // Subscription renewed successfully — keep Pro active
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
-        const sub = await stripe.subscriptions.retrieve(invoice.subscription);
-        const uid = sub.metadata && sub.metadata.uid;
+        // Try to get uid directly from invoice metadata first (new API structure)
+        let uid = invoice.parent &&
+                  invoice.parent.subscription_details &&
+                  invoice.parent.subscription_details.metadata &&
+                  invoice.parent.subscription_details.metadata.uid;
+        // Fallback: retrieve subscription if uid not in invoice
+        if (!uid) {
+          const subId = (invoice.parent &&
+                         invoice.parent.subscription_details &&
+                         invoice.parent.subscription_details.subscription) ||
+                        invoice.subscription;
+          if (subId) {
+            try {
+              const sub = await stripe.subscriptions.retrieve(subId);
+              uid = sub.metadata && sub.metadata.uid;
+            } catch(e) {
+              console.error('Could not retrieve subscription:', e);
+            }
+          }
+        }
         if (uid) {
           await db.collection('users').doc(uid).set(
             {isPro: true, lastRenewalAt: admin.firestore.FieldValue.serverTimestamp()},
             {merge: true}
           );
+          console.log('Pro renewed for uid:', uid);
         }
         break;
       }

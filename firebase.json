@@ -25,51 +25,41 @@
     ],
     "headers": [
       {
-        "source": "**/*.html",
+        "source": "**",
         "headers": [
           {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
+            "key": "Strict-Transport-Security",
+            "value": "max-age=31536000; includeSubDomains"
           }
         ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [{"key": "Cache-Control","value": "no-cache, no-store, must-revalidate"}]
       },
       {
         "source": "/sw.js",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          }
-        ]
+        "headers": [{"key": "Cache-Control","value": "no-cache, no-store, must-revalidate"}]
       },
       {
         "source": "**/*.@(js|css)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000"
-          }
-        ]
+        "headers": [{"key": "Cache-Control","value": "public, max-age=31536000"}]
       },
       {
         "source": "**/*.@(png|jpg|jpeg|gif|ico|svg|webp)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000"
-          }
-        ]
+        "headers": [{"key": "Cache-Control","value": "public, max-age=31536000"}]
+      }
+    ],
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "/MBnB1234.html",
+        "type": 302
       }
     ],
     "rewrites": [
-      {
-        "source": "/app",
-        "destination": "/app.html"
-      },
-      {
-        "source": "/MBnB1234",
-        "destination": "/MBnB1234.html"
-      }
+      {"source": "/app","destination": "/app.html"},
+      {"source": "/MBnB1234","destination": "/MBnB1234.html"}
     ]
   }
 }

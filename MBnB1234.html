@@ -403,6 +403,18 @@
     .threshold-val{font-size:12px;font-weight:700;color:var(--text);width:52px;text-align:right;flex-shrink:0;}
     .threshold-reset{font-size:11px;color:var(--muted);cursor:pointer;text-decoration:underline;text-align:center;margin-top:10px;}
     .threshold-reset:hover{color:#f59e0b;}
+    .thr-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:14px;color:var(--muted);cursor:pointer;font-family:inherit;line-height:1;flex-shrink:0;transition:color .15s,border-color .15s;}
+    .thr-btn:hover{color:#f59e0b;border-color:#f59e0b;}
+    .thr-btn.active{color:#f59e0b;border-color:#f59e0b;}
+    #thr-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:none;align-items:flex-end;justify-content:center;}
+    #thr-sheet-overlay.open{display:flex;}
+    #thr-sheet{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:520px;padding:0 0 env(safe-area-inset-bottom,0);}
+    .thr-sheet-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border);}
+    .thr-sheet-title{font-size:13px;font-weight:600;color:var(--text);}
+    .thr-sheet-close{background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:0;line-height:1;}
+    .thr-sheet-body{padding:14px 16px 20px;}
+    .thr-drone-name{font-size:12px;color:#f59e0b;font-weight:600;margin-bottom:10px;}
+    .thr-hint{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
     .pro-privacy-note{font-size:10px;color:var(--muted);text-align:center;line-height:1.6;}
     .pro-privacy-note a{color:var(--accent);}
     .pro-free-link{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;margin-top:14px;padding:4px;}
@@ -663,6 +675,18 @@
 </div>
 
 
+<!-- THRESHOLD SHEET OVERLAY -->
+<div id="thr-sheet-overlay" onclick="if(event.target===this)closeThresholdSheet()">
+  <div id="thr-sheet">
+    <div class="thr-sheet-header">
+      <div style="width:24px;"></div>
+      <div class="thr-sheet-title">Fly Rating Thresholds</div>
+      <button class="thr-sheet-close" onclick="closeThresholdSheet()">&times;</button>
+    </div>
+    <div class="thr-sheet-body" id="thr-sheet-body"></div>
+  </div>
+</div>
+
 <!-- PRO OVERLAY -->
 <div class="pro-overlay" id="pro-overlay">
   <div class="pro-sheet" id="pro-sheet">
@@ -894,6 +918,7 @@
             </optgroup>
           </select>
           <span class="drone-limits" id="drone-limits"></span>
+          <button class="thr-btn" id="thr-btn" onclick="openThresholdSheet()" title="Customise fly rating thresholds" style="display:none;" aria-label="Customise thresholds">&#9881;</button>
           <button class="unit-toggle" id="unit-toggle" onclick="toggleUnits()">mph</button>
         </div>
         <div class="search">
@@ -2213,6 +2238,12 @@ function applyThreshold(id,rawVal){
   if(id==='gustAmber'&&current.gustAmber>=current.gustRed)current.gustRed=current.gustAmber+5;
   if(id==='gustRed'&&current.gustRed<=current.gustAmber)current.gustAmber=current.gustRed-5;
   saveProThresholds(current);if(wxData){renderDash();renderFc();}renderFavBar();
+  // Update drone name/status in sheet if open
+  var dn=document.querySelector('.thr-drone-name');
+  if(dn){var d2=getDrone();dn.textContent=d2.name+(hasCustomThresholds()?' \u2022 Custom':' \u2022 Default');}
+  // Show reset link if now custom
+  var rs=document.querySelector('#thr-sheet-body .threshold-reset');
+  if(!rs&&hasCustomThresholds()){var body2=document.getElementById('thr-sheet-body');if(body2){var div=document.createElement('div');div.className='threshold-reset';div.onclick=resetProThresholds;div.textContent='Reset to '+getDrone().name+' defaults';body2.appendChild(div);}}
 }
 function flyRating(wind,gust,vis,wmo,kp,temp,wind80,wind120){
   var d=getDrone(),thr=getThresholds(),lvl='green',issues=[];
@@ -3475,6 +3506,43 @@ function signOutPro(){
   showToast('Signed out of Pro');
   if(wxData){renderDash();renderFc();}
 }
+function openThresholdSheet(){
+  if(!isPro()){openProOverlay();return;}
+  var overlay=document.getElementById('thr-sheet-overlay');
+  var body=document.getElementById('thr-sheet-body');
+  if(!overlay||!body)return;
+  var d=getDrone();
+  var isCustom=hasCustomThresholds();
+  var t=getThresholds();
+  function row(id,label,val,max,cls){
+    var pct=Math.round(val/max*100);
+    return '<div class="threshold-row">'+
+      '<div class="threshold-label">'+label+'</div>'+
+      '<input class="threshold-slider '+cls+'" type="range" min="5" max="'+max+'" step="1" value="'+val+'" style="--pct:'+pct+'%" oninput="updateThresholdSlider(this,&apos;'+id+'&apos;)" onchange="applyThreshold(&apos;'+id+'&apos;,this.value)">'+
+      '<div class="threshold-val" id="thr-val-'+id+'">'+thrDisp(val)+'</div>'+
+    '</div>';
+  }
+  body.innerHTML=
+    '<div class="thr-drone-name">'+esc(d.name)+(isCustom?' \u2022 Custom':' \u2022 Default')+'</div>'+
+    '<div class="thr-hint">Adjust when conditions turn amber or red for this drone. Changes apply instantly.</div>'+
+    row('windAmber','Wind caution',t.windAmber,80,'amber')+
+    row('windRed','Wind avoid',t.windRed,80,'red')+
+    row('gustAmber','Gust caution',t.gustAmber,100,'amber')+
+    row('gustRed','Gust avoid',t.gustRed,100,'red')+
+    (isCustom?'<div class="threshold-reset" onclick="resetProThresholds()">Reset to '+esc(d.name)+' defaults</div>':'');
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+  var btn=document.getElementById('thr-btn');
+  if(btn)btn.classList.add('active');
+}
+function closeThresholdSheet(){
+  var overlay=document.getElementById('thr-sheet-overlay');
+  if(overlay)overlay.classList.remove('open');
+  document.body.style.overflow='';
+  var btn=document.getElementById('thr-btn');
+  if(btn)btn.classList.remove('active');
+}
+
 function updateProUI(){
   // Swap header logo — gold border for Pro, plain for free
   var logo=document.getElementById('header-logo');
@@ -3526,6 +3594,7 @@ function initCustomDroneUI(){
     if(customGrp)customGrp.style.display='';
     var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=customDrone.name;
     if(teaserGrp)teaserGrp.remove();
+    var thrBtn=document.getElementById('thr-btn');if(thrBtn)thrBtn.style.display='';
     var bar=document.querySelector('.drone-bar');
     if(bar&&!document.getElementById('custom-drone-btn')){
       var btn=document.createElement('button');btn.id='custom-drone-btn';btn.textContent='+ Custom';
@@ -3535,6 +3604,7 @@ function initCustomDroneUI(){
   } else {
     // Free — hide real custom group, show teaser entry
     if(customGrp)customGrp.style.display='none';
+    var thrBtn2=document.getElementById('thr-btn');if(thrBtn2)thrBtn2.style.display='none';
     if(teaserGrp){
       teaserGrp.style.display='';
     } else {

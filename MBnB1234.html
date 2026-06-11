@@ -917,8 +917,7 @@
               <option value="__pro__" id="drone-pro-teaser">My Custom Drone (Pro only)</option>
             </optgroup>
           </select>
-          <span class="drone-limits" id="drone-limits"></span>
-          <button class="thr-btn" id="thr-btn" onclick="openThresholdSheet()" title="Customise fly rating thresholds" style="display:none;" aria-label="Customise thresholds">&#9881;</button>
+          <button class="drone-limits thr-btn" id="drone-limits" onclick="openThresholdSheet()" title="Adjust fly rating thresholds" aria-label="Adjust fly rating thresholds" style="background:none;border:none;cursor:pointer;font-family:inherit;padding:0;display:flex;align-items:center;gap:3px;white-space:nowrap;"></button>
           <button class="unit-toggle" id="unit-toggle" onclick="toggleUnits()">mph</button>
         </div>
         <div class="search">
@@ -1091,7 +1090,25 @@ function saveDrone(){
     if(thrSection)thrSection.outerHTML=buildThresholdUI();
   }
 }
-function updateDroneLimits(){var el=document.getElementById('drone-limits');if(el)el.textContent='Max '+spd(getDrone().windRed)+' '+spdU();}
+function updateDroneLimits(){
+  var el=document.getElementById('drone-limits');
+  if(!el)return;
+  var limitText='Max '+spd(getDrone().windRed)+' '+spdU();
+  if(isPro()){
+    var isCustom=hasCustomThresholds();
+    el.innerHTML=limitText+'<span style="font-size:10px;margin-left:3px;opacity:.7;">'+(isCustom?'✎️':'✎️')+'</span>';
+    el.style.color='var(--muted)';
+    el.style.textDecoration='underline';
+    el.style.textDecorationStyle='dotted';
+    el.style.cursor='pointer';
+    el.title='Adjust fly rating thresholds'+(isCustom?' (custom)':' ('+getDrone().name+' defaults)');
+  } else {
+    el.textContent=limitText;
+    el.style.textDecoration='none';
+    el.style.cursor='default';
+    el.title='';
+  }
+}
 function saveWxCache(data){try{localStorage.setItem('dc_wx',JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
 function loadWxCache(){try{var s=localStorage.getItem('dc_wx');if(s)return JSON.parse(s);}catch(e){}return null;}
 function saveLastLoc(lat,lng,name){try{localStorage.setItem('dc_lastloc',JSON.stringify({lat:lat,lng:lng,name:name}));}catch(e){}}
@@ -3573,6 +3590,8 @@ function updateProUI(){
     pill.innerHTML='<svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg><span id="pro-pill-label">Go Pro</span>';
     pill.title='Upgrade to DroneChecker Pro';
   }
+  // Refresh drone limits display (adds/removes pencil icon based on Pro status)
+  updateDroneLimits();
 }
 function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return'<div class="pro-upsell" onclick="openProOverlay()" role="button" tabindex="0"><div style="flex:1;"><div class="pro-upsell-t">DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind &amp; more</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';}
 function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button></div>';}
@@ -3594,7 +3613,6 @@ function initCustomDroneUI(){
     if(customGrp)customGrp.style.display='';
     var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=customDrone.name;
     if(teaserGrp)teaserGrp.remove();
-    var thrBtn=document.getElementById('thr-btn');if(thrBtn)thrBtn.style.display='';
     var bar=document.querySelector('.drone-bar');
     if(bar&&!document.getElementById('custom-drone-btn')){
       var btn=document.createElement('button');btn.id='custom-drone-btn';btn.textContent='+ Custom';
@@ -3604,7 +3622,6 @@ function initCustomDroneUI(){
   } else {
     // Free — hide real custom group, show teaser entry
     if(customGrp)customGrp.style.display='none';
-    var thrBtn2=document.getElementById('thr-btn');if(thrBtn2)thrBtn2.style.display='none';
     if(teaserGrp){
       teaserGrp.style.display='';
     } else {

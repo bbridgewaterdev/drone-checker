@@ -1,4 +1,4 @@
-const CACHE = 'dronechecker-v70';
+const CACHE = 'dronechecker-v71';
 
 const STATIC = [
   '/',
@@ -48,6 +48,9 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = e.request.url;
 
+  // Never cache non-GET requests (POST etc. — Firebase auth, Stripe, etc.)
+  if (e.request.method !== 'GET') return;
+
   // Never cache API calls — always fetch fresh
   if (url.includes('open-meteo.com') ||
       url.includes('postcodes.io') ||
@@ -56,7 +59,12 @@ self.addEventListener('fetch', e => {
       url.includes('geocoding-api.open-meteo.com') ||
       url.includes('tiles.stadiamaps.com') ||
       url.includes('googletagmanager.com') ||
-      url.includes('google-analytics.com')) {
+      url.includes('google-analytics.com') ||
+      url.includes('firestore.googleapis.com') ||
+      url.includes('firebase.googleapis.com') ||
+      url.includes('identitytoolkit.googleapis.com') ||
+      url.includes('securetoken.googleapis.com') ||
+      url.includes('stripe.com')) {
     e.respondWith(
       fetch(e.request).catch(() => new Response(
         JSON.stringify({ error: 'offline', message: 'No live data — do not fly without checking current conditions.' }),
@@ -94,7 +102,7 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(cached => {
       const fetchPromise = fetch(e.request).then(res => {
-        if(res.ok){
+        if (res.ok) {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }

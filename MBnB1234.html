@@ -3598,45 +3598,161 @@ function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.n
 function getMaxFavs(){return isPro()?999:2;}
 function proGateExport(){if(!isPro()){showToast('Export is a Pro feature');openProOverlay();return false;}return true;}
 function getWindowHours(){return isPro()?72:24;}
+// ---- Pro: multiple custom drone profiles ----
 var customDrone={name:'My Custom Drone',windAmber:22,windRed:31,gustAmber:25,gustRed:31};
-function loadCustomDrone(){try{var s=localStorage.getItem('dc_custom_drone');if(s)customDrone=JSON.parse(s);}catch(e){}}
+var customDrones=[];
+
+function loadCustomDrone(){
+  try{
+    // Migrate legacy single drone
+    var legacy=localStorage.getItem('dc_custom_drone');
+    var multi=localStorage.getItem('dc_custom_drones');
+    if(multi){
+      customDrones=JSON.parse(multi);
+    } else if(legacy){
+      customDrones=[JSON.parse(legacy)];
+      localStorage.setItem('dc_custom_drones',JSON.stringify(customDrones));
+    }
+    // Sync DRONES object with all custom drones
+    customDrones.forEach(function(d,i){DRONES['custom_'+i]=d;});
+    // Backward compat: set customDrone to first
+    if(customDrones.length)customDrone=customDrones[0];
+  }catch(e){customDrones=[];}
+}
+
+function saveCustomDrones(){
+  try{localStorage.setItem('dc_custom_drones',JSON.stringify(customDrones));}catch(e){}
+}
+
 function saveCustomDrone(d){customDrone=d;try{localStorage.setItem('dc_custom_drone',JSON.stringify(d));}catch(e){}}
-function openCustomDroneEditor(){if(!isPro()){openProOverlay();return;}var d=customDrone;var overlay=document.createElement('div');overlay.id='custom-drone-overlay';overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';overlay.innerHTML='<div style="background:var(--bg2);border-radius:16px;padding:24px 20px;width:100%;max-width:380px;border:1px solid var(--border);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;"><div style="font-size:15px;font-weight:700;">Custom Drone Profile</div><button onclick="document.getElementById(\'custom-drone-overlay\').remove()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;">&times;</button></div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Drone name</div><input id="cd-name" class="log-input" value="'+esc(d.name)+'" placeholder="e.g. My FPV Quad" style="margin-bottom:12px;"/><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;"><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind amber (km/h)</div><input id="cd-wa" class="log-input" type="number" value="'+d.windAmber+'" style="margin-bottom:0;"/></div><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind red (km/h)</div><input id="cd-wr" class="log-input" type="number" value="'+d.windRed+'" style="margin-bottom:0;"/></div><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust amber (km/h)</div><input id="cd-ga" class="log-input" type="number" value="'+d.gustAmber+'" style="margin-bottom:0;"/></div><div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust red (km/h)</div><input id="cd-gr" class="log-input" type="number" value="'+d.gustRed+'" style="margin-bottom:0;"/></div></div><div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Values in km/h regardless of your display unit.</div><button onclick="applyCustomDrone()" class="log-btn">Save Profile</button></div>';document.body.appendChild(overlay);}
-function applyCustomDrone(){var name=document.getElementById('cd-name').value.trim()||'My Custom Drone';var wa=parseInt(document.getElementById('cd-wa').value)||22;var wr=parseInt(document.getElementById('cd-wr').value)||31;var ga=parseInt(document.getElementById('cd-ga').value)||25;var gr=parseInt(document.getElementById('cd-gr').value)||31;var d={name:name,windAmber:wa,windRed:wr,gustAmber:ga,gustRed:gr};saveCustomDrone(d);DRONES['custom']=d;var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=name;selectedDrone='custom';try{localStorage.setItem('dc_drone','custom');}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value='custom';updateDroneLimits();if(wxData){renderDash();renderFc();}document.getElementById('custom-drone-overlay').remove();showToast('Custom profile saved');}
+
+function rebuildCustomDroneOptions(){
+  var sel=document.getElementById('drone-sel');
+  if(!sel)return;
+  // Remove existing custom optgroup
+  var existing=document.getElementById('drone-custom-group');
+  if(existing)existing.remove();
+  var teaser=document.getElementById('drone-pro-teaser-group');
+  if(!isPro()){
+    if(!teaser){
+      var tg=document.createElement('optgroup');tg.label='Pro';tg.id='drone-pro-teaser-group';
+      var to=document.createElement('option');to.value='__pro__';to.textContent='Custom Drone (Pro only)';
+      tg.appendChild(to);sel.appendChild(tg);
+    }
+    return;
+  }
+  if(teaser)teaser.remove();
+  var grp=document.createElement('optgroup');
+  grp.label='My Drones';grp.id='drone-custom-group';
+  customDrones.forEach(function(d,i){
+    var opt=document.createElement('option');
+    opt.value='custom_'+i;
+    opt.textContent=d.name;
+    grp.appendChild(opt);
+  });
+  sel.appendChild(grp);
+  // Restore selected value
+  if(selectedDrone&&selectedDrone.indexOf('custom_')===0){
+    sel.value=selectedDrone;
+    // If that option no longer exists, reset
+    if(sel.value!==selectedDrone){selectedDrone='mini4pro';sel.value=selectedDrone;try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}}
+  }
+}
+
+function openCustomDroneEditor(editIdx){
+  if(!isPro()){openProOverlay();return;}
+  var isEdit=typeof editIdx==='number';
+  var d=isEdit?customDrones[editIdx]:{name:'',windAmber:22,windRed:31,gustAmber:25,gustRed:31};
+  var overlay=document.createElement('div');
+  overlay.id='custom-drone-overlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);z-index:10002;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+  var deleteBtn=isEdit?'<button onclick="deleteCustomDrone('+editIdx+')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:8px 12px;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex:1;">Delete</button>':'';
+  overlay.innerHTML='<div style="background:var(--bg2);border-radius:16px;padding:24px 20px;width:100%;max-width:380px;border:1px solid var(--border);">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">'+
+    '<div style="font-size:15px;font-weight:700;">'+(isEdit?'Edit Drone Profile':'Add Custom Drone')+'</div>'+
+    '<button onclick="document.getElementById(&apos;custom-drone-overlay&apos;).remove()" style="background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;">&times;</button></div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Drone name</div>'+
+    '<input id="cd-name" class="log-input" value="'+esc(d.name)+'" placeholder="e.g. DJI Avata 2" style="margin-bottom:12px;"/>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind caution (km/h)</div><input id="cd-wa" class="log-input" type="number" value="'+d.windAmber+'" style="margin-bottom:0;"/></div>'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Wind avoid (km/h)</div><input id="cd-wr" class="log-input" type="number" value="'+d.windRed+'" style="margin-bottom:0;"/></div>'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust caution (km/h)</div><input id="cd-ga" class="log-input" type="number" value="'+d.gustAmber+'" style="margin-bottom:0;"/></div>'+
+    '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Gust avoid (km/h)</div><input id="cd-gr" class="log-input" type="number" value="'+d.gustRed+'" style="margin-bottom:0;"/></div></div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;">Values in km/h regardless of display unit.</div>'+
+    '<div style="display:flex;gap:8px;">'+deleteBtn+'<button onclick="applyCustomDrone('+(isEdit?editIdx:'')+')" class="log-btn" style="flex:2;">Save</button></div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function applyCustomDrone(editIdx){
+  var name=document.getElementById('cd-name').value.trim()||'My Drone';
+  var wa=parseInt(document.getElementById('cd-wa').value)||22;
+  var wr=parseInt(document.getElementById('cd-wr').value)||31;
+  var ga=parseInt(document.getElementById('cd-ga').value)||25;
+  var gr=parseInt(document.getElementById('cd-gr').value)||31;
+  if(wa>=wr)wr=wa+5;
+  if(ga>=gr)gr=ga+5;
+  var d={name:name,windAmber:wa,windRed:wr,gustAmber:ga,gustRed:gr};
+  var isEdit=typeof editIdx==='number';
+  if(isEdit){
+    customDrones[editIdx]=d;
+    DRONES['custom_'+editIdx]=d;
+  } else {
+    customDrones.push(d);
+    var newIdx=customDrones.length-1;
+    DRONES['custom_'+newIdx]=d;
+    selectedDrone='custom_'+newIdx;
+    try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}
+  }
+  saveCustomDrones();
+  rebuildCustomDroneOptions();
+  var sel=document.getElementById('drone-sel');
+  if(sel&&!isEdit)sel.value=selectedDrone;
+  updateDroneLimits();
+  if(wxData){renderDash();renderFc();}
+  renderFavBar();
+  var ov=document.getElementById('custom-drone-overlay');if(ov)ov.remove();
+  showToast(isEdit?name+' updated':name+' added to your fleet');
+}
+
+function deleteCustomDrone(idx){
+  if(!confirm('Delete '+customDrones[idx].name+'?'))return;
+  customDrones.splice(idx,1);
+  delete DRONES['custom_'+idx];
+  // Re-index remaining custom drones
+  customDrones.forEach(function(d,i){DRONES['custom_'+i]=d;});
+  saveCustomDrones();
+  // If currently selected drone was deleted, switch to first preset
+  if(selectedDrone==='custom_'+idx||parseInt(selectedDrone.replace('custom_',''))>=customDrones.length){
+    selectedDrone='mini4pro';
+    try{localStorage.setItem('dc_drone',selectedDrone);}catch(e){}
+  }
+  rebuildCustomDroneOptions();
+  var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;
+  updateDroneLimits();
+  if(wxData){renderDash();renderFc();}
+  renderFavBar();
+  var ov=document.getElementById('custom-drone-overlay');if(ov)ov.remove();
+  showToast('Drone removed');
+}
+
 function initCustomDroneUI(){
   if(!PAID_FEATURES_ENABLED)return;
-  loadCustomDrone();DRONES['custom']=customDrone;
-  var customGrp=document.getElementById('drone-custom-group');
-  var teaserGrp=document.getElementById('drone-pro-teaser-group');
+  loadCustomDrone();
+  rebuildCustomDroneOptions();
+  var bar=document.querySelector('.drone-bar');
+  var existingBtn=document.getElementById('custom-drone-btn');
   if(isPro()){
-    // Pro — show real custom drone option, remove teaser entirely
-    if(customGrp)customGrp.style.display='';
-    var opt=document.getElementById('drone-custom-option');if(opt)opt.textContent=customDrone.name;
-    if(teaserGrp)teaserGrp.remove();
-    var bar=document.querySelector('.drone-bar');
-    if(bar&&!document.getElementById('custom-drone-btn')){
-      var btn=document.createElement('button');btn.id='custom-drone-btn';btn.textContent='+ Custom';
+    if(bar&&!existingBtn){
+      var btn=document.createElement('button');
+      btn.id='custom-drone-btn';
+      btn.textContent='+ Drone';
       btn.style.cssText='background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);padding:7px 8px;color:#f59e0b;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;';
-      btn.onclick=openCustomDroneEditor;bar.appendChild(btn);
+      btn.onclick=function(){openCustomDroneEditor();};
+      bar.appendChild(btn);
     }
   } else {
-    // Free — hide real custom group, show teaser entry
-    if(customGrp)customGrp.style.display='none';
-    if(teaserGrp){
-      teaserGrp.style.display='';
-    } else {
-      var sel2=document.getElementById('drone-sel');
-      if(sel2){
-        teaserGrp=document.createElement('optgroup');
-        teaserGrp.label='Pro';
-        teaserGrp.id='drone-pro-teaser-group';
-        var to=document.createElement('option');
-        to.value='__pro__';to.id='drone-pro-teaser';
-        to.textContent='My Custom Drone (Pro only)';
-        teaserGrp.appendChild(to);
-        sel2.appendChild(teaserGrp);
-      }
-    }
+    if(existingBtn)existingBtn.remove();
   }
 }
 function proFavNudge(favs){if(!PAID_FEATURES_ENABLED)return'';if(!isPro()&&favs.length>=2){return'<button class="fav-add" onclick="openProOverlay()" style="border-color:rgba(245,158,11,.4);color:#f59e0b;">+ More spots</button>';}if(isPro()){return'<button class="fav-add" onclick="toggleFavCurrent()">+ Add</button>';}return'';}

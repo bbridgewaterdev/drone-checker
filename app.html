@@ -3428,8 +3428,7 @@ function handleGoogleSignIn(){
               console.error('[DC] signInWithCredential error:',e);
             });
           },
-          ux_mode: isStandalone ? 'redirect' : 'popup',
-          redirect_uri: 'https://dronechecker.co.uk/app.html',
+          ux_mode: 'popup',
           cancel_on_tap_outside: false,
           use_fedcm_for_prompt: false
         });
@@ -3457,9 +3456,25 @@ function handleGoogleSignIn(){
       }
   }
 
+  // TWA (Android app): use Firebase signInWithRedirect — GSI popup is blocked in TWA
+  if(isStandalone && /Android/.test(navigator.userAgent)){
+    loadFirebase(function(){
+      try{
+        var provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithRedirect(provider);
+      }catch(e){
+        if(btn){btn.style.opacity='1';btn.disabled=false;}
+        restoreOverlay();
+        showToast('Sign-in error. Please try again.');
+        console.error('[DC] signInWithRedirect error:',e);
+      }
+    });
+    return;
+  }
+
   // Safari sign-in now works via redirect since authDomain is dronechecker.co.uk (Firebase Hosting)
 
-  // Non-Safari: use GSI popup (works in Edge, Chrome, Android TWA)
+  // Non-Safari: use GSI popup (works in Edge, Chrome, desktop)
   if(_fbLoaded && window.google && window.google.accounts){
     _doGSISignIn();
   } else {

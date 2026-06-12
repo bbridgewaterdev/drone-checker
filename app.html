@@ -61,6 +61,8 @@
     .tab{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:8px;}
     .tab.on{display:block;}
     #tab-restrict.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;}
+    #tab-radar.on,#tab-gh.on,#tab-log.on{display:flex;flex-direction:column;}
+    #wind-display,#gh-body,#log-body{flex:1;display:flex;flex-direction:column;}
     .nav{height:58px;background:var(--bg2);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
     .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--muted);font-size:9.5px;cursor:pointer;font-family:inherit;padding:0 1px;}
     .nb.on{color:var(--accent);}
@@ -574,6 +576,8 @@
       firebase.auth().getRedirectResult().then(function(result){
         if(result&&result.user){
           var fbUser=result.user;
+          // Clear the pending redirect flag
+          try{sessionStorage.removeItem('dc_redirect_pending');}catch(e){}
           fetchProStatus(fbUser.uid,function(isProStatus){
             onRestored({
               uid:fbUser.uid,
@@ -595,7 +599,17 @@
             }
           });
         } else {
-          // No redirect result — check for existing persisted session
+          // No redirect result — check if we were expecting one (i.e. redirect was attempted)
+          var redirectPending=false;
+          try{redirectPending=sessionStorage.getItem('dc_redirect_pending')==='1';}catch(e){}
+          if(redirectPending){
+            // Redirect was attempted but returned no user — likely incognito/privacy mode
+            try{sessionStorage.removeItem('dc_redirect_pending');}catch(e){}
+            setTimeout(function(){
+              showToast('Sign-in failed. Please try again in a normal browser tab — incognito mode blocks Google sign-in.');
+            },1000);
+          }
+          // Check for existing persisted session
           firebase.auth().onAuthStateChanged(function(fbUser){
             if(fbUser){
               fetchProStatus(fbUser.uid,function(isProStatus){
@@ -614,6 +628,8 @@
         }
       }).catch(function(e){
         console.error('getRedirectResult error:',e);
+        // Clear redirect flag
+        try{sessionStorage.removeItem('dc_redirect_pending');}catch(e2){}
         // Fall back to checking existing session
         firebase.auth().onAuthStateChanged(function(fbUser){
           if(fbUser){
@@ -981,9 +997,7 @@
       </button>
       <button class="nb" id="nb-radar" onclick="goTab('radar',this)" role="tab" aria-selected="false" aria-label="Wind Detail">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9.59 4.59A2 2 0 1111 8H2"/>
-          <path d="M12.59 19.41A2 2 0 1114 16H2"/>
-          <path d="M6.59 11.59A2 2 0 108 15H2"/>
+          <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
         </svg>
         Wind Detail
       </button>
@@ -1674,8 +1688,6 @@ function addFlight(){
   saveFlights(flights);
   showToast('✈️ Flight logged');
   renderLog();
-  // Auto-backup: silently update the rolling backup file
-  autoBackupLog(flights);
 }
 
 // Rolling auto-backup — writes to the same file handle every time.
@@ -1935,7 +1947,7 @@ function shareConditions(){
     var w80=spd(c.wind_speed_80m||0),w120=spd(c.wind_speed_120m||0);
     var next24=getNext24hRatings(),wins=getFlightWindows(next24),now=new Date();
     var nextWin=null;for(var i=0;i<wins.length;i++){if(wins[i].start>now&&!nextWin){nextWin=wins[i];}}
-    var winLine=nextWin?'🕐 Next window: '+pad(nextWin.start.getHours())+':00 – '+pad(new Date(nextWin.end.getTime()+3600000).getHours())+':00':'🕐 No flyable windows in next 24h';
+    var winLine=nextWin?'🕐 Next window: '+pad(nextWin.start.getHours())+':00 – '+pad(new Date(nextWin.end.getTime()+3600000).getHours())+':00':'🕐 No flyable windows in next '+(isPro()?'72h':'6h');
     text=
       'DroneChecker Pro — Flying Conditions\n'+
       emoji+' '+cond.label+' in '+loc+'\n\n'+
@@ -1982,7 +1994,7 @@ function shareFlightWindow(){
     var cautionHours=next24.filter(function(r){return r.rating==='amber';}).length;
     var winLine,subLine='';
     if(!primaryWin){
-      winLine='✈ No flyable windows in the next 24h';
+      winLine='✈ No flyable windows in the next '+(isPro()?'72h':'6h');
     } else {
       var wEnd2=new Date(primaryWin.end.getTime()+3600000);
       var startStr=pad(primaryWin.start.getHours())+':00',endStr=pad(wEnd2.getHours())+':00';
@@ -2395,27 +2407,45 @@ function _oldGetNext24hRatings(){
   return results;
 }
 function buildHourStrip(hourlyRatings,now){
-  var nowH=now.getHours();
-  var strip='<div style="display:flex;gap:1.5px;margin:10px 0 4px;">';
-  var tickLabels=[];
+  var totalHours=hourlyRatings.length;
+  var is72=totalHours>24;
+  var strip='<div style="display:flex;gap:1px;margin:10px 0 0;position:relative;">';
+  var dayBoundaries=[];
+  if(is72){for(var d=1;d<hourlyRatings.length;d++){if(hourlyRatings[d].hour===0)dayBoundaries.push(d);}}
   for(var i=0;i<hourlyRatings.length;i++){
     var entry=hourlyRatings[i];
-    var col=entry.rating==='green'?'#22c55e':entry.rating==='amber'?'#f59e0b':'#ef4444';
-    var isNowHour=entry.hour===nowH&&i===0;
-    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'"></div>';
-    if(i%6===0)tickLabels.push({idx:i,label:pad(entry.hour)});
+    var col=entry.rating==='green'?'#22c55e':entry.rating==='amber'?'#f59e0b':entry.rating==='red'?'#ef4444':'#334155';
+    var isNowHour=entry.hour===now.getHours()&&i===0;
+    var isDayStart=dayBoundaries.indexOf(i)>=0;
+    var bLeft=isDayStart?'border-left:2px solid rgba(255,255,255,.3);':'';    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+bLeft+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'" ></div>';
   }
   strip+='</div>';
-  var labelHtml='<div style="position:relative;height:14px;margin-bottom:2px;">';
-  var pct=[0,25,50,75,100];
-  for(var j=0;j<tickLabels.length;j++){
-    var left=pct[j]+'%';
-    var transform=j===0?'none':j===tickLabels.length-1?'translateX(-100%)':'translateX(-50%)';
-    labelHtml+='<span style="position:absolute;left:'+left+';transform:'+transform+';font-size:10px;color:var(--muted);">'+tickLabels[j].label+'</span>';
+  var labelHtml='<div style="position:relative;height:16px;margin-top:2px;margin-bottom:4px;">';
+  if(is72){
+    var startH=hourlyRatings[0]?pad(hourlyRatings[0].hour):'00';
+    var endH=hourlyRatings[totalHours-1]?pad((hourlyRatings[totalHours-1].hour+1)%24):'00';
+    labelHtml+='<span style="position:absolute;left:0;font-size:10px;color:var(--muted);">'+startH+'</span>';
+    for(var b=0;b<dayBoundaries.length;b++){
+      var bIdx=dayBoundaries[b];
+      var bPct=Math.round((bIdx/totalHours)*100);
+      var dayDate=new Date(hourlyRatings[bIdx].time);
+      var dayLbl=dayDate.toLocaleDateString('en-GB',{weekday:'short'});
+      labelHtml+='<span style="position:absolute;left:'+bPct+'%;transform:translateX(-50%);font-size:10px;color:rgba(255,255,255,.5);font-weight:600;">'+dayLbl+'</span>';
+    }
+    labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endH+'</span>';
+  } else {
+    var ticks=[];
+    for(var t=0;t<hourlyRatings.length;t++){if(t%6===0)ticks.push({idx:t,label:pad(hourlyRatings[t].hour)});}
+    for(var k=0;k<ticks.length;k++){
+      var leftPct=Math.round((ticks[k].idx/(totalHours-1))*100);
+      if(leftPct>85&&k<ticks.length-1)continue;
+      var xform=k===0?'none':'translateX(-50%)';
+      labelHtml+='<span style="position:absolute;left:'+leftPct+'%;transform:'+xform+';font-size:10px;color:var(--muted);">'+ticks[k].label+'</span>';
+    }
+    var lastE=hourlyRatings[totalHours-1];
+    var endHr=lastE?pad((lastE.hour+1)%24):'00';
+    labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endHr+'</span>';
   }
-  var lastEntry=hourlyRatings[hourlyRatings.length-1];
-  var endH=lastEntry?pad((lastEntry.hour+1)%24):pad((nowH+24)%24);
-  labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endH+'</span>';
   labelHtml+='</div>';
   return strip+labelHtml;
 }
@@ -2423,7 +2453,7 @@ function getFlightWindows(hourlyRatings){
   var windows=[],inWindow=false,winStart=null,winEnd=null;
   for(var i=0;i<hourlyRatings.length;i++){
     var entry=hourlyRatings[i];
-    if(entry.rating==='green'){if(!inWindow){inWindow=true;winStart=entry.time;}winEnd=entry.time;}
+    if(entry.rating==='green'||entry.rating==='amber'){if(!inWindow){inWindow=true;winStart=entry.time;}winEnd=entry.time;}
     else{if(inWindow){windows.push({start:winStart,end:winEnd});inWindow=false;}}
   }
   if(inWindow)windows.push({start:winStart,end:winEnd});
@@ -2457,12 +2487,18 @@ function renderFlightWindowCard(){
   var primaryWin=currentWin||nextWin;
   var isNowOpen=!!currentWin;
   var isTomorrow=primaryWin&&primaryWin.start.getDate()!==now.getDate();
+  // Detect if window is amber-only (no green slots)
+  var winIsAmberOnly=false;
+  if(primaryWin){
+    var greenInWin=next24.filter(function(r){return r.rating==='green'&&r.time>=primaryWin.start&&r.time<=primaryWin.end;});
+    winIsAmberOnly=greenInWin.length===0;
+  }
   var hourStrip=buildHourStrip(next24,now);
   var mainHtml='';
   if(!primaryWin){
     mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
       '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(100,116,139,.08)" stroke="#475569" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="11" fill="none" stroke="#475569" stroke-width="1.5"/><line x1="14" y1="14" x2="26" y2="26" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="14" x2="14" y2="26" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/></svg>'+
-      '<div><div style="font-size:15px;font-weight:700;color:var(--muted);">No flyable windows in 48hrs</div>'+
+      '<div><div style="font-size:15px;font-weight:700;color:var(--muted);">No flyable windows in the next '+(isPro()?'72 hours':'6 hours')+'</div>'+
       '<div style="font-size:12px;color:var(--muted);margin-top:1px;">Check conditions again tomorrow.</div></div></div>';
   } else {
     var wEnd=new Date(primaryWin.end.getTime()+3600000);
@@ -2470,10 +2506,10 @@ function renderFlightWindowCard(){
     var durationH=Math.floor(durationMs/3600000),durationM=Math.floor((durationMs%3600000)/60000);
     var durationStr=durationH>0?durationH+'h'+(durationM>0?' '+durationM+'m':''):durationM+'m';
     var startStr=pad(primaryWin.start.getHours())+':00',endStr=pad(wEnd.getHours())+':00';
-    var col=isNowOpen?'var(--green)':'var(--accent)';
-    var label=isNowOpen?'Open now':'Next window'+(isTomorrow?' · Tomorrow':'');
+    var col=winIsAmberOnly?'var(--amber)':(isNowOpen?'var(--green)':'var(--accent)');
+    var label=isNowOpen?(winIsAmberOnly?'Open now · Caution':'Open now'):(winIsAmberOnly?'Flyable with caution'+(isTomorrow?' · Tomorrow':''):'Next window'+(isTomorrow?' · Tomorrow':''));
     var timeStr=isNowOpen?'Until '+endStr:startStr+' – '+endStr;
-    var subStr=isNowOpen?durationStr+' remaining':(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
+    var subStr=isNowOpen?(winIsAmberOnly?'Not ideal — fly carefully':durationStr+' remaining'):(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
     mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
       (isNowOpen?'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><circle cx="20" cy="20" r="13" fill="rgba(34,197,94,.2)" stroke="#22c55e" stroke-width="1.5"/><polyline points="12,20 17,26 28,13" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(6,182,212,.10)" stroke="#06b6d4" stroke-width="1.5"/><circle cx="20" cy="20" r="11" fill="rgba(6,182,212,.12)" stroke="#06b6d4" stroke-width="1.5"/><line x1="20" y1="20" x2="20" y2="12" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="20" x2="26" y2="20" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#06b6d4"/><line x1="20" y1="9.5" x2="20" y2="11" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="30.5" y1="20" x2="29" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="20" y1="30.5" x2="20" y2="29" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="9.5" y1="20" x2="11" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>')+
       '<div style="flex:1;">'+
@@ -2500,7 +2536,7 @@ function renderFlightWindowCard(){
       (primaryWin?'<button onclick="shareFlightWindow()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:5px 10px;color:var(--text);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share</button>':'')+
     '</div>'+
     mainHtml+
-    '<div style="font-size:11px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">Next 24 hours</div>'+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">'+(isPro()?'Next 72 hours':'Next 6 hours')+'</div>'+
     hourStrip+legend+'</div>';
 }
 function renderDash(){
@@ -3057,13 +3093,13 @@ function goTab(id,btn){
   if(id==='radar'){
     if(!isPro()){
       var windEl=document.getElementById('wind-display');
-      if(windEl)windEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;"><div style="font-size:36px;margin-bottom:16px;">💨</div><div style="font-weight:700;font-size:17px;margin-bottom:8px;">Wind Detail is Pro</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">See wind speed, direction and gusts at altitude — plus a full 24-hour wind breakdown.</div><button onclick="openProOverlay()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px 28px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Unlock Pro</button></div>';
+      if(windEl)windEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Wind Detail is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">See wind speed, direction and gusts at altitude — plus a full 24-hour wind breakdown.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
     } else { initWindMap(); }
   }
   if(id==='gh'){
     if(!isPro()){
       var ghEl=document.getElementById('gh-body');
-      if(ghEl)ghEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;"><div style="font-size:36px;margin-bottom:16px;">🌅</div><div style="font-weight:700;font-size:17px;margin-bottom:8px;">Golden Hour is Pro</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">Get precise golden hour, blue hour, sunrise and sunset times with live countdowns for your exact location.</div><button onclick="openProOverlay()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px 28px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Unlock Pro</button></div>';
+      if(ghEl)ghEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Golden Hour is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Get precise golden hour, blue hour, sunrise and sunset times with live countdowns for your exact location.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
     } else { renderGolden(); }
   }
   if(id==='cl')renderChecklist();
@@ -3071,7 +3107,7 @@ function goTab(id,btn){
   if(id==='log'){
     if(!isPro()){
       var logEl=document.getElementById('log-body');
-      if(logEl)logEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;"><div style="font-size:36px;margin-bottom:16px;">✈️</div><div style="font-weight:700;font-size:17px;margin-bottom:8px;">Flight Log is Pro</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">Log every flight with date, location, drone, duration and conditions. Export to Excel or Google Sheets.</div><button onclick="openProOverlay()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px 28px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Unlock Pro</button></div>';
+      if(logEl)logEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Flight Log is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Log every flight with date, location, drone, duration and conditions. Export to Excel or Google Sheets.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
     } else { renderLog(); }
   }
   if(id==='restrict')renderRestrictionsTab();
@@ -3550,6 +3586,7 @@ function handleGoogleSignIn(){
     loadFirebase(function(){
       try{
         var provider = new firebase.auth.GoogleAuthProvider();
+        try{sessionStorage.setItem('dc_redirect_pending','1');}catch(e){}
         firebase.auth().signInWithRedirect(provider);
       }catch(e){
         if(btn){btn.style.opacity='1';btn.disabled=false;}

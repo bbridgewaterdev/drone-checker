@@ -65,7 +65,58 @@ exports.createCheckoutSession = onRequest(
 );
 
 // ----------------------------------------------------------------
-// stripeWebhook
+// createPortalSession
+// Called from the app when the user taps "Manage subscription"
+// Expects JSON body: { uid }
+// Returns JSON: { url } — the Stripe Customer Portal URL
+// ----------------------------------------------------------------
+exports.createPortalSession = onRequest(
+  {secrets: [STRIPE_SECRET_KEY], cors: ['https://dronechecker.co.uk']},
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).send('Method Not Allowed');
+      return;
+    }
+
+    const {uid} = req.body;
+
+    if (!uid) {
+      res.status(400).json({error: 'Missing uid'});
+      return;
+    }
+
+    try {
+      const db = admin.firestore();
+      const userDoc = await db.collection('users').doc(uid).get();
+
+      if (!userDoc.exists) {
+        res.status(404).json({error: 'User not found'});
+        return;
+      }
+
+      const stripeCustomerId = userDoc.data().stripeCustomerId;
+
+      if (!stripeCustomerId) {
+        res.status(400).json({error: 'No Stripe customer found for this user'});
+        return;
+      }
+
+      const stripe = stripeLib(STRIPE_SECRET_KEY.value());
+
+      const session = await stripe.billingPortal.sessions.create({
+        customer: stripeCustomerId,
+        return_url: APP_URL,
+      });
+
+      res.json({url: session.url});
+    } catch (err) {
+      console.error('Portal session error:', err);
+      res.status(500).json({error: 'Could not create portal session'});
+    }
+  }
+);
+
+
 // Stripe calls this after successful payment events
 // Sets isPro: true in Firestore for the relevant user
 // ----------------------------------------------------------------

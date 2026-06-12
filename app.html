@@ -676,10 +676,11 @@
     <div class="disclaimer-title">Before you fly</div>
     <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
     <div class="disclaimer-box">
-      <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and restrictions independently.<br><br>
-      <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times.<br><br>
+      <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace, NOTAMs and restrictions independently before flying.<br><br>
+      <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times. Ensure you hold a valid CAA Operator ID and Flyer ID where required.<br><br>
+      <strong>Airspace data.</strong> The restrictions map shows ground hazards and indicative airspace zones only. Always check official NOTAMs via NATS or the CAA before flying.<br><br>
       <strong>No liability.</strong> DroneChecker accepts no liability for loss, damage or legal consequence from reliance on this app.<br><br>
-      <strong>Analytics.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). No personal data collected. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a>.
+      <strong>Data &amp; privacy.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). Free users: no personal data stored on our servers. Pro subscribers: your email and flight data are stored securely to provide cloud sync. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> and <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms of Service</a>.
     </div>
     <div id="disc-scroll-hint" style="text-align:center;padding:6px 0 10px;font-size:12px;color:var(--muted);animation:bounceY 1.4s ease-in-out infinite;">↓ Scroll to accept</div>
     <label class="disclaimer-check">
@@ -3736,7 +3737,31 @@ function updateProUI(){
   updateDroneLimits();
 }
 function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return'<div class="pro-upsell" onclick="openProOverlay()" role="button" tabindex="0"><div style="flex:1;"><div class="pro-upsell-t">DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind &amp; more</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';}
-function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button></div>';}
+function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;"><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button><button class="pro-signout-btn" onclick="openBillingPortal()" style="font-size:10px;opacity:.7;">Manage subscription</button></div></div>';}
+
+function openBillingPortal(){
+  if(!proUser||!proUser.uid){showToast('Please sign in first');return;}
+  var btn=event&&event.target;
+  if(btn){btn.textContent='Loading…';btn.disabled=true;}
+  fetch('https://us-central1-dronechecker.cloudfunctions.net/createPortalSession',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({uid:proUser.uid})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.url){
+      window.location.href=data.url;
+    } else {
+      showToast('Could not open billing portal. Please try again.');
+      if(btn){btn.textContent='Manage subscription';btn.disabled=false;}
+    }
+  })
+  .catch(function(){
+    showToast('Could not open billing portal. Check your connection.');
+    if(btn){btn.textContent='Manage subscription';btn.disabled=false;}
+  });
+}
 function getMaxFavs(){return isPro()?999:2;}
 function proGateExport(){if(!isPro()){showToast('Export is a Pro feature');openProOverlay();return false;}return true;}
 function getWindowHours(){return isPro()?72:6;}

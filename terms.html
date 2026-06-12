@@ -38,7 +38,7 @@
 
 <div class="doc">
   <h1>Terms of Service</h1>
-  <div class="updated">DroneChecker — Last updated: May 2026</div>
+  <div class="updated">DroneChecker — Last updated: June 2026</div>
 
   <h2>1. Acceptance of Terms</h2>
   <p>By accessing or using DroneChecker at dronechecker.co.uk or via the Google Play Store, you agree to be bound by these Terms of Service. If you do not agree, please do not use the App.</p>
@@ -47,16 +47,24 @@
   <p>DroneChecker is an informational application providing:</p>
   <ul>
     <li>Live weather conditions and flying condition ratings tailored to your drone model</li>
-    <li>24-hour hourly weather forecast and 7-day best day to fly planner with per-slot flying condition ratings</li>
-    <li>Wind direction compass showing current wind bearing, speed and gusts at your location</li>
+    <li>24-hour hourly weather forecast with per-slot flying condition ratings</li>
+    <li>Wind direction, speed and gusts at 10m, 80m and 120m altitude</li>
     <li>Geomagnetic activity (KP index) information from NOAA, integrated into the fly rating</li>
     <li>Golden hour and blue hour calculations for aerial photography</li>
     <li>Pre-flight checklist for drone pilots</li>
-    <li>Flight logging with CSV export for personal records</li>
+    <li>Flight logging with CSV and Excel export for personal records</li>
     <li>General UK CAA regulatory guidance</li>
     <li>Links to official airspace information resources</li>
     <li>Offline mode showing last known conditions when no internet connection is available</li>
     <li>Favourite location saving for frequently visited flying sites</li>
+  </ul>
+  <p><strong>DroneChecker Pro</strong> is an optional paid subscription (£2.99/month or £29.99/year) providing additional features including:</p>
+  <ul>
+    <li>Extended 48-hour hourly forecast and 7-day best day to fly planner</li>
+    <li>Ground hazard and indicative airspace restriction map</li>
+    <li>Cloud sync of flight logs and saved locations across devices</li>
+    <li>Multiple custom drone profiles with configurable wind thresholds</li>
+    <li>Today's conditions summary</li>
   </ul>
 
   <h2>⚠️ 3. Important Safety Disclaimer</h2>
@@ -68,7 +76,7 @@
       <li>You are solely responsible for ensuring your drone flight complies with all applicable laws and regulations.</li>
       <li>You must always check official sources before flying, including the CAA Drone Safety page at <a href="https://www.caa.co.uk/drones" target="_blank" rel="noopener noreferrer">caa.co.uk/drones</a>.</li>
       <li>DroneChecker does not provide real-time NOTAM data. Temporary flight restrictions may exist that are not reflected in the App.</li>
-      <li>DroneChecker does not provide airspace restriction mapping. You must verify airspace restrictions independently before every flight.</li>
+      <li>The Pro airspace restriction map shows ground hazards and indicative airspace zones only. It is not a substitute for official airspace checks. Always verify airspace and NOTAMs independently via NATS or the CAA before flying.</li>
       <li>Flying condition ratings are algorithmically generated estimates based on your selected drone profile and do not constitute official aviation advice.</li>
       <li>Wind data is sourced from Open-Meteo weather forecasts and represents conditions at 10m, 80m and 120m above ground level, which may differ from conditions at your specific flying altitude.</li>
       <li>Offline cached weather data may be outdated and should not be relied upon as current conditions.</li>
@@ -115,7 +123,21 @@
   </ul>
 
   <h2>7. Flight Log</h2>
-  <p>DroneChecker provides a flight logging feature for personal record-keeping purposes only. Flight log data is stored locally on your device and is not transmitted to DroneChecker or any third party. DroneChecker does not guarantee the accuracy, completeness, or legal sufficiency of flight log records for any regulatory, insurance, or legal purpose. You are solely responsible for maintaining accurate and compliant flight records as required by applicable regulations.</p>
+  <p>DroneChecker provides a flight logging feature for personal record-keeping purposes only.</p>
+  <p><strong>Free users:</strong> flight log data is stored locally on your device only and is not transmitted to DroneChecker or any third party.</p>
+  <p><strong>Pro subscribers:</strong> flight log data is synced to Firebase Firestore (Google Cloud, EU region) to enable cloud backup and cross-device access. You can export or delete your flight log at any time within the app. To request full account and data deletion, contact us at <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a>.</p>
+  <p>DroneChecker does not guarantee the accuracy, completeness, or legal sufficiency of flight log records for any regulatory, insurance, or legal purpose. You are solely responsible for maintaining accurate and compliant flight records as required by applicable regulations.</p>
+
+  <h2>7a. Pro Subscription</h2>
+  <p>DroneChecker Pro is a recurring subscription billed at £2.99/month or £29.99/year via Stripe. By subscribing you agree to:</p>
+  <ul>
+    <li>Automatic renewal at the end of each billing period unless cancelled beforehand</li>
+    <li>Stripe's Terms of Service governing payment processing</li>
+    <li>Cancellation at any time via your Stripe billing portal — access continues until the end of the current billing period</li>
+    <li>No refunds for partial billing periods, except where required by applicable law</li>
+    <li>Prices may change — you will be notified in advance of any price change</li>
+  </ul>
+  <p>Pro features are available only while your subscription is active. If payment fails, access to Pro features will be suspended until payment is resolved or the subscription is cancelled.</p>
 
   <h2>8. Intellectual Property</h2>
   <p>All content within DroneChecker, including the app design, logo, code, and text, is the intellectual property of DroneChecker and is protected by applicable copyright and intellectual property laws. You may not reproduce, distribute, or create derivative works without our express written permission.</p>
@@ -124,7 +146,7 @@
   <p>To the fullest extent permitted by applicable law, DroneChecker and its operators shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages arising from your use of the App, any inaccuracy in data provided, any drone incident or regulatory infringement, or any third-party claims arising from your use of the App.</p>
 
   <h2>10. Third-Party Links and Services</h2>
-  <p>DroneChecker integrates data from and contains links to third-party services including the CAA, Open-Meteo, NOAA, OpenStreetMap Nominatim, Postcodes.io, OpenFreeMap, Google Analytics and GitHub Pages. These are provided for convenience and functionality only. We are not responsible for the content, accuracy, availability, or practices of any third-party services. Each third-party service is subject to its own terms and privacy policy.</p>
+  <p>DroneChecker integrates data from and contains links to third-party services including the CAA, Open-Meteo, NOAA, OpenStreetMap Nominatim, Postcodes.io, Stadia Maps, Google Analytics, Firebase (Google Cloud), Google Sign-In, Stripe and Firebase Hosting. These are provided for convenience and functionality only. We are not responsible for the content, accuracy, availability, or practices of any third-party services. Each third-party service is subject to its own terms and privacy policy.</p>
 
   <h2>11. Governing Law</h2>
   <p>These Terms of Service shall be governed by and construed in accordance with the laws of England and Wales. Any disputes shall be subject to the exclusive jurisdiction of the courts of England and Wales.</p>

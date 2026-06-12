@@ -237,8 +237,11 @@
     .log-empty-icon{font-size:36px;margin-bottom:12px;}
     .log-count{font-size:12px;color:var(--muted);padding:8px 12px 0;}
     .disclaimer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overscroll-behavior:none;}
-    .disclaimer-sheet{background:var(--bg2);border-radius:16px;padding:24px 20px 0;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;border:1px solid var(--border);-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;}
-    @media(max-height:680px){.disclaimer-sheet{padding:16px 16px 0;max-height:92vh;border-radius:12px;}}
+    .disclaimer-sheet{background:var(--bg2);border-radius:16px;width:100%;max-width:420px;max-height:88vh;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+    @media(max-height:680px){.disclaimer-sheet{max-height:92vh;border-radius:12px;}}
+    .disclaimer-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px 16px;flex:1;}
+    @media(max-height:680px){.disclaimer-scroll{padding:16px 16px 12px;}}
+    .disclaimer-footer{padding:12px 20px 16px;border-top:1px solid var(--border);background:var(--bg2);border-radius:0 0 16px 16px;flex-shrink:0;}
     @media(max-height:680px){.disclaimer-icon{display:none;}.disclaimer-title{margin-bottom:4px;}.disclaimer-sub{margin-bottom:12px;}.disclaimer-box{margin-bottom:12px;padding:10px;}.disclaimer-check{margin-bottom:14px;}}
     @keyframes bounceY{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
     .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
@@ -249,7 +252,7 @@
     .disclaimer-check{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;cursor:pointer;}
     .disclaimer-check input{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent);margin-top:1px;cursor:pointer;}
     .disclaimer-check-lbl{font-size:13px;color:var(--text);line-height:1.5;}
-    .disclaimer-btn{width:100%;background:var(--bg3);border:none;border-radius:var(--radius-sm);padding:14px;color:var(--muted);font-size:15px;font-weight:600;cursor:not-allowed;font-family:inherit;transition:all .2s;}
+    .disclaimer-btn{width:100%;background:var(--bg3);border:none;border-radius:var(--radius-sm);padding:14px;color:var(--muted);font-size:15px;font-weight:600;cursor:not-allowed;font-family:inherit;transition:all .2s;margin:0;}
     .disclaimer-btn.ready{background:var(--accent);color:#fff;cursor:pointer;}
     .rule:last-child{margin-bottom:0;}
     .rule-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
@@ -653,41 +656,44 @@
 <body>
 <div id="disclaimer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
   <div class="disclaimer-sheet">
-    <div class="disclaimer-icon">
-      <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
-        <rect width="100" height="100" rx="20" fill="#0f172a"/>
-        <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
-        <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-        <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-        <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
-        <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
-        <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
-        <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
-        <circle cx="50" cy="50" r="11" fill="white"/>
-        <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
-      </svg>
+    <div class="disclaimer-scroll">
+      <div class="disclaimer-icon">
+        <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
+          <rect width="100" height="100" rx="20" fill="#0f172a"/>
+          <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
+          <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+          <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+          <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+          <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+          <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+          <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+          <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+          <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+          <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
+          <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
+          <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
+          <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
+          <circle cx="50" cy="50" r="11" fill="white"/>
+          <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
+        </svg>
+      </div>
+      <div class="disclaimer-title">Before you fly</div>
+      <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
+      <div class="disclaimer-box">
+        <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace, NOTAMs and restrictions independently before flying.<br><br>
+        <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times. Ensure you hold a valid CAA Operator ID and Flyer ID where required.<br><br>
+        <strong>Airspace data.</strong> The restrictions map shows ground hazards and indicative airspace zones only. Always check official NOTAMs via NATS or the CAA before flying.<br><br>
+        <strong>No liability.</strong> DroneChecker accepts no liability for loss, damage or legal consequence from reliance on this app.<br><br>
+        <strong>Data &amp; privacy.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). Free users: no personal data stored on our servers. Pro subscribers: your email and flight data are stored securely to provide cloud sync. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> and <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms of Service</a>.
+      </div>
+      <label class="disclaimer-check">
+        <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
+        <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
+      </label>
     </div>
-    <div class="disclaimer-title">Before you fly</div>
-    <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
-    <div class="disclaimer-box">
-      <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace, NOTAMs and restrictions independently before flying.<br><br>
-      <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times. Ensure you hold a valid CAA Operator ID and Flyer ID where required.<br><br>
-      <strong>Airspace data.</strong> The restrictions map shows ground hazards and indicative airspace zones only. Always check official NOTAMs via NATS or the CAA before flying.<br><br>
-      <strong>No liability.</strong> DroneChecker accepts no liability for loss, damage or legal consequence from reliance on this app.<br><br>
-      <strong>Data &amp; privacy.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). Free users: no personal data stored on our servers. Pro subscribers: your email and flight data are stored securely to provide cloud sync. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> and <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms of Service</a>.
+    <div class="disclaimer-footer">
+      <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled>Enter DroneChecker</button>
     </div>
-    <div id="disc-scroll-hint" style="text-align:center;padding:6px 0 10px;font-size:12px;color:var(--muted);animation:bounceY 1.4s ease-in-out infinite;">↓ Scroll to accept</div>
-    <label class="disclaimer-check">
-      <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
-      <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
-    </label>
-    <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled style="position:sticky;bottom:0;margin:16px -20px 0;border-radius:0 0 16px 16px;padding:16px;">Enter DroneChecker</button>
   </div>
 </div>
 

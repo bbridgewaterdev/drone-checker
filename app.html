@@ -681,7 +681,7 @@
       <div class="disclaimer-sub">Please read and accept before using DroneChecker</div>
       <div class="disclaimer-box">
         <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and NOTAMs independently before flying.<br><br>
-        <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times.<br><br>
+        <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times, including holding a valid CAA Operator ID and Flyer ID where required.<br><br>
         <strong>No liability.</strong> DroneChecker accepts no liability for any loss, damage or legal consequence from reliance on this app.<br><br>
         <strong>Data.</strong> Free users: no personal data stored on our servers. Pro subscribers: email and flight data stored securely. See <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> &amp; <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms</a>.
       </div>
@@ -826,6 +826,7 @@
       <div class="onboard-dot"></div>
       <div class="onboard-dot"></div>
       <div class="onboard-dot"></div>
+      <div class="onboard-dot"></div>
     </div>
     <div class="onboard-slide on" id="onboard-0">
       <div class="onboard-icon">🚁</div>
@@ -844,9 +845,14 @@
     <div class="onboard-slide" id="onboard-2">
       <div class="onboard-icon">📅</div>
       <div class="onboard-title">Plan the perfect flight</div>
-      <div class="onboard-desc">Check the 6-hour forecast with per-slot fly ratings before you head out. The golden hour calculator gives you precise sunrise, sunset and golden hour times with live countdowns — calculated astronomically for your exact location, no internet required.<br><br>Upgrade to <strong style="color:#f59e0b;">Pro</strong> for the 48-hour forecast, 7-day best day planner and airspace restrictions map.</div>
+      <div class="onboard-desc">Check the 6-hour forecast with per-slot fly ratings before you head out. The golden hour calculator gives you precise sunrise, sunset and golden hour times with live countdowns — calculated astronomically for your exact location, no internet required.<br><br>Upgrade to <strong style="color:#f59e0b;">Pro</strong> for the 48-hour forecast and 7-day best day planner.</div>
     </div>
     <div class="onboard-slide" id="onboard-3">
+      <div class="onboard-icon">🗺️</div>
+      <div class="onboard-title">Know where you can fly</div>
+      <div class="onboard-desc">Upgrade to <strong style="color:#f59e0b;">Pro</strong> to unlock the UK airspace and ground hazard restrictions map — showing flight restriction zones, prohibited areas, danger areas and ground hazards including schools, hospitals and railways, all on an interactive map.<br><br>Always verify airspace and NOTAMs independently before flying.</div>
+    </div>
+    <div class="onboard-slide" id="onboard-4">
       <div class="onboard-icon">✈️</div>
       <div class="onboard-title">Log every flight</div>
       <div class="onboard-desc">Record your flights with date, location, drone, duration and conditions — great for insurance records and your personal flight history. Weather data is auto-filled from your current session.<br><br>Upgrade to <strong style="color:#f59e0b;">Pro</strong> for cloud sync across all your devices and export to Excel.</div>
@@ -2057,7 +2063,7 @@ function startIntervals(){
     if(uLat&&uLng){fetchAll();}
   },1800000);
 }
-var onboardSlide=0;var onboardTotal=4;
+var onboardSlide=0;var onboardTotal=5;
 function checkOnboarding(){
   try{if(localStorage.getItem('dc_onboarded')==='1')return;}catch(e){}
   var overlay=document.getElementById('onboard-overlay');

@@ -1645,15 +1645,24 @@ function renderLog(){
       )+
     '</div>';
     entries+='<div class="log-actions">'+exportBtns+'<button class="log-clear" onclick="clearFlights()">Clear all</button></div>'+backupBtns;
-    for(var i=flights.length-1;i>=0;i--){
-      var f=flights[i];
+    // Sort by timestamp descending (newest first)
+    var sorted=flights.slice().sort(function(a,b){
+      var ta=a.ts?new Date(a.ts):new Date(a.date);
+      var tb=b.ts?new Date(b.ts):new Date(b.date);
+      return tb-ta;
+    });
+    for(var i=0;i<sorted.length;i++){
+      var f=sorted[i];
+      var origIdx=flights.indexOf(f);
+      var timeStr='';
+      if(f.ts){var td=new Date(f.ts);timeStr=' · '+pad(td.getHours())+':'+pad(td.getMinutes());}
       var cc=condColor[f.cond]||'';
       entries+='<div class="log-entry">'+
         '<div class="log-entry-hdr">'+
         '<div><div class="log-entry-loc">'+esc(f.loc)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:8px;">'+
-        '<div class="log-entry-date">'+esc(f.date)+'</div>'+
-        '<button class="log-entry-del" onclick="deleteFlight('+i+')" title="Delete" aria-label="Delete flight entry">×</button>'+
+        '<div class="log-entry-date">'+esc(f.date)+timeStr+'</div>'+
+        '<button class="log-entry-del" onclick="deleteFlight('+origIdx+')" title="Delete" aria-label="Delete flight entry">×</button>'+
         '</div></div>'+
         '<div class="log-entry-tags">'+
         '<span class="log-tag">🚁 '+esc(f.drone)+'</span>'+
@@ -1667,14 +1676,15 @@ function renderLog(){
         '</div>';
     }
   }
-  document.getElementById('log-body').innerHTML=stats+form+entries+'<div style="height:14px;"></div>'+proAccountCard();
 }
 function addFlight(){
   var loc=document.getElementById('li-loc').value.trim();
   if(!loc){showToast('Please enter a location');return;}
   var flights=loadFlights();
+  var now=new Date();
   flights.push({
-    date:document.getElementById('li-date').value||new Date().toISOString().split('T')[0],
+    date:document.getElementById('li-date').value||now.toISOString().split('T')[0],
+    ts:now.toISOString(),
     loc:loc,
     drone:document.getElementById('li-drone').value.trim(),
     dur:document.getElementById('li-dur').value,

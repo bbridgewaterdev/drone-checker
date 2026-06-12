@@ -240,7 +240,7 @@
     .disclaimer-sheet{background:var(--bg2);border-radius:16px;width:100%;max-width:420px;max-height:88vh;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
     @media(max-height:680px){.disclaimer-sheet{max-height:92vh;border-radius:12px;}}
     .disclaimer-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px 16px;flex:1;}
-    @media(max-height:680px){.disclaimer-scroll{padding:16px 16px 12px;}}
+    @media(max-height:720px){.disclaimer-scroll{padding:16px 16px 12px;}.disclaimer-icon{display:none;}.disclaimer-title{margin-bottom:4px;}.disclaimer-sub{margin-bottom:12px;}.disclaimer-box{margin-bottom:12px;padding:10px;}.disclaimer-check{margin-bottom:0;}}
     .disclaimer-footer{padding:12px 20px 16px;border-top:1px solid var(--border);background:var(--bg2);border-radius:0 0 16px 16px;flex-shrink:0;}
     @media(max-height:680px){.disclaimer-icon{display:none;}.disclaimer-title{margin-bottom:4px;}.disclaimer-sub{margin-bottom:12px;}.disclaimer-box{margin-bottom:12px;padding:10px;}.disclaimer-check{margin-bottom:14px;}}
     @keyframes bounceY{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
@@ -678,17 +678,16 @@
         </svg>
       </div>
       <div class="disclaimer-title">Before you fly</div>
-      <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
+      <div class="disclaimer-sub">Please read and accept before using DroneChecker</div>
       <div class="disclaimer-box">
-        <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace, NOTAMs and restrictions independently before flying.<br><br>
-        <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times. Ensure you hold a valid CAA Operator ID and Flyer ID where required.<br><br>
-        <strong>Airspace data.</strong> The restrictions map shows ground hazards and indicative airspace zones only. Always check official NOTAMs via NATS or the CAA before flying.<br><br>
-        <strong>No liability.</strong> DroneChecker accepts no liability for loss, damage or legal consequence from reliance on this app.<br><br>
-        <strong>Data &amp; privacy.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). Free users: no personal data stored on our servers. Pro subscribers: your email and flight data are stored securely to provide cloud sync. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> and <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms of Service</a>.
+        <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and NOTAMs independently before flying.<br><br>
+        <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times.<br><br>
+        <strong>No liability.</strong> DroneChecker accepts no liability for any loss, damage or legal consequence from reliance on this app.<br><br>
+        <strong>Data.</strong> Free users: no personal data stored on our servers. Pro subscribers: email and flight data stored securely. See <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> &amp; <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms</a>.
       </div>
       <label class="disclaimer-check">
         <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
-        <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
+        <span class="disclaimer-check-lbl">I understand DroneChecker is advisory only and I am solely responsible for safe and lawful drone operations.</span>
       </label>
     </div>
     <div class="disclaimer-footer">

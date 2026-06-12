@@ -25,7 +25,7 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
@@ -708,12 +708,8 @@
           <div class="pro-hero-sub">Everything free pilots love, plus more.</div>
         </div>
         <div class="pro-price-card">
-          <div style="display:flex;gap:6px;margin-bottom:12px;background:var(--bg3);border-radius:8px;padding:3px;">
-            <button id="plan-monthly-btn" onclick="selectPlan('monthly')" style="flex:1;padding:7px 0;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:#1e40af;color:#fff;transition:all .2s;">Monthly</button>
-            <button id="plan-yearly-btn" onclick="selectPlan('yearly')" style="flex:1;padding:7px 0;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s;">Yearly <span style="font-size:10px;background:#16a34a;color:#fff;border-radius:4px;padding:1px 5px;margin-left:3px;">SAVE 16%</span></button>
-          </div>
-          <div class="pro-price-row"><span class="pro-price-amt" id="plan-price-amt">&pound;2.99</span><span class="pro-price-per" id="plan-price-per">/ month</span></div>
-          <div class="pro-price-note" id="plan-price-note">Cancel anytime &middot; Secure payment via Stripe</div>
+          <div class="pro-price-row"><span class="pro-price-amt">&pound;2.99</span><span class="pro-price-per">/ month</span></div>
+          <div class="pro-price-note">Or &pound;24.99/year &middot; Cancel anytime</div>
         </div>
         <div class="pro-feat-section">Always free</div>
         <div class="pro-feat-row"><div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="pro-feat-title">Fly rating &amp; full weather dashboard</div><div class="pro-feat-desc">Live conditions calibrated to your drone model</div></div></div>
@@ -728,7 +724,7 @@
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div><div><div class="pro-feat-title">Restrictions map <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Schools, railways, National Trust &amp; more overlaid live</div></div></div>
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div><div><div class="pro-feat-title">Pro share card <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Share a branded image card of current conditions</div></div></div>
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title" style="color:var(--muted);">Fly alerts <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Notify me when saved spots turn flyable</div></div></div>
-        <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title">Cloud flight log sync <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Your flight log syncs automatically across all your devices</div></div></div>
+        <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title" style="color:var(--muted);">Cloud flight log sync <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Access your log across all your devices</div></div></div>
         <div style="height:16px;"></div>
         <button class="pro-cta-btn" id="pro-subscribe-btn" onclick="handleSubscribe()">Get Pro &middot; &pound;2.99/month</button>
         <div class="pro-cta-sub">Cancel anytime &middot; Secure payment via Stripe</div>
@@ -1035,7 +1031,7 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.6.2';
+var APP_VERSION='1.5.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -1511,56 +1507,12 @@ function renderWeekPlanner(daily){
       '<div class="week-dot '+dotCls+'"></div>'+
       (isBest?'<div style="font-size:11px;font-weight:600;color:var(--green);flex-shrink:0;">BEST</div>':'')+'</div>';
   }
-  var proUpsell=!isPro()?'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(245,158,11,.06);border-top:1px solid rgba(245,158,11,.15);border-radius:0 0 var(--radius-sm) var(--radius-sm);"><span style="font-size:12px;color:var(--muted);">Days 4–7 available with Pro</span><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock</button></div>':'';
+  var proUpsell=!isPro()?'<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(245,158,11,.06);border-top:1px solid rgba(245,158,11,.15);border-radius:0 0 var(--radius-sm) var(--radius-sm);"><span style="font-size:12px;color:var(--muted);">Full 48-hour forecast available with Pro</span><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock</button></div>':'';
   var weekTitle='Best Day to Fly — Next '+(isPro()?'7':'3')+' Days'+(isPro()?'':' <span style="font-size:10px;font-weight:400;color:var(--muted);">· 7 days with Pro</span>');
   return'<div class="week-card"><div class="card-ttl">'+weekTitle+'</div>'+rows+proUpsell+'</div>';
 }
 function loadFlights(){try{return JSON.parse(localStorage.getItem('dc_flights'))||[];}catch(e){return[];}}
-
-function saveFlights(f){
-  try{localStorage.setItem('dc_flights',JSON.stringify(f));}catch(e){}
-  if(isPro()&&proUser&&proUser.uid&&_fbLoaded){
-    try{
-      var db=firebase.firestore();
-      db.collection('users').doc(proUser.uid).set(
-        {flights:f,flightsUpdated:firebase.firestore.FieldValue.serverTimestamp()},
-        {merge:true}
-      ).catch(function(e){console.error('[DC] Firestore saveFlights error:',e);});
-    }catch(e){console.error('[DC] saveFlights cloud error:',e);}
-  }
-}
-
-function syncFlightsFromCloud(uid,callback){
-  if(!_fbLoaded||!uid){if(callback)callback();return;}
-  try{
-    var db=firebase.firestore();
-    db.collection('users').doc(uid).get().then(function(snap){
-      if(snap.exists&&snap.data().flights&&snap.data().flights.length){
-        var cloudFlights=snap.data().flights;
-        var localFlights=loadFlights();
-        var seen={};
-        var merged=[];
-        cloudFlights.concat(localFlights).forEach(function(f){
-          var key=(f.date||'')+'|'+(f.loc||'')+'|'+(f.drone||'')+'|'+(f.dur||'');
-          if(!seen[key]){seen[key]=true;merged.push(f);}
-        });
-        merged.sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
-        saveFlights(merged);
-        showToast('☁️ Flight log synced from cloud');
-        renderLog();
-      } else if(loadFlights().length){
-        saveFlights(loadFlights());
-      }
-      if(callback)callback();
-    }).catch(function(e){
-      console.error('[DC] syncFlightsFromCloud error:',e);
-      if(callback)callback();
-    });
-  }catch(e){
-    console.error('[DC] syncFlightsFromCloud error:',e);
-    if(callback)callback();
-  }
-}
+function saveFlights(f){try{localStorage.setItem('dc_flights',JSON.stringify(f));}catch(e){}}
 function renderLog(){
   var flights=loadFlights();
   var loc=document.getElementById('loc-name')?document.getElementById('loc-name').textContent:'';
@@ -2374,7 +2326,7 @@ function getHourlyRatings(numHours){
   }
   return results;
 }
-function getNext24hRatings(){return getHourlyRatings(isPro()?72:24);}
+function getNext24hRatings(){return getHourlyRatings(isPro()?72:6);}
 function _oldGetNext24hRatings(){
   if(!wxData||!wxData.hourly)return[];
   var hours=wxData.hourly,now=new Date();
@@ -2706,7 +2658,7 @@ function toggleFcDetail(idx){
 function renderFc(){
   if(!wxData||!wxData.hourly)return;
   var hours=wxData.hourly,now=new Date(),rows='',count=0;
-  var maxHours=isPro()?48:24;
+  var maxHours=isPro()?48:6;
   for(var i=0;i<hours.time.length&&count<maxHours;i++){
     var t=new Date(hours.time[i]);if(t<now)continue;
     var wmo=hours.weather_code[i],info=wmoInfo(wmo,t),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
@@ -2737,7 +2689,7 @@ function renderFc(){
     count++;
   }
   document.getElementById('fc-body').innerHTML=
-    '<div class="card"><div class="card-ttl">'+(isPro()?'Next 48 Hours':'Next 24 Hours')+' <span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">— tap any hour for full conditions</span></div>'+rows+
+    '<div class="card"><div class="card-ttl">'+(isPro()?'Next 48 Hours':'Next 6 Hours')+' <span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;text-transform:none;">— tap any hour for full conditions</span></div>'+rows+
     '<div style="display:flex;gap:16px;margin-top:10px;font-size:12px;"><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot green" style="display:inline-block;"></div><span style="color:var(--muted);">✓ Good</span></div><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot amber" style="display:inline-block;"></div><span style="color:var(--muted);">⚠ Caution</span></div><div style="display:flex;align-items:center;gap:6px;"><div class="fc-dot red" style="display:inline-block;"></div><span style="color:var(--muted);">✕ Avoid</span></div></div></div>'+
     renderWeekPlanner(wxData.daily)+
     proAccountCard()+
@@ -3054,11 +3006,26 @@ function goTab(id,btn){
   var tabEl=document.getElementById('tab-'+id);if(tabEl)tabEl.classList.add('on');
   if(btn){btn.classList.add('on');btn.setAttribute('aria-selected','true');}
   document.querySelectorAll('.nb').forEach(function(b){if(b!==btn)b.setAttribute('aria-selected','false');});
-  if(id==='radar')initWindMap();
-  if(id==='gh')renderGolden();
+  if(id==='radar'){
+    if(!isPro()){
+      var windEl=document.getElementById('wind-display');
+      if(windEl)windEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;"><div style="font-size:36px;margin-bottom:16px;">💨</div><div style="font-weight:700;font-size:17px;margin-bottom:8px;">Wind Detail is Pro</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">See wind speed, direction and gusts at altitude — plus a full 24-hour wind breakdown.</div><button onclick="openProOverlay()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px 28px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Unlock Pro</button></div>';
+    } else { initWindMap(); }
+  }
+  if(id==='gh'){
+    if(!isPro()){
+      var ghEl=document.getElementById('gh-body');
+      if(ghEl)ghEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;"><div style="font-size:36px;margin-bottom:16px;">🌅</div><div style="font-weight:700;font-size:17px;margin-bottom:8px;">Golden Hour is Pro</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">Get precise golden hour, blue hour, sunrise and sunset times with live countdowns for your exact location.</div><button onclick="openProOverlay()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px 28px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Unlock Pro</button></div>';
+    } else { renderGolden(); }
+  }
   if(id==='cl')renderChecklist();
   if(id==='rules')renderRules();
-  if(id==='log')renderLog();
+  if(id==='log'){
+    if(!isPro()){
+      var logEl=document.getElementById('log-body');
+      if(logEl)logEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;"><div style="font-size:36px;margin-bottom:16px;">✈️</div><div style="font-weight:700;font-size:17px;margin-bottom:8px;">Flight Log is Pro</div><div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">Log every flight with date, location, drone, duration and conditions. Export to Excel or Google Sheets.</div><button onclick="openProOverlay()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:12px 28px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Unlock Pro</button></div>';
+    } else { renderLog(); }
+  }
   if(id==='restrict')renderRestrictionsTab();
 }
 function applyDeepLink(){
@@ -3141,32 +3108,6 @@ var PAID_FEATURES_ENABLED=true;
 // proUser, loadProUser, saveProUser, isPro — defined below with Firebase integration
 // ---- Stripe checkout ----
 var CHECKOUT_URL='https://us-central1-dronechecker.cloudfunctions.net/createCheckoutSession';
-var _selectedPlan='monthly'; // 'monthly' or 'yearly'
-
-function selectPlan(plan){
-  _selectedPlan=plan;
-  var mBtn=document.getElementById('plan-monthly-btn');
-  var yBtn=document.getElementById('plan-yearly-btn');
-  var amt=document.getElementById('plan-price-amt');
-  var per=document.getElementById('plan-price-per');
-  var note=document.getElementById('plan-price-note');
-  var subBtn=document.getElementById('pro-subscribe-btn');
-  if(plan==='yearly'){
-    if(mBtn){mBtn.style.background='transparent';mBtn.style.color='var(--muted)';}
-    if(yBtn){yBtn.style.background='#1e40af';yBtn.style.color='#fff';}
-    if(amt){amt.innerHTML='&pound;29.99';}
-    if(per){per.textContent='/ year';}
-    if(note){note.innerHTML='That\'s &pound;2.50/month &middot; Save &pound;5.89 vs monthly';}
-    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;29.99/year';}
-  } else {
-    if(mBtn){mBtn.style.background='#1e40af';mBtn.style.color='#fff';}
-    if(yBtn){yBtn.style.background='transparent';yBtn.style.color='var(--muted)';}
-    if(amt){amt.innerHTML='&pound;2.99';}
-    if(per){per.textContent='/ month';}
-    if(note){note.textContent='Cancel anytime \u00b7 Secure payment via Stripe';}
-    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;2.99/month';}
-  }
-}
 
 function handleSubscribe(){
   // If not signed in, go to sign-in screen first
@@ -3184,20 +3125,20 @@ function startStripeCheckout(){
   fetch(CHECKOUT_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({uid:proUser.uid,email:proUser.email,plan:_selectedPlan})
+    body:JSON.stringify({uid:proUser.uid,email:proUser.email})
   })
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.url){
-      window.location.href=data.url;
+      window.location.href=data.url; // redirect to Stripe Checkout
     } else {
       showToast('Could not start checkout. Please try again.');
-      if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
+      if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
     }
   })
   .catch(function(){
     showToast('Could not start checkout. Check your connection.');
-    if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
+    if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
   });
 }
 
@@ -3504,7 +3445,7 @@ function handleGoogleSignIn(){
           },
           ux_mode: 'popup',
           cancel_on_tap_outside: false,
-          use_fedcm_for_prompt: false
+          use_fedcm_for_prompt: true
         });
         // Show the Google One Tap / sign-in button
         google.accounts.id.prompt(function(notification){
@@ -3530,25 +3471,9 @@ function handleGoogleSignIn(){
       }
   }
 
-  // TWA (Android app): use Firebase signInWithRedirect — GSI popup is blocked in TWA
-  if(isStandalone && /Android/.test(navigator.userAgent)){
-    loadFirebase(function(){
-      try{
-        var provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithRedirect(provider);
-      }catch(e){
-        if(btn){btn.style.opacity='1';btn.disabled=false;}
-        restoreOverlay();
-        showToast('Sign-in error. Please try again.');
-        console.error('[DC] signInWithRedirect error:',e);
-      }
-    });
-    return;
-  }
-
   // Safari sign-in now works via redirect since authDomain is dronechecker.co.uk (Firebase Hosting)
 
-  // Non-Safari: use GSI popup (works in Edge, Chrome, desktop)
+  // Non-Safari: use GSI popup (works in Edge, Chrome, Android TWA)
   if(_fbLoaded && window.google && window.google.accounts){
     _doGSISignIn();
   } else {
@@ -3566,14 +3491,15 @@ function onGoogleSignInSuccess(user){
   initCustomDroneUI();
   var firstName=user.name?(user.name.split(' ')[0]||'there'):'there';
   if(user.isPro){
+    // Already Pro — close overlay and welcome them
     closeProOverlay();
     showToast('Welcome back, '+firstName+'! Pro is active.');
     if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
     renderFavBar();
     if(wxData){renderDash();renderFc();}
-    // Sync flight log from cloud
-    syncFlightsFromCloud(user.uid,null);
   } else {
+    // Signed in but not yet Pro — keep overlay open on upgrade screen
+    // so they proceed straight to payment
     showProUpgrade();
   }
 }
@@ -3667,7 +3593,7 @@ function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return'<di
 function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button></div>';}
 function getMaxFavs(){return isPro()?999:2;}
 function proGateExport(){if(!isPro()){showToast('Export is a Pro feature');openProOverlay();return false;}return true;}
-function getWindowHours(){return isPro()?72:24;}
+function getWindowHours(){return isPro()?72:6;}
 // ---- Pro: multiple custom drone profiles ----
 var customDrone={name:'My Custom Drone',windAmber:22,windRed:31,gustAmber:25,gustRed:31};
 var customDrones=[];
@@ -3827,7 +3753,7 @@ function initCustomDroneUI(){
 }
 function proFavNudge(favs){if(!PAID_FEATURES_ENABLED)return'';if(!isPro()&&favs.length>=2){return'<button class="fav-add" onclick="openProOverlay()" style="border-color:rgba(245,158,11,.4);color:#f59e0b;">+ More spots</button>';}if(isPro()){return'<button class="fav-add" onclick="toggleFavCurrent()">+ Add</button>';}return'';}
 function exportFlights(){exportXlsx();}
-function renderBestTimeCard(){if(!isPro()||!wxData||!wxData.hourly)return'';var hours=wxData.hourly,now=new Date(),today=now.toDateString(),todayHours=[],greenCount=0,amberCount=0,rainCount=0,heavyRainCount=0;var sun=uLat&&uLng?calcSunTimes(uLat,uLng,now):null;for(var i=0;i<hours.time.length;i++){var t=new Date(hours.time[i]);if(t.toDateString()!==today||t<=now)continue;var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;var precip=hours.precipitation_probability?hours.precipitation_probability[i]||0:0;var r=flyRating(w,g,v,wmo,getKpForTime(t),tp,w80,w120);var isGolden=sun&&((sun.goldMornS&&sun.goldMornE&&t>=sun.goldMornS&&t<=sun.goldMornE)||(sun.goldEveS&&sun.goldEveE&&t>=sun.goldEveS&&t<=sun.goldEveE));var isRain=wmo>=51||(precip>=40);var isHeavyRain=wmo===63||wmo===65||wmo===67||wmo===73||wmo===75||wmo===81||wmo===82||wmo===86||wmo>=95||precip>=70;if(r.lvl==='green')greenCount++;else if(r.lvl==='amber')amberCount++;if(isRain)rainCount++;if(isHeavyRain)heavyRainCount++;todayHours.push({t:t,rating:r.lvl,wind:w,gust:g,temp:tp,isGolden:isGolden,wmo:wmo,precip:precip,isRain:isRain});}if(!todayHours.length)return'';var total=todayHours.length;var rainFrac=rainCount/total;var heavyRainFrac=heavyRainCount/total;var verdictLine,verdictCol;if(heavyRainFrac>=0.5){verdictLine='Heavy rain for most of the day — do not fly.';verdictCol='var(--red)';}else if(rainFrac>=0.6){verdictLine='Persistent rain today — not suitable for flying.';verdictCol='var(--red)';}else if(rainFrac>=0.35){verdictLine='Frequent showers expected — conditions poor for most of the day.';verdictCol='var(--amber)';}else if(greenCount>=Math.floor(total*.6)){verdictLine='Most of the day looks good to fly.';verdictCol='var(--green)';}else if(greenCount>=Math.floor(total*.35)){verdictLine='Some good windows available today.';verdictCol='var(--amber)';}else if(greenCount+amberCount>=Math.floor(total*.5)){verdictLine='Mixed conditions — limited flyable windows.';verdictCol='var(--amber)';}else{verdictLine='Challenging conditions for most of today.';verdictCol='var(--red)';}var firstThird=todayHours.slice(0,Math.ceil(todayHours.length/3));var lastThird=todayHours.slice(Math.floor(todayHours.length*2/3));var avgFirst=firstThird.reduce(function(s,h){return s+h.wind;},0)/(firstThird.length||1);var avgLast=lastThird.reduce(function(s,h){return s+h.wind;},0)/(lastThird.length||1);var windTrend=avgLast-avgFirst;var trendStr=windTrend>3?'easing later':windTrend<-3?'picking up later':'staying consistent';var dryGreenHours=todayHours.filter(function(h){return!h.isRain&&h.rating==='green';});var narrative='';if(rainFrac>=0.6){narrative='Rain is expected for most of today. Most drones have no water resistance — flying in rain risks permanent damage.';if(dryGreenHours.length>=2){narrative+=' A possible dry window around '+pad(dryGreenHours[0].t.getHours())+':00, but check conditions on the ground before flying.';}else{narrative+=' No reliable dry windows expected today.';}}else if(rainFrac>=0.35){var dryMorning=todayHours.filter(function(h){return!h.isRain&&h.t.getHours()<13&&h.rating==='green';}).length;var dryAfternoon=todayHours.filter(function(h){return!h.isRain&&h.t.getHours()>=13&&h.rating==='green';}).length;narrative='Showers expected throughout the day.';if(dryMorning>dryAfternoon)narrative+=' Drier periods more likely in the morning — check the hourly forecast.';else if(dryAfternoon>dryMorning)narrative+=' Better chance of dry spells in the afternoon.';else narrative+=' Check the hourly forecast for gaps between showers.';}else{narrative='Wind is '+trendStr+' today.';var morningGreen=todayHours.filter(function(h){return h.t.getHours()<13&&h.rating==='green';}).length;var afternoonGreen=todayHours.filter(function(h){return h.t.getHours()>=13&&h.rating==='green';}).length;if(morningGreen>afternoonGreen)narrative+=' Conditions look better in the morning.';else if(afternoonGreen>morningGreen)narrative+=' Conditions look better in the afternoon.';}var goldenHours=todayHours.filter(function(h){return h.isGolden;});var bestGolden=goldenHours.length?goldenHours[0]:null;if(rainFrac<0.6&&bestGolden){if(bestGolden.rating==='green'&&!bestGolden.isRain)narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 looks flyable - good for photography.';else if(bestGolden.rating==='amber')narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 is marginal.';}return'<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div class="card-ttl" style="margin-bottom:0;">Today\'s conditions summary</div><span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div><div style="font-size:13px;font-weight:600;color:'+verdictCol+';margin-bottom:8px;">'+verdictLine+'</div><div style="font-size:12px;color:var(--muted);line-height:1.7;">'+narrative+'</div></div>';}
+function renderBestTimeCard(){if(!isPro()||!wxData||!wxData.hourly)return'';var hours=wxData.hourly,now=new Date(),today=now.toDateString(),candidates=[],todayHours=[],greenCount=0,amberCount=0;var sun=uLat&&uLng?calcSunTimes(uLat,uLng,now):null;for(var i=0;i<hours.time.length;i++){var t=new Date(hours.time[i]);if(t.toDateString()!==today||t<=now)continue;var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;var r=flyRating(w,g,v,wmo,getKpForTime(t),tp,w80,w120);var isGolden=sun&&((sun.goldMornS&&sun.goldMornE&&t>=sun.goldMornS&&t<=sun.goldMornE)||(sun.goldEveS&&sun.goldEveE&&t>=sun.goldEveS&&t<=sun.goldEveE));if(r.lvl==='green')greenCount++;else if(r.lvl==='amber')amberCount++;todayHours.push({t:t,rating:r.lvl,wind:w,gust:g,temp:tp,isGolden:isGolden});}if(!todayHours.length)return'';var total=todayHours.length;var verdictLine,verdictCol;if(greenCount>=Math.floor(total*.6)){verdictLine='Most of the day looks good to fly.';verdictCol='var(--green)';}else if(greenCount+amberCount>=Math.floor(total*.5)){verdictLine='Mixed conditions today - some good windows available.';verdictCol='var(--amber)';}else{verdictLine='Challenging conditions for most of today.';verdictCol='var(--red)';}var firstThird=todayHours.slice(0,Math.ceil(todayHours.length/3));var lastThird=todayHours.slice(Math.floor(todayHours.length*2/3));var avgFirst=firstThird.reduce(function(s,h){return s+h.wind;},0)/(firstThird.length||1);var avgLast=lastThird.reduce(function(s,h){return s+h.wind;},0)/(lastThird.length||1);var windTrend=avgLast-avgFirst;var trendStr=windTrend>3?'easing later':windTrend<-3?'picking up later':'staying consistent';var goldenHours=todayHours.filter(function(h){return h.isGolden;});var bestGolden=goldenHours.length?goldenHours[0]:null;var narrative='Wind is '+trendStr+' today.';var morningGreen=todayHours.filter(function(h){return h.t.getHours()<13&&h.rating==='green';}).length;var afternoonGreen=todayHours.filter(function(h){return h.t.getHours()>=13&&h.rating==='green';}).length;if(morningGreen>afternoonGreen)narrative+=' Conditions look better in the morning.';else if(afternoonGreen>morningGreen)narrative+=' Conditions look better in the afternoon.';if(bestGolden&&bestGolden.rating==='green')narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 looks flyable - good for photography.';else if(bestGolden&&bestGolden.rating==='amber')narrative+=' Golden hour around '+pad(bestGolden.t.getHours())+':00 is marginal.';else narrative+=' No golden hour overlap today.';return'<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;"><div class="card-ttl" style="margin-bottom:0;">Today\'s conditions summary</div><span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div><div style="font-size:13px;font-weight:600;color:'+verdictCol+';margin-bottom:8px;">'+verdictLine+'</div><div style="font-size:12px;color:var(--muted);line-height:1.7;">'+narrative+'</div></div>';}
 function renderFlightStats(flights){if(!isPro()||flights.length<3)return'';var now=new Date(),months=[];for(var m=5;m>=0;m--){var d=new Date(now.getFullYear(),now.getMonth()-m,1);var label=d.toLocaleDateString('en-GB',{month:'short'});var mf=flights.filter(function(f){var fd=new Date(f.date);return fd.getMonth()===d.getMonth()&&fd.getFullYear()===d.getFullYear();});months.push({label:label,count:mf.length});}var maxCount=Math.max.apply(null,months.map(function(m){return m.count;}));if(maxCount===0)return'';var locMap={};flights.forEach(function(f){if(f.loc)locMap[f.loc]=(locMap[f.loc]||0)+1;});var topLocs=Object.keys(locMap).sort(function(a,b){return locMap[b]-locMap[a];}).slice(0,3);var good=flights.filter(function(f){return f.cond==='Good to Fly';}).length;var caution=flights.filter(function(f){return f.cond==='Fly with Caution';}).length;var avoid=flights.filter(function(f){return f.cond==='Do Not Fly';}).length;var bars=months.map(function(m){var h=maxCount>0?Math.max(4,Math.round((m.count/maxCount)*60)):4;return'<div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;"><div style="font-size:10px;color:var(--muted);">'+(m.count||'')+'</div><div style="width:100%;background:var(--accent);border-radius:3px 3px 0 0;height:'+h+'px;min-height:4px;opacity:'+(m.count?'1':'0.15')+';display:flex;"></div><div style="font-size:9px;color:var(--muted);">'+m.label+'</div></div>';}).join('');return'<div class="card" style="border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.04);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="card-ttl" style="margin-bottom:0;">Flight statistics</div><span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;">PRO</span></div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Flights per month</div><div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:16px;">'+bars+'</div>'+(topLocs.length?'<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Top locations</div>'+topLocs.map(function(l){return'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;"><span style="color:var(--text);">'+esc(l)+'</span><span style="color:var(--muted);">'+locMap[l]+' flight'+(locMap[l]!==1?'s':'')+'</span></div>';}).join(''):'')+'<div style="display:flex;gap:8px;margin-top:12px;"><div style="flex:1;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--green);">'+good+'</div><div style="font-size:10px;color:var(--muted);">Good</div></div><div style="flex:1;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--amber);">'+caution+'</div><div style="font-size:10px;color:var(--muted);">Caution</div></div><div style="flex:1;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-sm);padding:8px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--red);">'+avoid+'</div><div style="font-size:10px;color:var(--muted);">Avoided</div></div></div></div>';}
 function prefetchSavedLocations(){
   if(!isPro())return;

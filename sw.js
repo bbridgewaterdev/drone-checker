@@ -1,4 +1,4 @@
-const CACHE = 'dronechecker-v80';
+const CACHE = 'dronechecker-v81';
 
 const STATIC = [
   '/',

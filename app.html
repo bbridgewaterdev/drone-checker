@@ -2221,6 +2221,8 @@ function fetchAll(){
       if(updEl)updEl.textContent='Updated just now';
       saveWxCache(data);hideOfflineBanner();hideSplash();
       renderDash();renderFc();renderGolden();
+      // Update restrictions map centre if already initialised
+      if(restrictInitDone&&restrictMap&&uLat&&uLng)flyToUserLocation(uLat,uLng);
       fetchKp();
     })
     .catch(function(err){
@@ -2409,35 +2411,46 @@ function _oldGetNext24hRatings(){
 function buildHourStrip(hourlyRatings,now){
   var totalHours=hourlyRatings.length;
   var is72=totalHours>24;
-  var strip='<div style="display:flex;gap:1px;margin:10px 0 0;position:relative;">';
   var dayBoundaries=[];
   if(is72){for(var d=1;d<hourlyRatings.length;d++){if(hourlyRatings[d].hour===0)dayBoundaries.push(d);}}
-  for(var i=0;i<hourlyRatings.length;i++){
-    var entry=hourlyRatings[i];
-    var col=entry.rating==='green'?'#22c55e':entry.rating==='amber'?'#f59e0b':entry.rating==='red'?'#ef4444':'#334155';
-    var isNowHour=entry.hour===now.getHours()&&i===0;
-    var isDayStart=dayBoundaries.indexOf(i)>=0;
-    var bLeft=isDayStart?'border-left:2px solid rgba(255,255,255,.3);':'';    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+bLeft+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'" ></div>';
-  }
-  strip+='</div>';
-  var labelHtml='<div style="position:relative;height:16px;margin-top:2px;margin-bottom:4px;">';
+
+  // Day labels ABOVE bar (72h only)
+  var dayLabelHtml='';
   if(is72){
-    var startH=hourlyRatings[0]?pad(hourlyRatings[0].hour):'00';
-    var endH=hourlyRatings[totalHours-1]?pad((hourlyRatings[totalHours-1].hour+1)%24):'00';
-    labelHtml+='<span style="position:absolute;left:0;font-size:10px;color:var(--muted);">'+startH+'</span>';
+    dayLabelHtml='<div style="position:relative;height:14px;margin-bottom:2px;">';
     for(var b=0;b<dayBoundaries.length;b++){
       var bIdx=dayBoundaries[b];
       var bPct=Math.round((bIdx/totalHours)*100);
       var dayDate=new Date(hourlyRatings[bIdx].time);
       var dayLbl=dayDate.toLocaleDateString('en-GB',{weekday:'short'});
-      labelHtml+='<span style="position:absolute;left:'+bPct+'%;transform:translateX(-50%);font-size:10px;color:rgba(255,255,255,.5);font-weight:600;">'+dayLbl+'</span>';
+      dayLabelHtml+='<span style="position:absolute;left:'+bPct+'%;transform:translateX(-50%);font-size:10px;color:rgba(255,255,255,.45);font-weight:600;letter-spacing:.3px;">'+dayLbl+'</span>';
     }
+    dayLabelHtml+='</div>';
+  }
+
+  // Bar
+  var strip='<div style="display:flex;gap:1px;position:relative;">';
+  for(var i=0;i<hourlyRatings.length;i++){
+    var entry=hourlyRatings[i];
+    var col=entry.rating==='green'?'#22c55e':entry.rating==='amber'?'#f59e0b':entry.rating==='red'?'#ef4444':'#334155';
+    var isNowHour=entry.hour===now.getHours()&&i===0;
+    var isDayStart=dayBoundaries.indexOf(i)>=0;
+    var bLeft=isDayStart?'border-left:2px solid rgba(255,255,255,.25);':'';    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+bLeft+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'"></div>';
+  }
+  strip+='</div>';
+
+  // Hour labels BELOW bar
+  var labelHtml='<div style="position:relative;height:16px;margin-top:3px;margin-bottom:4px;">';
+  if(is72){
+    var startH=hourlyRatings[0]?pad(hourlyRatings[0].hour):'00';
+    var endH=hourlyRatings[totalHours-1]?pad((hourlyRatings[totalHours-1].hour+1)%24):'00';
+    labelHtml+='<span style="position:absolute;left:0;font-size:10px;color:var(--muted);">'+startH+'</span>';
     labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endH+'</span>';
   } else {
     var ticks=[];
     for(var t=0;t<hourlyRatings.length;t++){if(t%6===0)ticks.push({idx:t,label:pad(hourlyRatings[t].hour)});}
     for(var k=0;k<ticks.length;k++){
-      var leftPct=Math.round((ticks[k].idx/(totalHours-1))*100);
+      var leftPct=Math.round((ticks[k].idx/Math.max(totalHours-1,1))*100);
       if(leftPct>85&&k<ticks.length-1)continue;
       var xform=k===0?'none':'translateX(-50%)';
       labelHtml+='<span style="position:absolute;left:'+leftPct+'%;transform:'+xform+';font-size:10px;color:var(--muted);">'+ticks[k].label+'</span>';
@@ -2447,7 +2460,7 @@ function buildHourStrip(hourlyRatings,now){
     labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endHr+'</span>';
   }
   labelHtml+='</div>';
-  return strip+labelHtml;
+  return dayLabelHtml+strip+labelHtml;
 }
 function getFlightWindows(hourlyRatings){
   var windows=[],inWindow=false,winStart=null,winEnd=null;
@@ -3909,7 +3922,7 @@ function getHazardType(tags){
   if(tags.amenity==='police')return HAZARD_TYPES.find(function(h){return h.key==='police';});
   return null;
 }
-function renderRestrictionsTab(){var el=document.getElementById('tab-restrict');if(!el)return;if(!isPro()){el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Restrictions Map</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Schools, railways, National Trust land and more.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';return;}if(restrictInitDone){if(restrictMap)restrictMap.invalidateSize();return;}restrictInitDone=true;var legendHtml=HAZARD_TYPES.map(function(h){var onch='toggleHazardLayer('+JSON.stringify(h.key)+',this.checked)';return'<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 0;"><input type="checkbox" checked onchange="'+onch+'" style="accent-color:'+h.color+';width:13px;height:13px;cursor:pointer;flex-shrink:0;"><span style="width:10px;height:10px;border-radius:2px;background:'+h.color+';flex-shrink:0;opacity:.8;display:inline-block;"></span><span style="font-size:10px;color:var(--text);">'+h.label+'</span></label>';}).join('');el.innerHTML='<div style="background:rgba(239,68,68,.06);border-bottom:1px solid rgba(239,68,68,.15);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div style="flex:1;font-size:11px;color:var(--muted);">Ground hazards only - not a substitute for official airspace checks.</div><button onclick="openNotamLink()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:#ef4444;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">NOTAMs &#8599;</button></div><div id="restrict-map-el" style="flex:1;min-height:0;"></div><div style="background:var(--bg2);border-top:1px solid var(--border);padding:8px 12px;flex-shrink:0;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Hazard layers</span><span id="restrict-zoom-warn" style="font-size:10px;color:var(--amber);display:none;">Zoom in to see hazards</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px;">'+legendHtml+'</div></div>';setTimeout(function(){initRestrictMap();showToast('Zoom in on the map to load hazard data');},100);}
+function renderRestrictionsTab(){var el=document.getElementById('tab-restrict');if(!el)return;if(!isPro()){el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Restrictions Map</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Schools, railways, National Trust land and more.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';return;}if(restrictInitDone){if(restrictMap){restrictMap.invalidateSize();if(uLat&&uLng)flyToUserLocation(uLat,uLng);}return;}restrictInitDone=true;var legendHtml=HAZARD_TYPES.map(function(h){var onch='toggleHazardLayer('+JSON.stringify(h.key)+',this.checked)';return'<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 0;"><input type="checkbox" checked onchange="'+onch+'" style="accent-color:'+h.color+';width:13px;height:13px;cursor:pointer;flex-shrink:0;"><span style="width:10px;height:10px;border-radius:2px;background:'+h.color+';flex-shrink:0;opacity:.8;display:inline-block;"></span><span style="font-size:10px;color:var(--text);">'+h.label+'</span></label>';}).join('');el.innerHTML='<div style="background:rgba(239,68,68,.06);border-bottom:1px solid rgba(239,68,68,.15);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div style="flex:1;font-size:11px;color:var(--muted);">Ground hazards only - not a substitute for official airspace checks.</div><button onclick="openNotamLink()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:#ef4444;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">NOTAMs &#8599;</button></div><div id="restrict-map-el" style="flex:1;min-height:0;"></div><div style="background:var(--bg2);border-top:1px solid var(--border);padding:8px 12px;flex-shrink:0;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Hazard layers</span><span id="restrict-zoom-warn" style="font-size:10px;color:var(--amber);display:none;">Zoom in to see hazards</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px;">'+legendHtml+'</div></div>';setTimeout(function(){initRestrictMap();showToast('Zoom in on the map to load hazard data');},100);}
 function initRestrictMap(){var mapEl=document.getElementById('restrict-map-el');if(!mapEl)return;if(restrictMap){restrictMap.invalidateSize();return;}var lat=uLat||51.5,lng=uLng||-0.1;restrictMap=L.map('restrict-map-el',{center:[lat,lng],zoom:13,zoomControl:true,attributionControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(restrictMap);restrictHazardsLayer=L.layerGroup().addTo(restrictMap);if(uLat&&uLng){L.circleMarker([uLat,uLng],{radius:7,color:'#06b6d4',fillColor:'#06b6d4',fillOpacity:1,weight:2,interactive:false}).addTo(restrictMap);}restrictMap.on('moveend',fetchGroundHazards);restrictMap.on('zoomend',fetchGroundHazards);
   // ── Locate button overlay ──
   var locBtn=document.createElement('button');

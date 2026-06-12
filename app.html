@@ -25,7 +25,7 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
@@ -708,8 +708,12 @@
           <div class="pro-hero-sub">Everything free pilots love, plus more.</div>
         </div>
         <div class="pro-price-card">
-          <div class="pro-price-row"><span class="pro-price-amt">&pound;2.99</span><span class="pro-price-per">/ month</span></div>
-          <div class="pro-price-note">Or &pound;24.99/year &middot; Cancel anytime</div>
+          <div style="display:flex;gap:6px;margin-bottom:12px;background:var(--bg3);border-radius:8px;padding:3px;">
+            <button id="plan-monthly-btn" onclick="selectPlan('monthly')" style="flex:1;padding:7px 0;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:#1e40af;color:#fff;transition:all .2s;">Monthly</button>
+            <button id="plan-yearly-btn" onclick="selectPlan('yearly')" style="flex:1;padding:7px 0;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s;">Yearly <span style="font-size:10px;background:#16a34a;color:#fff;border-radius:4px;padding:1px 5px;margin-left:3px;">SAVE 16%</span></button>
+          </div>
+          <div class="pro-price-row"><span class="pro-price-amt" id="plan-price-amt">&pound;2.99</span><span class="pro-price-per" id="plan-price-per">/ month</span></div>
+          <div class="pro-price-note" id="plan-price-note">Cancel anytime &middot; Secure payment via Stripe</div>
         </div>
         <div class="pro-feat-section">Always free</div>
         <div class="pro-feat-row"><div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="pro-feat-title">Fly rating &amp; full weather dashboard</div><div class="pro-feat-desc">Live conditions calibrated to your drone model</div></div></div>
@@ -724,7 +728,7 @@
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div><div><div class="pro-feat-title">Restrictions map <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Schools, railways, National Trust &amp; more overlaid live</div></div></div>
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg></div><div><div class="pro-feat-title">Pro share card <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Share a branded image card of current conditions</div></div></div>
         <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title" style="color:var(--muted);">Fly alerts <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Notify me when saved spots turn flyable</div></div></div>
-        <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title" style="color:var(--muted);">Cloud flight log sync <span class="pro-feat-badge-soon">COMING SOON</span></div><div class="pro-feat-desc">Access your log across all your devices</div></div></div>
+        <div class="pro-feat-row"><div class="pro-feat-check pro"><svg width="12" height="12" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1e293b"/><rect width="100" height="100" rx="20" fill="none" stroke="#334155" stroke-width="4"/><circle cx="50" cy="50" r="11" fill="#64748b"/><circle cx="50" cy="50" r="5.5" fill="#1e293b"/></svg></div><div><div class="pro-feat-title">Cloud flight log sync <span class="pro-feat-badge">PRO</span></div><div class="pro-feat-desc">Your flight log syncs automatically across all your devices</div></div></div>
         <div style="height:16px;"></div>
         <button class="pro-cta-btn" id="pro-subscribe-btn" onclick="handleSubscribe()">Get Pro &middot; &pound;2.99/month</button>
         <div class="pro-cta-sub">Cancel anytime &middot; Secure payment via Stripe</div>
@@ -1031,7 +1035,7 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.5.0';
+var APP_VERSION='1.6.2';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -1512,7 +1516,51 @@ function renderWeekPlanner(daily){
   return'<div class="week-card"><div class="card-ttl">'+weekTitle+'</div>'+rows+proUpsell+'</div>';
 }
 function loadFlights(){try{return JSON.parse(localStorage.getItem('dc_flights'))||[];}catch(e){return[];}}
-function saveFlights(f){try{localStorage.setItem('dc_flights',JSON.stringify(f));}catch(e){}}
+
+function saveFlights(f){
+  try{localStorage.setItem('dc_flights',JSON.stringify(f));}catch(e){}
+  if(isPro()&&proUser&&proUser.uid&&_fbLoaded){
+    try{
+      var db=firebase.firestore();
+      db.collection('users').doc(proUser.uid).set(
+        {flights:f,flightsUpdated:firebase.firestore.FieldValue.serverTimestamp()},
+        {merge:true}
+      ).catch(function(e){console.error('[DC] Firestore saveFlights error:',e);});
+    }catch(e){console.error('[DC] saveFlights cloud error:',e);}
+  }
+}
+
+function syncFlightsFromCloud(uid,callback){
+  if(!_fbLoaded||!uid){if(callback)callback();return;}
+  try{
+    var db=firebase.firestore();
+    db.collection('users').doc(uid).get().then(function(snap){
+      if(snap.exists&&snap.data().flights&&snap.data().flights.length){
+        var cloudFlights=snap.data().flights;
+        var localFlights=loadFlights();
+        var seen={};
+        var merged=[];
+        cloudFlights.concat(localFlights).forEach(function(f){
+          var key=(f.date||'')+'|'+(f.loc||'')+'|'+(f.drone||'')+'|'+(f.dur||'');
+          if(!seen[key]){seen[key]=true;merged.push(f);}
+        });
+        merged.sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
+        saveFlights(merged);
+        showToast('☁️ Flight log synced from cloud');
+        renderLog();
+      } else if(loadFlights().length){
+        saveFlights(loadFlights());
+      }
+      if(callback)callback();
+    }).catch(function(e){
+      console.error('[DC] syncFlightsFromCloud error:',e);
+      if(callback)callback();
+    });
+  }catch(e){
+    console.error('[DC] syncFlightsFromCloud error:',e);
+    if(callback)callback();
+  }
+}
 function renderLog(){
   var flights=loadFlights();
   var loc=document.getElementById('loc-name')?document.getElementById('loc-name').textContent:'';
@@ -3108,14 +3156,38 @@ var PAID_FEATURES_ENABLED=true;
 // proUser, loadProUser, saveProUser, isPro — defined below with Firebase integration
 // ---- Stripe checkout ----
 var CHECKOUT_URL='https://us-central1-dronechecker.cloudfunctions.net/createCheckoutSession';
+var _selectedPlan='monthly'; // 'monthly' or 'yearly'
+
+function selectPlan(plan){
+  _selectedPlan=plan;
+  var mBtn=document.getElementById('plan-monthly-btn');
+  var yBtn=document.getElementById('plan-yearly-btn');
+  var amt=document.getElementById('plan-price-amt');
+  var per=document.getElementById('plan-price-per');
+  var note=document.getElementById('plan-price-note');
+  var subBtn=document.getElementById('pro-subscribe-btn');
+  if(plan==='yearly'){
+    if(mBtn){mBtn.style.background='transparent';mBtn.style.color='var(--muted)';}
+    if(yBtn){yBtn.style.background='#1e40af';yBtn.style.color='#fff';}
+    if(amt){amt.innerHTML='&pound;29.99';}
+    if(per){per.textContent='/ year';}
+    if(note){note.innerHTML='That\'s &pound;2.50/month &middot; Save &pound;5.89 vs monthly';}
+    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;29.99/year';}
+  } else {
+    if(mBtn){mBtn.style.background='#1e40af';mBtn.style.color='#fff';}
+    if(yBtn){yBtn.style.background='transparent';yBtn.style.color='var(--muted)';}
+    if(amt){amt.innerHTML='&pound;2.99';}
+    if(per){per.textContent='/ month';}
+    if(note){note.textContent='Cancel anytime \u00b7 Secure payment via Stripe';}
+    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;2.99/month';}
+  }
+}
 
 function handleSubscribe(){
-  // If not signed in, go to sign-in screen first
   if(!proUser||!proUser.uid||!proUser.email){
     showProSignin();
     return;
   }
-  // Already signed in — go straight to Stripe checkout
   startStripeCheckout();
 }
 
@@ -3125,20 +3197,20 @@ function startStripeCheckout(){
   fetch(CHECKOUT_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({uid:proUser.uid,email:proUser.email})
+    body:JSON.stringify({uid:proUser.uid,email:proUser.email,plan:_selectedPlan})
   })
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.url){
-      window.location.href=data.url; // redirect to Stripe Checkout
+      window.location.href=data.url;
     } else {
       showToast('Could not start checkout. Please try again.');
-      if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
+      if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
     }
   })
   .catch(function(){
     showToast('Could not start checkout. Check your connection.');
-    if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
+    if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
   });
 }
 
@@ -3149,7 +3221,7 @@ function handleStripeReturn(){
     var pro=params.get('pro');
     if(!pro)return;
     // Clean the URL
-    window.history.replaceState({},'','/MBnB1234.html');
+    window.history.replaceState({},'','/app.html');
     if(pro==='success'){
       // Payment succeeded — refresh Pro status from Firestore
       showToast('Payment successful! Activating Pro…');
@@ -3445,7 +3517,7 @@ function handleGoogleSignIn(){
           },
           ux_mode: 'popup',
           cancel_on_tap_outside: false,
-          use_fedcm_for_prompt: true
+          use_fedcm_for_prompt: false
         });
         // Show the Google One Tap / sign-in button
         google.accounts.id.prompt(function(notification){
@@ -3473,7 +3545,23 @@ function handleGoogleSignIn(){
 
   // Safari sign-in now works via redirect since authDomain is dronechecker.co.uk (Firebase Hosting)
 
-  // Non-Safari: use GSI popup (works in Edge, Chrome, Android TWA)
+  // TWA (Android app): use Firebase signInWithRedirect — GSI popup is blocked in TWA
+  if(isStandalone && /Android/.test(navigator.userAgent)){
+    loadFirebase(function(){
+      try{
+        var provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithRedirect(provider);
+      }catch(e){
+        if(btn){btn.style.opacity='1';btn.disabled=false;}
+        restoreOverlay();
+        showToast('Sign-in error. Please try again.');
+        console.error('[DC] signInWithRedirect error:',e);
+      }
+    });
+    return;
+  }
+
+  // Non-TWA: use GSI popup (works in Edge, Chrome, desktop, Safari via Firebase Hosting)
   if(_fbLoaded && window.google && window.google.accounts){
     _doGSISignIn();
   } else {
@@ -3491,15 +3579,13 @@ function onGoogleSignInSuccess(user){
   initCustomDroneUI();
   var firstName=user.name?(user.name.split(' ')[0]||'there'):'there';
   if(user.isPro){
-    // Already Pro — close overlay and welcome them
     closeProOverlay();
     showToast('Welcome back, '+firstName+'! Pro is active.');
     if(typeof renderRestrictionsTab==='function')renderRestrictionsTab();
     renderFavBar();
     if(wxData){renderDash();renderFc();}
+    syncFlightsFromCloud(user.uid,null);
   } else {
-    // Signed in but not yet Pro — keep overlay open on upgrade screen
-    // so they proceed straight to payment
     showProUpgrade();
   }
 }
@@ -3841,26 +3927,60 @@ function loadNatsFrz(){
   function styleFor(color,fillOpacity){
     return{color:color,weight:2,fillColor:color,fillOpacity:fillOpacity,opacity:0.9};
   }
-  // Helper: popup
-  function bindPopup(layer,name,typeLabel,color){
+  // Helper: popup with vertical limits
+  function bindPopup(layer,name,typeLabel,color,upper,lower){
+    var limitsHtml='';
+    if(upper||lower){
+      limitsHtml='<br><span style="font-size:11px;color:#94a3b8;line-height:1.8;">'
+        +(upper?'↑ '+upper:'')
+        +(upper&&lower?' &nbsp;·&nbsp; ':'')
+        +(lower&&lower!=='SFC'?'↓ '+lower:lower==='SFC'?'↓ Surface':'')
+        +'</span>';
+    }
     layer.bindPopup(
       '<strong style="color:'+color+';">'+esc(name)+'</strong>'+
-      '<br><span style="font-size:11px;color:'+color+';font-weight:600;">'+typeLabel+'</span>'
+      '<br><span style="font-size:11px;color:'+color+';font-weight:600;">'+typeLabel+'</span>'+
+      limitsHtml
     );
   }
 
-  // 1. FRZ (red)
+  // 1. FRZ / Restricted (red for FRZ prefix, amber for EGR prefix)
   fetch('/Restricted_drone.geojson')
     .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
     .then(function(data){
-      natsFrzLayer=L.geoJSON(data,{
-        style:function(){return styleFor('#ef4444',0.15);},
-        onEachFeature:function(feature,layer){
-          var p=feature.properties||{};
-          var name=p.name||p.Name||'Flight Restriction Zone';
-          bindPopup(layer,name,'Flight Restriction Zone (FRZ)','#ef4444');
-        }
-      }).addTo(restrictMap);
+      // Split into FRZ (red) and EGR (amber) based on Name prefix
+      var frzFeatures=[];
+      var egrFeatures=[];
+      (data.features||[]).forEach(function(f){
+        var name=(f.properties&&(f.properties.Name||f.properties.name))||'';
+        if(/^EGR/i.test(name)) egrFeatures.push(f);
+        else frzFeatures.push(f);
+      });
+
+      // FRZ (red)
+      if(frzFeatures.length){
+        natsFrzLayer=L.geoJSON({type:'FeatureCollection',features:frzFeatures},{
+          style:function(){return styleFor('#ef4444',0.15);},
+          onEachFeature:function(feature,layer){
+            var p=feature.properties||{};
+            var name=p.Name||p.name||'Flight Restriction Zone';
+            bindPopup(layer,name,'Flight Restriction Zone (FRZ)','#ef4444',p.upper,p.lower);
+          }
+        }).addTo(restrictMap);
+      }
+
+      // EGR Restricted (amber)
+      if(egrFeatures.length){
+        L.geoJSON({type:'FeatureCollection',features:egrFeatures},{
+          style:function(){return styleFor('#f59e0b',0.1);},
+          onEachFeature:function(feature,layer){
+            var p=feature.properties||{};
+            var name=p.Name||p.name||'Restricted Area';
+            bindPopup(layer,name,'Restricted Area (EGR)','#f59e0b',p.upper,p.lower);
+          }
+        }).addTo(restrictMap);
+      }
+      showToast('NATS airspace loaded');
     }).catch(function(){});
 
   // 2. Prohibited (purple)
@@ -3871,8 +3991,8 @@ function loadNatsFrz(){
         style:function(){return styleFor('#7c3aed',0.15);},
         onEachFeature:function(feature,layer){
           var p=feature.properties||{};
-          var name=p.name||p.Name||'Prohibited Area';
-          bindPopup(layer,name,'Prohibited Area','#7c3aed');
+          var name=p.Name||p.name||'Prohibited Area';
+          bindPopup(layer,name,'Prohibited Area','#7c3aed',p.upper,p.lower);
         }
       }).addTo(restrictMap);
     }).catch(function(){});
@@ -3885,25 +4005,10 @@ function loadNatsFrz(){
         style:function(){return styleFor('#f97316',0.1);},
         onEachFeature:function(feature,layer){
           var p=feature.properties||{};
-          var name=p.name||p.Name||'Danger Area';
-          bindPopup(layer,name,'Danger Area','#f97316');
+          var name=p.Name||p.name||'Danger Area';
+          bindPopup(layer,name,'Danger Area','#f97316',p.upper,p.lower);
         }
       }).addTo(restrictMap);
-    }).catch(function(){});
-
-  // 4. Restricted — EGR zones (amber)
-  fetch('/Restricted_drone.geojson')
-    .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
-    .then(function(data){
-      L.geoJSON(data,{
-        style:function(){return styleFor('#f59e0b',0.1);},
-        onEachFeature:function(feature,layer){
-          var p=feature.properties||{};
-          var name=p.Name||p.name||'Restricted Area';
-          bindPopup(layer,name,'Restricted Area (EGR)','#f59e0b');
-        }
-      }).addTo(restrictMap);
-      showToast('NATS airspace loaded');
     }).catch(function(){});
 }
 function toggleHazardLayer(key,enabled){activeHazardKeys[key]=enabled;fetchGroundHazards();}

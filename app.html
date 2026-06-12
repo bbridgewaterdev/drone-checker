@@ -708,8 +708,12 @@
           <div class="pro-hero-sub">Everything free pilots love, plus more.</div>
         </div>
         <div class="pro-price-card">
-          <div class="pro-price-row"><span class="pro-price-amt">&pound;2.99</span><span class="pro-price-per">/ month</span></div>
-          <div class="pro-price-note">Or &pound;24.99/year &middot; Cancel anytime</div>
+          <div style="display:flex;gap:6px;margin-bottom:12px;background:var(--bg3);border-radius:8px;padding:3px;">
+            <button id="plan-monthly-btn" onclick="selectPlan('monthly')" style="flex:1;padding:7px 0;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:#1e40af;color:#fff;transition:all .2s;">Monthly</button>
+            <button id="plan-yearly-btn" onclick="selectPlan('yearly')" style="flex:1;padding:7px 0;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:all .2s;">Yearly <span style="font-size:10px;background:#16a34a;color:#fff;border-radius:4px;padding:1px 5px;margin-left:3px;">SAVE 16%</span></button>
+          </div>
+          <div class="pro-price-row"><span class="pro-price-amt" id="plan-price-amt">&pound;2.99</span><span class="pro-price-per" id="plan-price-per">/ month</span></div>
+          <div class="pro-price-note" id="plan-price-note">Cancel anytime &middot; Secure payment via Stripe</div>
         </div>
         <div class="pro-feat-section">Always free</div>
         <div class="pro-feat-row"><div class="pro-feat-check free"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><div class="pro-feat-title">Fly rating &amp; full weather dashboard</div><div class="pro-feat-desc">Live conditions calibrated to your drone model</div></div></div>
@@ -1031,7 +1035,7 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
-var APP_VERSION='1.6.1';
+var APP_VERSION='1.6.2';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -3137,6 +3141,32 @@ var PAID_FEATURES_ENABLED=true;
 // proUser, loadProUser, saveProUser, isPro — defined below with Firebase integration
 // ---- Stripe checkout ----
 var CHECKOUT_URL='https://us-central1-dronechecker.cloudfunctions.net/createCheckoutSession';
+var _selectedPlan='monthly'; // 'monthly' or 'yearly'
+
+function selectPlan(plan){
+  _selectedPlan=plan;
+  var mBtn=document.getElementById('plan-monthly-btn');
+  var yBtn=document.getElementById('plan-yearly-btn');
+  var amt=document.getElementById('plan-price-amt');
+  var per=document.getElementById('plan-price-per');
+  var note=document.getElementById('plan-price-note');
+  var subBtn=document.getElementById('pro-subscribe-btn');
+  if(plan==='yearly'){
+    if(mBtn){mBtn.style.background='transparent';mBtn.style.color='var(--muted)';}
+    if(yBtn){yBtn.style.background='#1e40af';yBtn.style.color='#fff';}
+    if(amt){amt.innerHTML='&pound;29.99';}
+    if(per){per.textContent='/ year';}
+    if(note){note.innerHTML='That\'s &pound;2.50/month &middot; Save &pound;5.89 vs monthly';}
+    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;29.99/year';}
+  } else {
+    if(mBtn){mBtn.style.background='#1e40af';mBtn.style.color='#fff';}
+    if(yBtn){yBtn.style.background='transparent';yBtn.style.color='var(--muted)';}
+    if(amt){amt.innerHTML='&pound;2.99';}
+    if(per){per.textContent='/ month';}
+    if(note){note.textContent='Cancel anytime \u00b7 Secure payment via Stripe';}
+    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;2.99/month';}
+  }
+}
 
 function handleSubscribe(){
   // If not signed in, go to sign-in screen first
@@ -3154,20 +3184,20 @@ function startStripeCheckout(){
   fetch(CHECKOUT_URL,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({uid:proUser.uid,email:proUser.email})
+    body:JSON.stringify({uid:proUser.uid,email:proUser.email,plan:_selectedPlan})
   })
   .then(function(r){return r.json();})
   .then(function(data){
     if(data.url){
-      window.location.href=data.url; // redirect to Stripe Checkout
+      window.location.href=data.url;
     } else {
       showToast('Could not start checkout. Please try again.');
-      if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
+      if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
     }
   })
   .catch(function(){
     showToast('Could not start checkout. Check your connection.');
-    if(btn){btn.textContent='Get Pro · £2.99/month';btn.disabled=false;}
+    if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
   });
 }
 

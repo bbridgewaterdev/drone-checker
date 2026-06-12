@@ -10,8 +10,9 @@ admin.initializeApp();
 const STRIPE_SECRET_KEY = defineSecret('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
 
-// ---- Your Stripe price ID for DroneChecker Pro ----
-const PRICE_ID = 'price_1TgjvDBwELWfTObfoMWjvt6N';
+// ---- Your Stripe price IDs for DroneChecker Pro ----
+const PRICE_ID_MONTHLY = 'price_1TgjvDBwELWfTObfoMWjvt6N';
+const PRICE_ID_YEARLY  = 'price_1ThSwBBwELWfTObfULMmiYjp';
 
 // ---- App URL — where Stripe redirects after checkout ----
 const APP_URL = 'https://dronechecker.co.uk/app.html';
@@ -30,12 +31,14 @@ exports.createCheckoutSession = onRequest(
       return;
     }
 
-    const {uid, email} = req.body;
+    const {uid, email, plan} = req.body;
 
     if (!uid || !email) {
       res.status(400).json({error: 'Missing uid or email'});
       return;
     }
+
+    const priceId = (plan === 'yearly') ? PRICE_ID_YEARLY : PRICE_ID_MONTHLY;
 
     try {
       const stripe = stripeLib(STRIPE_SECRET_KEY.value());
@@ -44,7 +47,7 @@ exports.createCheckoutSession = onRequest(
         mode: 'subscription',
         payment_method_types: ['card'],
         customer_email: email,
-        line_items: [{price: PRICE_ID, quantity: 1}],
+        line_items: [{price: priceId, quantity: 1}],
         success_url: APP_URL + '?pro=success',
         cancel_url:  APP_URL + '?pro=cancelled',
         metadata: {uid},

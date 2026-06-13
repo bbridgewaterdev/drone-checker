@@ -993,7 +993,6 @@
             </optgroup>
           </select>
           <button class="drone-limits thr-btn" id="drone-limits" onclick="openThresholdSheet()" title="Adjust fly rating thresholds" aria-label="Adjust fly rating thresholds" style="background:none;border:none;cursor:pointer;font-family:inherit;padding:0;display:flex;align-items:center;gap:3px;white-space:nowrap;"></button>
-          <button class="unit-toggle" id="unit-toggle" onclick="toggleUnits()">mph</button>
         </div>
         <div class="search">
           <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. SW1 or London" aria-label="Search postcode or town" onkeydown="if(event.key==='Enter')doSearch()"/>
@@ -3858,6 +3857,9 @@ function openSettings(){
   if(tu)tu.value=tempMode;
   var vEl=document.getElementById('settings-version');
   if(vEl)vEl.textContent='v'+APP_VERSION;
+  // Show custom drone row for Pro users only
+  var cdr=document.getElementById('settings-custom-drone-row');
+  if(cdr)cdr.style.display=isPro()?'flex':'none';
 }
 function closeSettings(){
   var overlay=document.getElementById('settings-overlay');
@@ -4323,6 +4325,22 @@ function openNotamLink(){window.open('https://nats-uk.ead-it.com/cms-nats/opencm
           <div class="settings-row-label">FAQ</div>
         </div>
         <a href="/faq.html" target="_blank" class="settings-btn">View</a>
+      </div>
+
+      <div class="settings-section">Drone</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Wind thresholds</div>
+          <div class="settings-row-sub">Adjust caution/no-fly limits for your drone</div>
+        </div>
+        <button class="settings-btn" onclick="closeSettings();openThresholdSheet();">Edit</button>
+      </div>
+      <div class="settings-row" id="settings-custom-drone-row" style="display:none;">
+        <div>
+          <div class="settings-row-label">Custom drone profiles</div>
+          <div class="settings-row-sub">Add or edit your own drones</div>
+        </div>
+        <button class="settings-btn" onclick="closeSettings();openCustomDroneOverlay();">Manage</button>
       </div>
 
       <div class="settings-section">Support</div>

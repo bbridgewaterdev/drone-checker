@@ -3536,26 +3536,8 @@ function handleForgotPassword(){
 function handleGoogleSignIn(){
   var btn=document.getElementById('pro-google-signin-btn');
 
-  // Detect incognito/private mode before attempting sign-in
-  // In incognito, sessionStorage is available but gets wiped on redirect
-  // A reliable cross-browser test is to try writing to localStorage
-  var isIncognito=false;
-  try{
-    var testKey='_dc_incognito_test';
-    localStorage.setItem(testKey,'1');
-    localStorage.removeItem(testKey);
-  }catch(e){
-    isIncognito=true;
-  }
-  // Additional check: Firefox private mode blocks indexedDB
-  if(!isIncognito&&typeof indexedDB==='undefined')isIncognito=true;
-
-  if(isIncognito){
-    showToast('⚠️ Incognito mode detected — Google sign-in is blocked. Please open DroneChecker in a normal browser tab.');
-    return;
-  }
-
-  if(btn){btn.style.opacity='0.6';btn.disabled=true;}
+  function proceedWithSignIn(){
+    if(btn){btn.style.opacity='0.6';btn.disabled=true;}
 
   // Close the overlay so the Google popup appears on top unobstructed
   var overlay=document.getElementById('pro-overlay');
@@ -3662,6 +3644,22 @@ function handleGoogleSignIn(){
         _doGSISignIn();
       });
     });
+  }
+  } // end proceedWithSignIn
+
+  // Detect incognito using Storage Quota API — most reliable cross-browser method
+  // Normal mode: quota is several GB. Chrome/Samsung incognito: ~120MB
+  if(navigator.storage&&navigator.storage.estimate){
+    navigator.storage.estimate().then(function(estimate){
+      if(estimate.quota&&estimate.quota<200*1024*1024){
+        showToast('⚠️ Google sign-in is blocked in private/incognito mode. Please open DroneChecker in a normal browser tab, or use Continue with Email instead.');
+        if(btn){btn.style.opacity='1';btn.disabled=false;}
+      } else {
+        proceedWithSignIn();
+      }
+    }).catch(function(){proceedWithSignIn();});
+  } else {
+    proceedWithSignIn();
   }
 }
 

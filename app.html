@@ -42,41 +42,8 @@
       --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
       --accent:#06b6d4;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
       --radius:14px;--radius-sm:9px;
+      
     }
-    body.light-mode{
-      --bg:#f1f5f9;--bg2:#ffffff;--bg3:#e2e8f0;
-      --text:#0f172a;--muted:#64748b;--border:#cbd5e1;
-      --accent:#0284c7;--green:#16a34a;--amber:#d97706;--red:#dc2626;
-    }
-    body.light-mode .wx-temp{color:#0f172a;}
-    body.light-mode .h-title{color:#0f172a;}
-    body.light-mode .legend-no-data{background:#94a3b8 !important;}
-    .day-bar-lbl{color:rgba(255,255,255,.5);}
-    body.light-mode .day-bar-lbl{color:rgba(0,0,0,.4);}
-    /* Settings sheet */
-    .settings-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:8000;display:none;align-items:flex-end;justify-content:center;}
-    .settings-overlay.open{display:flex;}
-    .settings-sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;border-top:1px solid var(--border);}
-    .settings-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
-    .settings-title{font-size:16px;font-weight:700;color:var(--text);}
-    .settings-close{background:var(--bg3);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;font-family:inherit;}
-    .settings-body{overflow-y:auto;padding:12px 0 24px;flex:1;}
-    .settings-section{padding:8px 20px 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
-    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--border);}
-    .settings-row:last-child{border-bottom:none;}
-    .settings-row-label{font-size:14px;color:var(--text);font-weight:500;}
-    .settings-row-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-    .settings-toggle{position:relative;width:44px;height:26px;flex-shrink:0;}
-    .settings-toggle input{opacity:0;width:0;height:0;}
-    .settings-toggle-slider{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg3);border-radius:13px;cursor:pointer;transition:.2s;}
-    .settings-toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
-    .settings-toggle input:checked+.settings-toggle-slider{background:var(--accent);}
-    .settings-toggle input:checked+.settings-toggle-slider:before{transform:translateX(18px);}
-    .settings-select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:13px;font-weight:600;outline:none;font-family:inherit;cursor:pointer;}
-    .settings-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
-    .settings-btn.danger{color:var(--red);border-color:rgba(239,68,68,.3);}
-    .settings-cog{background:none;border:none;cursor:pointer;padding:4px;color:var(--muted);display:flex;align-items:center;flex-shrink:0;}
-    .settings-cog:hover{color:var(--text);}
     #app{height:100svh;display:flex;flex-direction:column;background:var(--bg);}
     #splash{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity .3s;}
     #splash.hidden{opacity:0;pointer-events:none;}
@@ -94,8 +61,6 @@
     .tab{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:8px;}
     .tab.on{display:block;}
     #tab-restrict.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;}
-    #tab-radar.on,#tab-gh.on{display:flex;flex-direction:column;}
-    #wind-display,#gh-body{flex:1;display:flex;flex-direction:column;}
     .nav{height:58px;background:var(--bg2);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
     .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--muted);font-size:9.5px;cursor:pointer;font-family:inherit;padding:0 1px;}
     .nb.on{color:var(--accent);}
@@ -141,9 +106,8 @@
     .wx-info-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:4px;transition:color .15s;}
     .wx-info-btn:hover,.wx-info-btn.active{color:var(--accent);}
     .wx-info-panel{display:none;font-size:11px;color:var(--muted);line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
-    .wx-val{font-size:15px;font-weight:600;color:var(--text);}
+    .wx-val{font-size:15px;font-weight:600;}
     .wx-sub{font-size:11px;color:var(--muted);margin-top:2px;}
-    .whr-time{font-size:13px;font-weight:600;color:var(--text);width:46px;}
     .wx-hero{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px;padding:4px 0;}
     .wx-icon{font-size:64px;line-height:1;display:inline-flex;align-items:center;}
     .wx-temp{font-size:44px;font-weight:800;line-height:1;letter-spacing:-1px;}
@@ -156,14 +120,14 @@
     .kp-bar{height:100%;border-radius:6px;}
     .kp-scale{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted);}
     .fc-item{background:var(--bg3);border-radius:var(--radius-sm);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;transition:background .15s;}
-    .fc-item:hover{background:var(--bg3);}
-    .fc-item.fc-open{background:var(--bg3);border-radius:var(--radius-sm) var(--radius-sm) 0 0;margin-bottom:0;}
+    .fc-item:hover{background:#3d4f63;}
+    .fc-item.fc-open{background:#253145;border-radius:var(--radius-sm) var(--radius-sm) 0 0;margin-bottom:0;}
     .fc-item:hover .fc-chevron{color:var(--accent);}
     .fc-chevron{font-size:12px;color:var(--muted);flex-shrink:0;transition:transform .2s,color .15s;line-height:1;}
     .fc-item.fc-open .fc-chevron{transform:rotate(180deg);color:var(--accent);}
-    .fc-time{font-size:13px;font-weight:600;width:46px;flex-shrink:0;color:var(--text);}
+    .fc-time{font-size:13px;font-weight:600;width:46px;flex-shrink:0;}
     .fc-icon{font-size:20px;width:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .fc-temp{font-size:13px;font-weight:600;width:52px;color:var(--text);}
+    .fc-temp{font-size:13px;font-weight:600;width:52px;}
     .fc-desc{flex:1;font-size:12px;color:var(--muted);}
     .fc-wind{font-size:12px;color:var(--muted);width:54px;text-align:right;}
     .fc-dot{width:11px;height:11px;flex-shrink:0;display:inline-block;}
@@ -171,7 +135,7 @@
     .fc-dot.amber{background:var(--amber);border-radius:2px;transform:rotate(45deg);}
     .fc-dot.red{background:var(--red);border-radius:2px;}
     /* Hourly detail panel */
-    .fc-detail{display:none;background:var(--bg3);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:0 0 2px;margin-bottom:6px;overflow:hidden;}
+    .fc-detail{display:none;background:linear-gradient(160deg,#111f35 0%,#0f172a 100%);border:1px solid #1e3050;border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:0 0 2px;margin-bottom:6px;overflow:hidden;}
     .fc-detail.open{display:block;animation:fcSlideIn .2s cubic-bezier(.25,.46,.45,.94);}
     @keyframes fcSlideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
     /* Rating hero bar */
@@ -186,17 +150,17 @@
     .fcd-hero-lbl.red{color:var(--red);}
     .fcd-hero-desc{font-size:11px;color:var(--muted);line-height:1.45;margin-top:1px;}
     /* Divider */
-    .fcd-divider{height:1px;background:var(--border);margin:0 14px;}
+    .fcd-divider{height:1px;background:linear-gradient(90deg,transparent,#1e3050 20%,#1e3050 80%,transparent);margin:0 14px;}
     /* Tiles grid */
-    .fcd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);margin-top:1px;}
-    .fcd-tile{background:var(--bg2);padding:12px 14px;}
+    .fcd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#1e3050;margin-top:1px;}
+    .fcd-tile{background:#0f1e32;padding:12px 14px;}
     .fcd-tile-wide{grid-column:span 2;}
     .fcd-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
     .fcd-val{font-size:18px;font-weight:700;line-height:1;color:var(--text);}
     .fcd-val span{font-size:11px;font-weight:400;color:var(--muted);}
     .fcd-sub{font-size:10px;color:var(--muted);margin-top:3px;}
     /* Mini bar — sole colour signal */
-    .fcd-bar-bg{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+    .fcd-bar-bg{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:8px;overflow:hidden;}
     .fcd-bar{height:100%;border-radius:2px;}
     .fcd-bar.green{background:var(--green);}
     .fcd-bar.amber{background:var(--amber);}
@@ -229,7 +193,7 @@
     .cl-reset{width:100%;background:var(--bg3);border:none;border-radius:var(--radius-sm);padding:12px;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;}
     .gh-slot{background:var(--bg3);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;border-left:5px solid transparent;}
     .gh-slot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-    .gh-slot-name{font-size:14px;font-weight:600;color:var(--text);}
+    .gh-slot-name{font-size:14px;font-weight:600;}
     .gh-slot-time{font-size:13px;font-weight:600;}
     .gh-slot-desc{font-size:12px;color:var(--muted);line-height:1.5;}
     .gh-badge{display:inline-block;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;margin-left:8px;vertical-align:middle;}
@@ -271,11 +235,8 @@
     .log-empty-icon{font-size:36px;margin-bottom:12px;}
     .log-count{font-size:12px;color:var(--muted);padding:8px 12px 0;}
     .disclaimer-overlay{position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.9);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;overscroll-behavior:none;}
-    .disclaimer-sheet{background:var(--bg2);border-radius:16px;width:100%;max-width:420px;max-height:88vh;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-    @media(max-height:680px){.disclaimer-sheet{max-height:92vh;border-radius:12px;}}
-    .disclaimer-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 20px 16px;flex:1;}
-    @media(max-height:720px){.disclaimer-scroll{padding:16px 16px 12px;}.disclaimer-icon{display:none;}.disclaimer-title{margin-bottom:4px;}.disclaimer-sub{margin-bottom:12px;}.disclaimer-box{margin-bottom:12px;padding:10px;}.disclaimer-check{margin-bottom:0;}}
-    .disclaimer-footer{padding:12px 20px 16px;border-top:1px solid var(--border);background:var(--bg2);border-radius:0 0 16px 16px;flex-shrink:0;}
+    .disclaimer-sheet{background:var(--bg2);border-radius:16px;padding:24px 20px 20px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;border:1px solid var(--border);-webkit-overflow-scrolling:touch;}
+    @media(max-height:680px){.disclaimer-sheet{padding:16px 16px 16px;max-height:92vh;border-radius:12px;}}
     @media(max-height:680px){.disclaimer-icon{display:none;}.disclaimer-title{margin-bottom:4px;}.disclaimer-sub{margin-bottom:12px;}.disclaimer-box{margin-bottom:12px;padding:10px;}.disclaimer-check{margin-bottom:14px;}}
     @keyframes bounceY{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
     .disclaimer-icon{font-size:36px;text-align:center;margin-bottom:12px;}
@@ -286,7 +247,7 @@
     .disclaimer-check{display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;cursor:pointer;}
     .disclaimer-check input{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent);margin-top:1px;cursor:pointer;}
     .disclaimer-check-lbl{font-size:13px;color:var(--text);line-height:1.5;}
-    .disclaimer-btn{width:100%;background:var(--bg3);border:none;border-radius:var(--radius-sm);padding:14px;color:var(--muted);font-size:15px;font-weight:600;cursor:not-allowed;font-family:inherit;transition:all .2s;margin:0;}
+    .disclaimer-btn{width:100%;background:var(--bg3);border:none;border-radius:var(--radius-sm);padding:14px;color:var(--muted);font-size:15px;font-weight:600;cursor:not-allowed;font-family:inherit;transition:all .2s;}
     .disclaimer-btn.ready{background:var(--accent);color:#fff;cursor:pointer;}
     .rule:last-child{margin-bottom:0;}
     .rule-ico{font-size:18px;flex-shrink:0;margin-top:1px;}
@@ -636,20 +597,15 @@
             }
           });
         } else {
-          // No redirect result — check if we were expecting one using localStorage timestamp
+          // No redirect result — check if we were expecting one (i.e. redirect was attempted)
           var redirectPending=false;
-          try{
-            var flagTs=parseInt(localStorage.getItem('dc_redirect_ts')||'0');
-            // Flag is valid if set within the last 3 minutes
-            if(flagTs&&(Date.now()-flagTs)<180000){
-              redirectPending=true;
-              localStorage.removeItem('dc_redirect_ts');
-            }
-          }catch(e){}
+          try{redirectPending=sessionStorage.getItem('dc_redirect_pending')==='1';}catch(e){}
           if(redirectPending){
+            // Redirect was attempted but returned no user — likely incognito/privacy mode
+            try{sessionStorage.removeItem('dc_redirect_pending');}catch(e){}
             setTimeout(function(){
-              showToast('\u26a0\ufe0f Google sign-in failed. If you\'re in private/incognito mode, please switch to a normal browser tab. Or use Continue with Email instead.');
-            },800);
+              showToast('Sign-in failed. Please try again in a normal browser tab — incognito mode blocks Google sign-in.');
+            },1000);
           }
           // Check for existing persisted session
           firebase.auth().onAuthStateChanged(function(fbUser){
@@ -695,43 +651,40 @@
 <body>
 <div id="disclaimer-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;min-height:100vh;background:rgba(0,0,0,.92);z-index:10000;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
   <div class="disclaimer-sheet">
-    <div class="disclaimer-scroll">
-      <div class="disclaimer-icon">
-        <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
-          <rect width="100" height="100" rx="20" fill="#0f172a"/>
-          <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
-          <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-          <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
-          <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-          <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
-          <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-          <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-          <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-          <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
-          <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
-          <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
-          <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
-          <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
-          <circle cx="50" cy="50" r="11" fill="white"/>
-          <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
-        </svg>
-      </div>
-      <div class="disclaimer-title">Before you fly</div>
-      <div class="disclaimer-sub">Please read and accept before using DroneChecker</div>
-      <div class="disclaimer-box">
-        <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and NOTAMs independently before flying.<br><br>
-        <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times, including holding a valid CAA Operator ID and Flyer ID where required.<br><br>
-        <strong>No liability.</strong> DroneChecker accepts no liability for any loss, damage or legal consequence from reliance on this app.<br><br>
-        <strong>Data.</strong> Free users: no personal data stored on our servers. Pro subscribers: email and flight data stored securely. See <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> &amp; <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms</a>.
-      </div>
-      <label class="disclaimer-check">
-        <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
-        <span class="disclaimer-check-lbl">I understand DroneChecker is advisory only and I am solely responsible for safe and lawful drone operations.</span>
-      </label>
+    <div class="disclaimer-icon">
+      <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;">
+        <rect width="100" height="100" rx="20" fill="#0f172a"/>
+        <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
+        <line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/>
+        <circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/>
+        <rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/>
+        <rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/>
+        <rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/>
+        <rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/>
+        <circle cx="50" cy="50" r="11" fill="white"/>
+        <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
+      </svg>
     </div>
-    <div class="disclaimer-footer">
-      <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled>Enter DroneChecker</button>
+    <div class="disclaimer-title">Before you fly</div>
+    <div class="disclaimer-sub">Please read and accept the following before using DroneChecker</div>
+    <div class="disclaimer-box">
+      <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and restrictions independently.<br><br>
+      <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times.<br><br>
+      <strong>No liability.</strong> DroneChecker accepts no liability for loss, damage or legal consequence from reliance on this app.<br><br>
+      <strong>Analytics.</strong> Anonymous usage analytics via Google Analytics (IP anonymised). No personal data collected. See the <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a>.
     </div>
+    <div id="disc-scroll-hint" style="text-align:center;padding:6px 0 10px;font-size:12px;color:var(--muted);animation:bounceY 1.4s ease-in-out infinite;">↓ Scroll to accept</div>
+    <label class="disclaimer-check">
+      <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
+      <span class="disclaimer-check-lbl">I understand that DroneChecker is advisory only and that I am solely responsible for safe and lawful drone operations.</span>
+    </label>
+    <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled>Enter DroneChecker</button>
   </div>
 </div>
 
@@ -811,7 +764,6 @@
           <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
           <span>Continue with Google</span>
         </button>
-        <div style="font-size:11px;color:var(--muted);text-align:center;margin:-4px 0 8px;line-height:1.5;">⚠️ Google sign-in doesn't work in private or incognito mode. Use a normal browser tab or sign in with email below.</div>
 
         <div class="pro-auth-divider">or</div>
 
@@ -866,36 +818,30 @@
       <div class="onboard-dot"></div>
       <div class="onboard-dot"></div>
       <div class="onboard-dot"></div>
-      <div class="onboard-dot"></div>
     </div>
     <div class="onboard-slide on" id="onboard-0">
       <div class="onboard-icon">🚁</div>
       <div class="onboard-title">Know before you fly</div>
-      <div class="onboard-desc">DroneChecker gives you a clear fly rating based on live weather, wind, precipitation and geomagnetic conditions — tailored to your exact drone model. See your best flight window at a glance.<br><br>
+      <div class="onboard-desc">DroneChecker gives you a clear fly rating based on live weather, wind, precipitation and geomagnetic conditions — tailored to your exact drone model. See your best flight window for the next 24 hours at a glance.<br><br>
         <span class="rating-chip g">✓ Good to Fly</span>
-        <span class="rating-chip a">⚠ Fly with Caution</span>
+        <span class="rating-chip a">⚠ Caution</span>
         <span class="rating-chip r">✕ Do Not Fly</span>
       </div>
     </div>
     <div class="onboard-slide" id="onboard-1">
       <div class="onboard-icon">📍</div>
       <div class="onboard-title">Search your flying spot</div>
-      <div class="onboard-desc">Type any UK postcode or town to get live conditions for your exact location. Save your regular flying spots as favourites for one-tap access — each showing a live fly rating dot so you can check all your spots at a glance.</div>
+      <div class="onboard-desc">Type any UK postcode or town to get live conditions for your exact location. Save up to 2 of your regular flying spots as favourites for one-tap access.</div>
     </div>
     <div class="onboard-slide" id="onboard-2">
       <div class="onboard-icon">📅</div>
       <div class="onboard-title">Plan the perfect flight</div>
-      <div class="onboard-desc">Check the 6-hour forecast with per-slot fly ratings before you head out. The golden hour calculator gives you precise sunrise, sunset and golden hour times with live countdowns — calculated astronomically for your exact location, no internet required.<br><br>Upgrade to <strong style="color:#f59e0b;">Pro</strong> for the 48-hour forecast and 7-day best day planner.</div>
+      <div class="onboard-desc">The 7-day planner highlights the best day to fly this week. Check precipitation probability and per-hour geomagnetic forecasts so conditions don't catch you out. The golden hour calculator gives you precise sunrise, sunset and golden hour times with live countdowns.</div>
     </div>
     <div class="onboard-slide" id="onboard-3">
-      <div class="onboard-icon">🗺️</div>
-      <div class="onboard-title">Know where you can fly</div>
-      <div class="onboard-desc">Upgrade to <strong style="color:#f59e0b;">Pro</strong> to unlock the UK airspace and ground hazard restrictions map — showing flight restriction zones, prohibited areas, danger areas and ground hazards including schools, hospitals and railways, all on an interactive map.<br><br>Always verify airspace and NOTAMs independently before flying.</div>
-    </div>
-    <div class="onboard-slide" id="onboard-4">
       <div class="onboard-icon">✈️</div>
       <div class="onboard-title">Log every flight</div>
-      <div class="onboard-desc">Record your flights with date, location, drone, duration and conditions — great for insurance records and your personal flight history. Weather data is auto-filled from your current session.<br><br>Upgrade to <strong style="color:#f59e0b;">Pro</strong> for cloud sync across all your devices and export to Excel.</div>
+      <div class="onboard-desc">Record your flights with date, location, drone, duration and conditions — great for insurance records and your own personal flight history.</div>
     </div>
     <button class="onboard-btn" id="onboard-btn" onclick="nextSlide()">Next</button>
     <button class="onboard-skip" onclick="finishOnboarding()">Skip</button>
@@ -934,9 +880,6 @@
         <svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>
         <span id="pro-pill-label">Go Pro</span>
       </div>
-      <button class="settings-cog" onclick="openSettings()" aria-label="Settings" style="margin-left:6px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      </button>
     </div>
     <!-- Row 2: updated · refresh (right-aligned) -->
     <div class="h-row2">
@@ -993,6 +936,7 @@
             </optgroup>
           </select>
           <button class="drone-limits thr-btn" id="drone-limits" onclick="openThresholdSheet()" title="Adjust fly rating thresholds" aria-label="Adjust fly rating thresholds" style="background:none;border:none;cursor:pointer;font-family:inherit;padding:0;display:flex;align-items:center;gap:3px;white-space:nowrap;"></button>
+          <button class="unit-toggle" id="unit-toggle" onclick="toggleUnits()">mph</button>
         </div>
         <div class="search">
           <input id="loc-inp" type="text" placeholder="Postcode or town, e.g. SW1 or London" aria-label="Search postcode or town" onkeydown="if(event.key==='Enter')doSearch()"/>
@@ -1107,7 +1051,7 @@ var APP_VERSION='1.6.2';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',tempMode='c',lastUpdated=null,windMap=null,windAnimFrame=null;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',lastUpdated=null,windMap=null,windAnimFrame=null;
 var UK_FRZS=[
   {n:'Heathrow',i:'EGLL',lat:51.4775,lng:-0.4614,r:5000},
   {n:'Gatwick',i:'EGKK',lat:51.1537,lng:-0.1821,r:5000},
@@ -1385,21 +1329,14 @@ function dirLabel(deg){return['N','NE','E','SE','S','SW','W','NW'][Math.round(de
 function pad(n){return(n<10?'0':'')+n;}
 function fmtTime(d){return pad(d.getHours())+':'+pad(d.getMinutes());}
 var DRONE_SVG='<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>';
-function loadUnits(){
-  try{var s=localStorage.getItem('dc_units');if(s==='imperial')unitMode='mph';else if(s==='ms')unitMode='ms';else if(s==='kts')unitMode='kts';else unitMode='kmh';}catch(e){}
-  try{tempMode=localStorage.getItem('dc_temp_unit')||'c';}catch(e){}
-  updateUnitToggle();
-}
-function saveUnits(){
-  try{localStorage.setItem('dc_units',unitMode==='mph'?'imperial':unitMode==='ms'?'ms':unitMode==='kts'?'kts':'metric');}catch(e){}
-  try{localStorage.setItem('dc_temp_unit',tempMode);}catch(e){}
-}
+function loadUnits(){try{var s=localStorage.getItem('dc_units');if(s==='imperial')unitMode='mph';else if(s==='ms')unitMode='ms';else unitMode='kmh';}catch(e){}updateUnitToggle();}
+function saveUnits(){try{localStorage.setItem('dc_units',unitMode==='mph'?'imperial':unitMode==='ms'?'ms':'metric');}catch(e){}}
 function toggleUnits(){unitMode=unitMode==='kmh'?'mph':unitMode==='mph'?'ms':'kmh';saveUnits();updateUnitToggle();updateDroneLimits();if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))initWindMap();}}
 function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;var current={kmh:'km/h',mph:'mph',ms:'m/s'};var next={kmh:'mph',mph:'m/s',ms:'km/h'};btn.textContent=current[unitMode]+' → '+next[unitMode];btn.setAttribute('aria-label','Currently '+current[unitMode]+'. Tap to switch to '+next[unitMode]);btn.title='Switch to '+next[unitMode];}
-function spd(v){if(unitMode==='mph')return Math.round(v*0.621);if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));if(unitMode==='kts')return parseFloat((v*0.539957).toFixed(1));return Math.round(v);}
-function spdU(){return unitMode==='mph'?'mph':unitMode==='ms'?'m/s':unitMode==='kts'?'kt':'km/h';}
-function tmp(v){return tempMode==='f'?Math.round(v*9/5+32):Math.round(v);}
-function tmpU(){return tempMode==='f'?'°F':'°C';}
+function spd(v){if(unitMode==='mph')return Math.round(v*0.621);if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));return Math.round(v);}
+function spdU(){return unitMode==='mph'?'mph':unitMode==='ms'?'m/s':'km/h';}
+function tmp(v){return unitMode==='mph'?Math.round(v*9/5+32):Math.round(v);}
+function tmpU(){return unitMode==='mph'?'°F':'°C';}
 function visDisp(v){if(unitMode==='mph'){if(v>=1609)return{val:(v/1609.34).toFixed(1),unit:'mi'};return{val:Math.round(v*3.281),unit:'ft'};}if(v>=1000)return{val:(v/1000).toFixed(0),unit:'km'};return{val:v,unit:'m'};}
 function buildFeedbackMailto(){
   var info=[];
@@ -1706,24 +1643,15 @@ function renderLog(){
       )+
     '</div>';
     entries+='<div class="log-actions">'+exportBtns+'<button class="log-clear" onclick="clearFlights()">Clear all</button></div>'+backupBtns;
-    // Sort by timestamp descending (newest first)
-    var sorted=flights.slice().sort(function(a,b){
-      var ta=a.ts?new Date(a.ts):new Date(a.date);
-      var tb=b.ts?new Date(b.ts):new Date(b.date);
-      return tb-ta;
-    });
-    for(var i=0;i<sorted.length;i++){
-      var f=sorted[i];
-      var origIdx=flights.indexOf(f);
-      var timeStr='';
-      if(f.ts){var td=new Date(f.ts);timeStr=' · '+pad(td.getHours())+':'+pad(td.getMinutes());}
+    for(var i=flights.length-1;i>=0;i--){
+      var f=flights[i];
       var cc=condColor[f.cond]||'';
       entries+='<div class="log-entry">'+
         '<div class="log-entry-hdr">'+
         '<div><div class="log-entry-loc">'+esc(f.loc)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:8px;">'+
-        '<div class="log-entry-date">'+esc(f.date)+timeStr+'</div>'+
-        '<button class="log-entry-del" onclick="deleteFlight('+origIdx+')" title="Delete" aria-label="Delete flight entry">×</button>'+
+        '<div class="log-entry-date">'+esc(f.date)+'</div>'+
+        '<button class="log-entry-del" onclick="deleteFlight('+i+')" title="Delete" aria-label="Delete flight entry">×</button>'+
         '</div></div>'+
         '<div class="log-entry-tags">'+
         '<span class="log-tag">🚁 '+esc(f.drone)+'</span>'+
@@ -1737,15 +1665,14 @@ function renderLog(){
         '</div>';
     }
   }
+  document.getElementById('log-body').innerHTML=stats+form+entries+'<div style="height:14px;"></div>'+proAccountCard();
 }
 function addFlight(){
   var loc=document.getElementById('li-loc').value.trim();
   if(!loc){showToast('Please enter a location');return;}
   var flights=loadFlights();
-  var now=new Date();
   flights.push({
-    date:document.getElementById('li-date').value||now.toISOString().split('T')[0],
-    ts:now.toISOString(),
+    date:document.getElementById('li-date').value||new Date().toISOString().split('T')[0],
     loc:loc,
     drone:document.getElementById('li-drone').value.trim(),
     dur:document.getElementById('li-dur').value,
@@ -2112,7 +2039,7 @@ function startIntervals(){
     if(uLat&&uLng){fetchAll();}
   },1800000);
 }
-var onboardSlide=0;var onboardTotal=5;
+var onboardSlide=0;var onboardTotal=4;
 function checkOnboarding(){
   try{if(localStorage.getItem('dc_onboarded')==='1')return;}catch(e){}
   var overlay=document.getElementById('onboard-overlay');
@@ -2292,8 +2219,6 @@ function fetchAll(){
       if(updEl)updEl.textContent='Updated just now';
       saveWxCache(data);hideOfflineBanner();hideSplash();
       renderDash();renderFc();renderGolden();
-      // Update restrictions map centre if already initialised
-      if(restrictInitDone&&restrictMap&&uLat&&uLng)flyToUserLocation(uLat,uLng);
       fetchKp();
     })
     .catch(function(err){
@@ -2482,46 +2407,35 @@ function _oldGetNext24hRatings(){
 function buildHourStrip(hourlyRatings,now){
   var totalHours=hourlyRatings.length;
   var is72=totalHours>24;
+  var strip='<div style="display:flex;gap:1px;margin:10px 0 0;position:relative;">';
   var dayBoundaries=[];
   if(is72){for(var d=1;d<hourlyRatings.length;d++){if(hourlyRatings[d].hour===0)dayBoundaries.push(d);}}
-
-  // Day labels ABOVE bar (72h only)
-  var dayLabelHtml='';
-  if(is72){
-    dayLabelHtml='<div style="position:relative;height:14px;margin-bottom:2px;">';
-    for(var b=0;b<dayBoundaries.length;b++){
-      var bIdx=dayBoundaries[b];
-      var bPct=Math.round((bIdx/totalHours)*100);
-      var dayDate=new Date(hourlyRatings[bIdx].time);
-      var dayLbl=dayDate.toLocaleDateString('en-GB',{weekday:'short'});
-      dayLabelHtml+='<span class="day-bar-lbl" style="position:absolute;left:'+bPct+'%;transform:translateX(-50%);font-size:10px;font-weight:600;letter-spacing:.3px;">'+dayLbl+'</span>';
-    }
-    dayLabelHtml+='</div>';
-  }
-
-  // Bar
-  var strip='<div style="display:flex;gap:1px;position:relative;">';
   for(var i=0;i<hourlyRatings.length;i++){
     var entry=hourlyRatings[i];
     var col=entry.rating==='green'?'#22c55e':entry.rating==='amber'?'#f59e0b':entry.rating==='red'?'#ef4444':'#334155';
     var isNowHour=entry.hour===now.getHours()&&i===0;
     var isDayStart=dayBoundaries.indexOf(i)>=0;
-    var bLeft=isDayStart?'border-left:2px solid rgba(255,255,255,.25);':'';    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+bLeft+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'"></div>';
+    var bLeft=isDayStart?'border-left:2px solid rgba(255,255,255,.3);':'';    strip+='<div title="'+pad(entry.hour)+':00" style="flex:1;height:20px;background:'+col+';border-radius:2px;'+bLeft+(isNowHour?'box-shadow:0 0 0 1.5px #fff;':'')+'" ></div>';
   }
   strip+='</div>';
-
-  // Hour labels BELOW bar
-  var labelHtml='<div style="position:relative;height:16px;margin-top:3px;margin-bottom:4px;">';
+  var labelHtml='<div style="position:relative;height:16px;margin-top:2px;margin-bottom:4px;">';
   if(is72){
     var startH=hourlyRatings[0]?pad(hourlyRatings[0].hour):'00';
     var endH=hourlyRatings[totalHours-1]?pad((hourlyRatings[totalHours-1].hour+1)%24):'00';
     labelHtml+='<span style="position:absolute;left:0;font-size:10px;color:var(--muted);">'+startH+'</span>';
+    for(var b=0;b<dayBoundaries.length;b++){
+      var bIdx=dayBoundaries[b];
+      var bPct=Math.round((bIdx/totalHours)*100);
+      var dayDate=new Date(hourlyRatings[bIdx].time);
+      var dayLbl=dayDate.toLocaleDateString('en-GB',{weekday:'short'});
+      labelHtml+='<span style="position:absolute;left:'+bPct+'%;transform:translateX(-50%);font-size:10px;color:rgba(255,255,255,.5);font-weight:600;">'+dayLbl+'</span>';
+    }
     labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endH+'</span>';
   } else {
     var ticks=[];
     for(var t=0;t<hourlyRatings.length;t++){if(t%6===0)ticks.push({idx:t,label:pad(hourlyRatings[t].hour)});}
     for(var k=0;k<ticks.length;k++){
-      var leftPct=Math.round((ticks[k].idx/Math.max(totalHours-1,1))*100);
+      var leftPct=Math.round((ticks[k].idx/(totalHours-1))*100);
       if(leftPct>85&&k<ticks.length-1)continue;
       var xform=k===0?'none':'translateX(-50%)';
       labelHtml+='<span style="position:absolute;left:'+leftPct+'%;transform:'+xform+';font-size:10px;color:var(--muted);">'+ticks[k].label+'</span>';
@@ -2531,7 +2445,7 @@ function buildHourStrip(hourlyRatings,now){
     labelHtml+='<span style="position:absolute;right:0;font-size:10px;color:var(--muted);">'+endHr+'</span>';
   }
   labelHtml+='</div>';
-  return dayLabelHtml+strip+labelHtml;
+  return strip+labelHtml;
 }
 function getFlightWindows(hourlyRatings){
   var windows=[],inWindow=false,winStart=null,winEnd=null;
@@ -2577,21 +2491,6 @@ function renderFlightWindowCard(){
     var greenInWin=next24.filter(function(r){return r.rating==='green'&&r.time>=primaryWin.start&&r.time<=primaryWin.end;});
     winIsAmberOnly=greenInWin.length===0;
   }
-  // Detect transition point from green → amber within an open window
-  var transitionHour=null;
-  if(isNowOpen&&!winIsAmberOnly){
-    var seenGreen=false;
-    for(var ti=0;ti<next24.length;ti++){
-      var slot=next24[ti];
-      if(slot.time<primaryWin.start)continue;
-      if(slot.time>new Date(primaryWin.end.getTime()+3600000))break;
-      if(slot.rating==='green'){seenGreen=true;}
-      else if(seenGreen&&(slot.rating==='amber'||slot.rating==='red')){
-        transitionHour=slot.time;
-        break;
-      }
-    }
-  }
   var hourStrip=buildHourStrip(next24,now);
   var mainHtml='';
   if(!primaryWin){
@@ -2608,13 +2507,7 @@ function renderFlightWindowCard(){
     var col=winIsAmberOnly?'var(--amber)':(isNowOpen?'var(--green)':'var(--accent)');
     var label=isNowOpen?(winIsAmberOnly?'Open now · Caution':'Open now'):(winIsAmberOnly?'Flyable with caution'+(isTomorrow?' · Tomorrow':''):'Next window'+(isTomorrow?' · Tomorrow':''));
     var timeStr=isNowOpen?'Until '+endStr:startStr+' – '+endStr;
-    var subStr=isNowOpen
-      ?(winIsAmberOnly
-        ?'Not ideal — fly carefully'
-        :(transitionHour
-          ?durationStr+' remaining · Caution from '+pad(transitionHour.getHours())+':00'
-          :durationStr+' remaining'))
-      :(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
+    var subStr=isNowOpen?(winIsAmberOnly?'Not ideal — fly carefully':durationStr+' remaining'):(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
     mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
       (isNowOpen?'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><circle cx="20" cy="20" r="13" fill="rgba(34,197,94,.2)" stroke="#22c55e" stroke-width="1.5"/><polyline points="12,20 17,26 28,13" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(6,182,212,.10)" stroke="#06b6d4" stroke-width="1.5"/><circle cx="20" cy="20" r="11" fill="rgba(6,182,212,.12)" stroke="#06b6d4" stroke-width="1.5"/><line x1="20" y1="20" x2="20" y2="12" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="20" x2="26" y2="20" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#06b6d4"/><line x1="20" y1="9.5" x2="20" y2="11" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="30.5" y1="20" x2="29" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="20" y1="30.5" x2="20" y2="29" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="9.5" y1="20" x2="11" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>')+
       '<div style="flex:1;">'+
@@ -2633,7 +2526,7 @@ function renderFlightWindowCard(){
     '<span><span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Good</span>'+
     '<span><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Caution</span>'+
     '<span><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>Avoid</span>'+
-    '<span><span class="legend-no-data" style="display:inline-block;width:10px;height:10px;background:#334155;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>No data</span>'+
+    '<span><span style="display:inline-block;width:10px;height:10px;background:#334155;border-radius:2px;vertical-align:middle;margin-right:3px;"></span>No data</span>'+
     '</div>';
   return '<div class="card" id="flight-window-card">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">'+
@@ -2662,10 +2555,10 @@ function renderDash(){
   }
   var rPrecip=tilePrecip(curPrecip);
   var vDisp=visDisp(vis);
-  var tPrimary=tempMode==='f'?Math.round(rawTemp*9/5+32)+'°F':Math.round(rawTemp)+'°C';
-  var tSecondary=tempMode==='f'?Math.round(rawTemp)+'°C':Math.round(rawTemp*9/5+32)+'°F';
-  var fPrimary=tempMode==='f'?Math.round(c.apparent_temperature*9/5+32)+'°F':Math.round(c.apparent_temperature)+'°C';
-  var fSecondary=tempMode==='f'?Math.round(c.apparent_temperature)+'°C':Math.round(c.apparent_temperature*9/5+32)+'°F';
+  var tPrimary=unitMode==='mph'?Math.round(rawTemp*9/5+32)+'°F':Math.round(rawTemp)+'°C';
+  var tSecondary=unitMode==='mph'?Math.round(rawTemp)+'°C':Math.round(rawTemp*9/5+32)+'°F';
+  var fPrimary=unitMode==='mph'?Math.round(c.apparent_temperature*9/5+32)+'°F':Math.round(c.apparent_temperature)+'°C';
+  var fSecondary=unitMode==='mph'?Math.round(c.apparent_temperature)+'°C':Math.round(c.apparent_temperature*9/5+32)+'°F';
   var updTxt=lastUpdated?'Updated '+timeSince(lastUpdated):'Loading...';
   var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
   var lipoWarnInner=rawTemp<10?
@@ -2984,7 +2877,7 @@ function initWindMap(){
     var gustCol=hGust>=d.gustRed?'var(--red)':hGust>=d.gustAmber?'var(--amber)':'var(--muted)';
     fcRows+='<div class="wind-hr-row" data-w10="'+hWind+'" data-w80="'+h80v+'" data-w120="'+h120v+'" data-g="'+hGust+'" style="padding:10px 0;border-bottom:1px solid var(--border);">'+
       '<div style="display:flex;align-items:center;gap:10px;">'+
-        '<div class="whr-time">'+pad(t.getHours())+':00</div>'+
+        '<div style="width:46px;font-size:13px;font-weight:600;">'+pad(t.getHours())+':00</div>'+
         '<div style="flex:1;">'+
           '<div class="whr-spd" style="font-size:13px;font-weight:600;color:'+hcol+';">'+hw+' '+spdU()+'</div>'+
           '<div class="whr-gust" style="font-size:11px;color:'+gustCol+';">Gusts '+hg+' '+spdU()+' · 10m only</div>'+
@@ -3213,21 +3106,7 @@ function goTab(id,btn){
     if(!isPro()){
       var logEl=document.getElementById('log-body');
       if(logEl)logEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Flight Log is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Log every flight with date, location, drone, duration and conditions. Export to Excel or Google Sheets.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
-    } else {
-      // Always render immediately with whatever is in local storage
-      renderLog();
-      // Then sync from cloud if local is empty and we're signed in
-      if(loadFlights().length===0&&proUser&&proUser.uid){
-        if(_fbLoaded){
-          syncFlightsFromCloud(proUser.uid,function(){renderLog();});
-        } else {
-          // Firebase not yet loaded — wait for it then sync
-          loadFirebase(function(){
-            syncFlightsFromCloud(proUser.uid,function(){renderLog();});
-          });
-        }
-      }
-    }
+    } else { renderLog(); }
   }
   if(id==='restrict')renderRestrictionsTab();
 }
@@ -3619,9 +3498,7 @@ function handleForgotPassword(){
 
 function handleGoogleSignIn(){
   var btn=document.getElementById('pro-google-signin-btn');
-
-  function proceedWithSignIn(){
-    if(btn){btn.style.opacity='0.6';btn.disabled=true;}
+  if(btn){btn.style.opacity='0.6';btn.disabled=true;}
 
   // Close the overlay so the Google popup appears on top unobstructed
   var overlay=document.getElementById('pro-overlay');
@@ -3707,7 +3584,7 @@ function handleGoogleSignIn(){
     loadFirebase(function(){
       try{
         var provider = new firebase.auth.GoogleAuthProvider();
-        try{localStorage.setItem('dc_redirect_ts', Date.now().toString());}catch(e){}
+        try{sessionStorage.setItem('dc_redirect_pending','1');}catch(e){}
         firebase.auth().signInWithRedirect(provider);
       }catch(e){
         if(btn){btn.style.opacity='1';btn.disabled=false;}
@@ -3728,22 +3605,6 @@ function handleGoogleSignIn(){
         _doGSISignIn();
       });
     });
-  }
-  } // end proceedWithSignIn
-
-  // Detect incognito using Storage Quota API — most reliable cross-browser method
-  // Normal mode: quota is several GB. Chrome/Samsung incognito: ~120MB
-  if(navigator.storage&&navigator.storage.estimate){
-    navigator.storage.estimate().then(function(estimate){
-      if(estimate.quota&&estimate.quota<200*1024*1024){
-        showToast('⚠️ Google sign-in is blocked in private/incognito mode. Please open DroneChecker in a normal browser tab, or use Continue with Email instead.');
-        if(btn){btn.style.opacity='1';btn.disabled=false;}
-      } else {
-        proceedWithSignIn();
-      }
-    }).catch(function(){proceedWithSignIn();});
-  } else {
-    proceedWithSignIn();
   }
 }
 
@@ -3850,80 +3711,7 @@ function updateProUI(){
   updateDroneLimits();
 }
 function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return'<div class="pro-upsell" onclick="openProOverlay()" role="button" tabindex="0"><div style="flex:1;"><div class="pro-upsell-t">DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind &amp; more</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';}
-function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;"><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button><button class="pro-signout-btn" onclick="openBillingPortal()" style="font-size:10px;opacity:.7;">Manage subscription</button></div></div>';}
-
-// ---- SETTINGS ----
-function openSettings(){
-  var overlay=document.getElementById('settings-overlay');
-  if(overlay)overlay.classList.add('open');
-  var darkToggle=document.getElementById('settings-dark-toggle');
-  if(darkToggle)darkToggle.checked=!document.body.classList.contains('light-mode');
-  var wu=document.getElementById('settings-wind-unit');
-  if(wu)wu.value=unitMode;
-  var tu=document.getElementById('settings-temp-unit');
-  if(tu)tu.value=tempMode;
-  var vEl=document.getElementById('settings-version');
-  if(vEl)vEl.textContent='v'+APP_VERSION;
-  // Show custom drone row for Pro users only
-  var cdr=document.getElementById('settings-custom-drone-row');
-  if(cdr)cdr.style.display=isPro()?'flex':'none';
-}
-function closeSettings(){
-  var overlay=document.getElementById('settings-overlay');
-  if(overlay)overlay.classList.remove('open');
-}
-function closeSettingsOutside(e){
-  if(e.target===document.getElementById('settings-overlay'))closeSettings();
-}
-function toggleTheme(isDark){
-  if(isDark){document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');}
-  else{document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');}
-}
-function saveWindUnit(val){
-  // Map settings values to existing unitMode system
-  unitMode=val==='mph'?'mph':val==='ms'?'ms':val==='kts'?'kts':'kmh';
-  saveUnits();
-  updateUnitToggle();
-  if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))renderWindTab();}
-}
-function saveTempUnit(val){
-  tempMode=val;
-  saveUnits();
-  if(wxData){renderDash();renderFc();}
-}
-function resetDataFromSettings(){
-  if(confirm('Reset all app data? This will clear your settings, checklist progress and consent. Your flight log will not be deleted.')){
-    closeSettings();
-    if(typeof resetData==='function')resetData();
-    else{localStorage.clear();location.reload();}
-  }
-}
-// Apply saved theme on load (default: dark)
-(function(){if(localStorage.getItem('dc_theme')==='light')document.body.classList.add('light-mode');})();
-
-function openBillingPortal(){
-  if(!proUser||!proUser.uid){showToast('Please sign in first');return;}
-  var btn=event&&event.target;
-  if(btn){btn.textContent='Loading…';btn.disabled=true;}
-  fetch('https://us-central1-dronechecker.cloudfunctions.net/createPortalSession',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({uid:proUser.uid})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.url){
-      window.location.href=data.url;
-    } else {
-      showToast('Could not open billing portal. Please try again.');
-      if(btn){btn.textContent='Manage subscription';btn.disabled=false;}
-    }
-  })
-  .catch(function(){
-    showToast('Could not open billing portal. Check your connection.');
-    if(btn){btn.textContent='Manage subscription';btn.disabled=false;}
-  });
-}
+function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button></div>';}
 function getMaxFavs(){return isPro()?999:2;}
 function proGateExport(){if(!isPro()){showToast('Export is a Pro feature');openProOverlay();return false;}return true;}
 function getWindowHours(){return isPro()?72:6;}
@@ -4119,7 +3907,7 @@ function getHazardType(tags){
   if(tags.amenity==='police')return HAZARD_TYPES.find(function(h){return h.key==='police';});
   return null;
 }
-function renderRestrictionsTab(){var el=document.getElementById('tab-restrict');if(!el)return;if(!isPro()){el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Restrictions Map</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Schools, railways, National Trust land and more.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';return;}if(restrictInitDone){if(restrictMap){restrictMap.invalidateSize();if(uLat&&uLng)flyToUserLocation(uLat,uLng);}return;}restrictInitDone=true;var legendHtml=HAZARD_TYPES.map(function(h){var onch='toggleHazardLayer('+JSON.stringify(h.key)+',this.checked)';return'<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 0;"><input type="checkbox" checked onchange="'+onch+'" style="accent-color:'+h.color+';width:13px;height:13px;cursor:pointer;flex-shrink:0;"><span style="width:10px;height:10px;border-radius:2px;background:'+h.color+';flex-shrink:0;opacity:.8;display:inline-block;"></span><span style="font-size:10px;color:var(--text);">'+h.label+'</span></label>';}).join('');el.innerHTML='<div style="background:rgba(239,68,68,.06);border-bottom:1px solid rgba(239,68,68,.15);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div style="flex:1;font-size:11px;color:var(--muted);">Ground hazards only - not a substitute for official airspace checks.</div><button onclick="openNotamLink()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:#ef4444;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">NOTAMs &#8599;</button></div><div id="restrict-map-el" style="flex:1;min-height:0;"></div><div style="background:var(--bg2);border-top:1px solid var(--border);padding:8px 12px;flex-shrink:0;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Hazard layers</span><span id="restrict-zoom-warn" style="font-size:10px;color:var(--amber);display:none;">Zoom in to see hazards</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px;">'+legendHtml+'</div></div>';setTimeout(function(){initRestrictMap();showToast('Zoom in on the map to load hazard data');},100);}
+function renderRestrictionsTab(){var el=document.getElementById('tab-restrict');if(!el)return;if(!isPro()){el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Restrictions Map</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Schools, railways, National Trust land and more.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';return;}if(restrictInitDone){if(restrictMap)restrictMap.invalidateSize();return;}restrictInitDone=true;var legendHtml=HAZARD_TYPES.map(function(h){var onch='toggleHazardLayer('+JSON.stringify(h.key)+',this.checked)';return'<label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:3px 0;"><input type="checkbox" checked onchange="'+onch+'" style="accent-color:'+h.color+';width:13px;height:13px;cursor:pointer;flex-shrink:0;"><span style="width:10px;height:10px;border-radius:2px;background:'+h.color+';flex-shrink:0;opacity:.8;display:inline-block;"></span><span style="font-size:10px;color:var(--text);">'+h.label+'</span></label>';}).join('');el.innerHTML='<div style="background:rgba(239,68,68,.06);border-bottom:1px solid rgba(239,68,68,.15);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div style="flex:1;font-size:11px;color:var(--muted);">Ground hazards only - not a substitute for official airspace checks.</div><button onclick="openNotamLink()" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;color:#ef4444;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">NOTAMs &#8599;</button></div><div id="restrict-map-el" style="flex:1;min-height:0;"></div><div style="background:var(--bg2);border-top:1px solid var(--border);padding:8px 12px;flex-shrink:0;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Hazard layers</span><span id="restrict-zoom-warn" style="font-size:10px;color:var(--amber);display:none;">Zoom in to see hazards</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px;">'+legendHtml+'</div></div>';setTimeout(function(){initRestrictMap();showToast('Zoom in on the map to load hazard data');},100);}
 function initRestrictMap(){var mapEl=document.getElementById('restrict-map-el');if(!mapEl)return;if(restrictMap){restrictMap.invalidateSize();return;}var lat=uLat||51.5,lng=uLng||-0.1;restrictMap=L.map('restrict-map-el',{center:[lat,lng],zoom:13,zoomControl:true,attributionControl:true});L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19}).addTo(restrictMap);restrictHazardsLayer=L.layerGroup().addTo(restrictMap);if(uLat&&uLng){L.circleMarker([uLat,uLng],{radius:7,color:'#06b6d4',fillColor:'#06b6d4',fillOpacity:1,weight:2,interactive:false}).addTo(restrictMap);}restrictMap.on('moveend',fetchGroundHazards);restrictMap.on('zoomend',fetchGroundHazards);
   // ── Locate button overlay ──
   var locBtn=document.createElement('button');
@@ -4269,108 +4057,5 @@ function openNotamLink(){window.open('https://nats-uk.ead-it.com/cms-nats/opencm
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
-<!-- Settings Sheet -->
-<div class="settings-overlay" id="settings-overlay" onclick="closeSettingsOutside(event)">
-  <div class="settings-sheet">
-    <div class="settings-header">
-      <div class="settings-title">Settings</div>
-      <button class="settings-close" onclick="closeSettings()">×</button>
-    </div>
-    <div class="settings-body">
-
-      <div class="settings-section">Appearance</div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Dark mode</div>
-          <div class="settings-row-sub">Always starts in dark mode</div>
-        </div>
-        <label class="settings-toggle">
-          <input type="checkbox" id="settings-dark-toggle" onchange="toggleTheme(this.checked)" checked>
-          <span class="settings-toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="settings-section">Units</div>
-      <div class="settings-row">
-        <div class="settings-row-label">Wind speed</div>
-        <select class="settings-select" id="settings-wind-unit" onchange="saveWindUnit(this.value)">
-          <option value="kmh">km/h</option>
-          <option value="mph">mph</option>
-          <option value="ms">m/s</option>
-          <option value="kts">knots</option>
-        </select>
-      </div>
-      <div class="settings-row">
-        <div class="settings-row-label">Temperature</div>
-        <select class="settings-select" id="settings-temp-unit" onchange="saveTempUnit(this.value)">
-          <option value="c">°C first</option>
-          <option value="f">°F first</option>
-        </select>
-      </div>
-
-      <div class="settings-section">App</div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">App version</div>
-          <div class="settings-row-sub" id="settings-version"></div>
-        </div>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Privacy Policy</div>
-        </div>
-        <a href="/privacy.html" target="_blank" class="settings-btn">View</a>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Terms of Service</div>
-        </div>
-        <a href="/terms.html" target="_blank" class="settings-btn">View</a>
-      </div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">FAQ</div>
-        </div>
-        <a href="/faq.html" target="_blank" class="settings-btn">View</a>
-      </div>
-
-      <div class="settings-section">Drone</div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Wind thresholds</div>
-          <div class="settings-row-sub">Adjust caution/no-fly limits for your drone</div>
-        </div>
-        <button class="settings-btn" onclick="closeSettings();openThresholdSheet();">Edit</button>
-      </div>
-      <div class="settings-row" id="settings-custom-drone-row" style="display:none;">
-        <div>
-          <div class="settings-row-label">Custom drone profiles</div>
-          <div class="settings-row-sub">Add or edit your own drones</div>
-        </div>
-        <button class="settings-btn" onclick="closeSettings();openCustomDroneOverlay();">Manage</button>
-      </div>
-
-      <div class="settings-section">Support</div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Send feedback</div>
-          <div class="settings-row-sub">Report a bug or suggest a feature</div>
-        </div>
-        <a href="#" onclick="this.href=buildFeedbackMailto();return true;" id="feedback-link" class="settings-btn">Send</a>
-      </div>
-
-      <div class="settings-section">Data</div>
-      <div class="settings-row">
-        <div>
-          <div class="settings-row-label">Reset all data</div>
-          <div class="settings-row-sub">Clears settings, checklist and consent</div>
-        </div>
-        <button class="settings-btn danger" onclick="resetDataFromSettings()">Reset</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
 </body>
 </html>

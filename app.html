@@ -2537,13 +2537,16 @@ function renderFlightWindowCard(){
   // Detect transition point from green → amber within an open window
   var transitionHour=null;
   if(isNowOpen&&!winIsAmberOnly){
-    var foundTransition=false;
+    var seenGreen=false;
     for(var ti=0;ti<next24.length;ti++){
       var slot=next24[ti];
-      if(slot.time<now)continue;
-      if(slot.time>primaryWin.end)break;
-      if(!foundTransition&&slot.rating==='green'){foundTransition=true;}
-      if(foundTransition&&slot.rating==='amber'){transitionHour=slot.time;break;}
+      if(slot.time<primaryWin.start)continue;
+      if(slot.time>new Date(primaryWin.end.getTime()+3600000))break;
+      if(slot.rating==='green'){seenGreen=true;}
+      else if(seenGreen&&(slot.rating==='amber'||slot.rating==='red')){
+        transitionHour=slot.time;
+        break;
+      }
     }
   }
   var hourStrip=buildHourStrip(next24,now);

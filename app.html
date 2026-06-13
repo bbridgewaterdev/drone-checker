@@ -141,8 +141,9 @@
     .wx-info-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:4px;transition:color .15s;}
     .wx-info-btn:hover,.wx-info-btn.active{color:var(--accent);}
     .wx-info-panel{display:none;font-size:11px;color:var(--muted);line-height:1.7;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
-    .wx-val{font-size:15px;font-weight:600;}
+    .wx-val{font-size:15px;font-weight:600;color:var(--text);}
     .wx-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+    .whr-time{font-size:13px;font-weight:600;color:var(--text);width:46px;}
     .wx-hero{display:flex;align-items:flex-end;gap:14px;margin-bottom:16px;padding:4px 0;}
     .wx-icon{font-size:64px;line-height:1;display:inline-flex;align-items:center;}
     .wx-temp{font-size:44px;font-weight:800;line-height:1;letter-spacing:-1px;}
@@ -155,14 +156,14 @@
     .kp-bar{height:100%;border-radius:6px;}
     .kp-scale{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted);}
     .fc-item{background:var(--bg3);border-radius:var(--radius-sm);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px;cursor:pointer;transition:background .15s;}
-    .fc-item:hover{background:#3d4f63;}
-    .fc-item.fc-open{background:#253145;border-radius:var(--radius-sm) var(--radius-sm) 0 0;margin-bottom:0;}
+    .fc-item:hover{background:var(--bg3);}
+    .fc-item.fc-open{background:var(--bg3);border-radius:var(--radius-sm) var(--radius-sm) 0 0;margin-bottom:0;}
     .fc-item:hover .fc-chevron{color:var(--accent);}
     .fc-chevron{font-size:12px;color:var(--muted);flex-shrink:0;transition:transform .2s,color .15s;line-height:1;}
     .fc-item.fc-open .fc-chevron{transform:rotate(180deg);color:var(--accent);}
-    .fc-time{font-size:13px;font-weight:600;width:46px;flex-shrink:0;}
+    .fc-time{font-size:13px;font-weight:600;width:46px;flex-shrink:0;color:var(--text);}
     .fc-icon{font-size:20px;width:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .fc-temp{font-size:13px;font-weight:600;width:52px;}
+    .fc-temp{font-size:13px;font-weight:600;width:52px;color:var(--text);}
     .fc-desc{flex:1;font-size:12px;color:var(--muted);}
     .fc-wind{font-size:12px;color:var(--muted);width:54px;text-align:right;}
     .fc-dot{width:11px;height:11px;flex-shrink:0;display:inline-block;}
@@ -170,7 +171,7 @@
     .fc-dot.amber{background:var(--amber);border-radius:2px;transform:rotate(45deg);}
     .fc-dot.red{background:var(--red);border-radius:2px;}
     /* Hourly detail panel */
-    .fc-detail{display:none;background:linear-gradient(160deg,#111f35 0%,#0f172a 100%);border:1px solid #1e3050;border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:0 0 2px;margin-bottom:6px;overflow:hidden;}
+    .fc-detail{display:none;background:var(--bg3);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:0 0 2px;margin-bottom:6px;overflow:hidden;}
     .fc-detail.open{display:block;animation:fcSlideIn .2s cubic-bezier(.25,.46,.45,.94);}
     @keyframes fcSlideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
     /* Rating hero bar */
@@ -185,17 +186,17 @@
     .fcd-hero-lbl.red{color:var(--red);}
     .fcd-hero-desc{font-size:11px;color:var(--muted);line-height:1.45;margin-top:1px;}
     /* Divider */
-    .fcd-divider{height:1px;background:linear-gradient(90deg,transparent,#1e3050 20%,#1e3050 80%,transparent);margin:0 14px;}
+    .fcd-divider{height:1px;background:var(--border);margin:0 14px;}
     /* Tiles grid */
-    .fcd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#1e3050;margin-top:1px;}
-    .fcd-tile{background:#0f1e32;padding:12px 14px;}
+    .fcd-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);margin-top:1px;}
+    .fcd-tile{background:var(--bg2);padding:12px 14px;}
     .fcd-tile-wide{grid-column:span 2;}
     .fcd-lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
     .fcd-val{font-size:18px;font-weight:700;line-height:1;color:var(--text);}
     .fcd-val span{font-size:11px;font-weight:400;color:var(--muted);}
     .fcd-sub{font-size:10px;color:var(--muted);margin-top:3px;}
     /* Mini bar — sole colour signal */
-    .fcd-bar-bg{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-top:8px;overflow:hidden;}
+    .fcd-bar-bg{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
     .fcd-bar{height:100%;border-radius:2px;}
     .fcd-bar.green{background:var(--green);}
     .fcd-bar.amber{background:var(--amber);}
@@ -228,7 +229,7 @@
     .cl-reset{width:100%;background:var(--bg3);border:none;border-radius:var(--radius-sm);padding:12px;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;}
     .gh-slot{background:var(--bg3);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;border-left:5px solid transparent;}
     .gh-slot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-    .gh-slot-name{font-size:14px;font-weight:600;}
+    .gh-slot-name{font-size:14px;font-weight:600;color:var(--text);}
     .gh-slot-time{font-size:13px;font-weight:600;}
     .gh-slot-desc{font-size:12px;color:var(--muted);line-height:1.5;}
     .gh-badge{display:inline-block;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;margin-left:8px;vertical-align:middle;}
@@ -2977,7 +2978,7 @@ function initWindMap(){
     var gustCol=hGust>=d.gustRed?'var(--red)':hGust>=d.gustAmber?'var(--amber)':'var(--muted)';
     fcRows+='<div class="wind-hr-row" data-w10="'+hWind+'" data-w80="'+h80v+'" data-w120="'+h120v+'" data-g="'+hGust+'" style="padding:10px 0;border-bottom:1px solid var(--border);">'+
       '<div style="display:flex;align-items:center;gap:10px;">'+
-        '<div style="width:46px;font-size:13px;font-weight:600;">'+pad(t.getHours())+':00</div>'+
+        '<div class="whr-time">'+pad(t.getHours())+':00</div>'+
         '<div style="flex:1;">'+
           '<div class="whr-spd" style="font-size:13px;font-weight:600;color:'+hcol+';">'+hw+' '+spdU()+'</div>'+
           '<div class="whr-gust" style="font-size:11px;color:'+gustCol+';">Gusts '+hg+' '+spdU()+' · 10m only</div>'+
@@ -3206,7 +3207,14 @@ function goTab(id,btn){
     if(!isPro()){
       var logEl=document.getElementById('log-body');
       if(logEl)logEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Flight Log is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Log every flight with date, location, drone, duration and conditions. Export to Excel or Google Sheets.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
-    } else { renderLog(); }
+    } else {
+      // Sync from cloud if local is empty but we're signed in as Pro
+      if(loadFlights().length===0&&proUser&&proUser.uid&&_fbLoaded){
+        syncFlightsFromCloud(proUser.uid,function(){renderLog();});
+      } else {
+        renderLog();
+      }
+    }
   }
   if(id==='restrict')renderRestrictionsTab();
 }

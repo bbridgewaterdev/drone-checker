@@ -94,8 +94,8 @@
     .tab{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:8px;}
     .tab.on{display:block;}
     #tab-restrict.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;}
-    #tab-radar.on,#tab-gh.on,#tab-log.on{display:flex;flex-direction:column;}
-    #wind-display,#gh-body,#log-body{flex:1;display:flex;flex-direction:column;}
+    #tab-radar.on,#tab-gh.on{display:flex;flex-direction:column;}
+    #wind-display,#gh-body{flex:1;display:flex;flex-direction:column;}
     .nav{height:58px;background:var(--bg2);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
     .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--muted);font-size:9.5px;cursor:pointer;font-family:inherit;padding:0 1px;}
     .nb.on{color:var(--accent);}
@@ -3214,11 +3214,18 @@ function goTab(id,btn){
       var logEl=document.getElementById('log-body');
       if(logEl)logEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Flight Log is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Log every flight with date, location, drone, duration and conditions. Export to Excel or Google Sheets.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
     } else {
-      // Sync from cloud if local is empty but we're signed in as Pro
-      if(loadFlights().length===0&&proUser&&proUser.uid&&_fbLoaded){
-        syncFlightsFromCloud(proUser.uid,function(){renderLog();});
-      } else {
-        renderLog();
+      // Always render immediately with whatever is in local storage
+      renderLog();
+      // Then sync from cloud if local is empty and we're signed in
+      if(loadFlights().length===0&&proUser&&proUser.uid){
+        if(_fbLoaded){
+          syncFlightsFromCloud(proUser.uid,function(){renderLog();});
+        } else {
+          // Firebase not yet loaded — wait for it then sync
+          loadFirebase(function(){
+            syncFlightsFromCloud(proUser.uid,function(){renderLog();});
+          });
+        }
       }
     }
   }

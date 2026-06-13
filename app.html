@@ -602,15 +602,20 @@
             }
           });
         } else {
-          // No redirect result — check if we were expecting one (i.e. redirect was attempted)
+          // No redirect result — check if we were expecting one using localStorage timestamp
           var redirectPending=false;
-          try{redirectPending=sessionStorage.getItem('dc_redirect_pending')==='1';}catch(e){}
+          try{
+            var flagTs=parseInt(localStorage.getItem('dc_redirect_ts')||'0');
+            // Flag is valid if set within the last 3 minutes
+            if(flagTs&&(Date.now()-flagTs)<180000){
+              redirectPending=true;
+              localStorage.removeItem('dc_redirect_ts');
+            }
+          }catch(e){}
           if(redirectPending){
-            // Redirect was attempted but returned no user — likely incognito/privacy mode
-            try{sessionStorage.removeItem('dc_redirect_pending');}catch(e){}
             setTimeout(function(){
-              showToast('Sign-in failed. Please try again in a normal browser tab — incognito mode blocks Google sign-in.');
-            },1000);
+              showToast('\u26a0\ufe0f Google sign-in failed. If you\'re in private/incognito mode, please switch to a normal browser tab. Or use Continue with Email instead.');
+            },800);
           }
           // Check for existing persisted session
           firebase.auth().onAuthStateChanged(function(fbUser){
@@ -3623,7 +3628,7 @@ function handleGoogleSignIn(){
     loadFirebase(function(){
       try{
         var provider = new firebase.auth.GoogleAuthProvider();
-        try{sessionStorage.setItem('dc_redirect_pending','1');}catch(e){}
+        try{localStorage.setItem('dc_redirect_ts', Date.now().toString());}catch(e){}
         firebase.auth().signInWithRedirect(provider);
       }catch(e){
         if(btn){btn.style.opacity='1';btn.disabled=false;}

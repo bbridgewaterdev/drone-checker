@@ -42,8 +42,36 @@
       --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
       --accent:#06b6d4;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
       --radius:14px;--radius-sm:9px;
-      
     }
+    body.light-mode{
+      --bg:#f1f5f9;--bg2:#ffffff;--bg3:#e2e8f0;
+      --text:#0f172a;--muted:#64748b;--border:#cbd5e1;
+      --accent:#0284c7;--green:#16a34a;--amber:#d97706;--red:#dc2626;
+    }
+    /* Settings sheet */
+    .settings-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:8000;display:none;align-items:flex-end;justify-content:center;}
+    .settings-overlay.open{display:flex;}
+    .settings-sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;border-top:1px solid var(--border);}
+    .settings-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    .settings-title{font-size:16px;font-weight:700;color:var(--text);}
+    .settings-close{background:var(--bg3);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;font-family:inherit;}
+    .settings-body{overflow-y:auto;padding:12px 0 24px;flex:1;}
+    .settings-section{padding:8px 20px 4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+    .settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid var(--border);}
+    .settings-row:last-child{border-bottom:none;}
+    .settings-row-label{font-size:14px;color:var(--text);font-weight:500;}
+    .settings-row-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+    .settings-toggle{position:relative;width:44px;height:26px;flex-shrink:0;}
+    .settings-toggle input{opacity:0;width:0;height:0;}
+    .settings-toggle-slider{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg3);border-radius:13px;cursor:pointer;transition:.2s;}
+    .settings-toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+    .settings-toggle input:checked+.settings-toggle-slider{background:var(--accent);}
+    .settings-toggle input:checked+.settings-toggle-slider:before{transform:translateX(18px);}
+    .settings-select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:13px;font-weight:600;outline:none;font-family:inherit;cursor:pointer;}
+    .settings-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+    .settings-btn.danger{color:var(--red);border-color:rgba(239,68,68,.3);}
+    .settings-cog{background:none;border:none;cursor:pointer;padding:4px;color:var(--muted);display:flex;align-items:center;flex-shrink:0;}
+    .settings-cog:hover{color:var(--text);}
     #app{height:100svh;display:flex;flex-direction:column;background:var(--bg);}
     #splash{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999;transition:opacity .3s;}
     #splash.hidden{opacity:0;pointer-events:none;}
@@ -900,6 +928,9 @@
         <svg width="11" height="11" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><rect width="100" height="100" rx="20" fill="none" stroke="#f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>
         <span id="pro-pill-label">Go Pro</span>
       </div>
+      <button class="settings-cog" onclick="openSettings()" aria-label="Settings" style="margin-left:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
     </div>
     <!-- Row 2: updated · refresh (right-aligned) -->
     <div class="h-row2">
@@ -3795,6 +3826,48 @@ function updateProUI(){
 function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return'<div class="pro-upsell" onclick="openProOverlay()" role="button" tabindex="0"><div style="flex:1;"><div class="pro-upsell-t">DroneChecker Pro</div><div class="pro-upsell-s">Saved spots, altitude wind &amp; more</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>';}
 function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;"><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button><button class="pro-signout-btn" onclick="openBillingPortal()" style="font-size:10px;opacity:.7;">Manage subscription</button></div></div>';}
 
+// ---- SETTINGS ----
+function openSettings(){
+  var overlay=document.getElementById('settings-overlay');
+  if(overlay)overlay.classList.add('open');
+  var darkToggle=document.getElementById('settings-dark-toggle');
+  if(darkToggle)darkToggle.checked=!document.body.classList.contains('light-mode');
+  var wu=document.getElementById('settings-wind-unit');
+  if(wu)wu.value=localStorage.getItem('dc_wind_unit')||'kmh';
+  var tu=document.getElementById('settings-temp-unit');
+  if(tu)tu.value=localStorage.getItem('dc_temp_unit')||'c';
+  var vEl=document.getElementById('settings-version');
+  if(vEl)vEl.textContent='v'+APP_VERSION;
+}
+function closeSettings(){
+  var overlay=document.getElementById('settings-overlay');
+  if(overlay)overlay.classList.remove('open');
+}
+function closeSettingsOutside(e){
+  if(e.target===document.getElementById('settings-overlay'))closeSettings();
+}
+function toggleTheme(isDark){
+  if(isDark){document.body.classList.remove('light-mode');localStorage.setItem('dc_theme','dark');}
+  else{document.body.classList.add('light-mode');localStorage.setItem('dc_theme','light');}
+}
+function saveWindUnit(val){
+  localStorage.setItem('dc_wind_unit',val);
+  if(wxData){renderDash();renderFc();}
+}
+function saveTempUnit(val){
+  localStorage.setItem('dc_temp_unit',val);
+  if(wxData){renderDash();renderFc();}
+}
+function resetDataFromSettings(){
+  if(confirm('Reset all app data? This will clear your settings, checklist progress and consent. Your flight log will not be deleted.')){
+    closeSettings();
+    if(typeof resetData==='function')resetData();
+    else{localStorage.clear();location.reload();}
+  }
+}
+// Apply saved theme on load (default: dark)
+(function(){if(localStorage.getItem('dc_theme')==='light')document.body.classList.add('light-mode');})();
+
 function openBillingPortal(){
   if(!proUser||!proUser.uid){showToast('Please sign in first');return;}
   var btn=event&&event.target;
@@ -4163,5 +4236,83 @@ function openNotamLink(){window.open('https://nats-uk.ead-it.com/cms-nats/opencm
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
+<!-- Settings Sheet -->
+<div class="settings-overlay" id="settings-overlay" onclick="closeSettingsOutside(event)">
+  <div class="settings-sheet">
+    <div class="settings-header">
+      <div class="settings-title">Settings</div>
+      <button class="settings-close" onclick="closeSettings()">×</button>
+    </div>
+    <div class="settings-body">
+
+      <div class="settings-section">Appearance</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Dark mode</div>
+          <div class="settings-row-sub">Always starts in dark mode</div>
+        </div>
+        <label class="settings-toggle">
+          <input type="checkbox" id="settings-dark-toggle" onchange="toggleTheme(this.checked)" checked>
+          <span class="settings-toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="settings-section">Units</div>
+      <div class="settings-row">
+        <div class="settings-row-label">Wind speed</div>
+        <select class="settings-select" id="settings-wind-unit" onchange="saveWindUnit(this.value)">
+          <option value="kmh">km/h</option>
+          <option value="mph">mph</option>
+          <option value="ms">m/s</option>
+          <option value="kts">knots</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Temperature</div>
+        <select class="settings-select" id="settings-temp-unit" onchange="saveTempUnit(this.value)">
+          <option value="c">°C first</option>
+          <option value="f">°F first</option>
+        </select>
+      </div>
+
+      <div class="settings-section">App</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">App version</div>
+          <div class="settings-row-sub" id="settings-version"></div>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Privacy Policy</div>
+        </div>
+        <a href="/privacy.html" target="_blank" class="settings-btn">View</a>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Terms of Service</div>
+        </div>
+        <a href="/terms.html" target="_blank" class="settings-btn">View</a>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">FAQ</div>
+        </div>
+        <a href="/faq.html" target="_blank" class="settings-btn">View</a>
+      </div>
+
+      <div class="settings-section">Data</div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">Reset all data</div>
+          <div class="settings-row-sub">Clears settings, checklist and consent</div>
+        </div>
+        <button class="settings-btn danger" onclick="resetDataFromSettings()">Reset</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

@@ -2686,7 +2686,7 @@ function renderDash(){
       '</div>';
     }
   }
-  var warningsRow=(lipoWarnInner||nightWarnInner)?'<div style="display:flex;gap:8px;margin-top:8px;">'+lipoWarnInner+nightWarnInner+'</div>':'';
+  var warningsRow=(lipoWarnInner||nightWarnInner)?'<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">'+lipoWarnInner+nightWarnInner+'</div>':'';
   document.getElementById('dash').innerHTML=
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share</button></div>'+
     renderBestTimeCard()+renderFlightWindowCard()+

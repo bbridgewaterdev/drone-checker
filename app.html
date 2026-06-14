@@ -2651,7 +2651,7 @@ function renderFlightWindowCard(){
       ?(winIsAmberOnly
         ?(longWindow?'Caution conditions until '+endLabel:'Not ideal — fly carefully')
         :(transitionHour
-          ?durationStr+' remaining · Caution from '+pad(transitionHour.getHours())+':00'
+          ?(longWindow?'Good until '+endLabel+' · Caution from '+pad(transitionHour.getHours())+':00':durationStr+' remaining · Caution from '+pad(transitionHour.getHours())+':00')
           :(longWindow?'Good until '+endLabel:durationStr+' remaining')))
       :(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
     mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+

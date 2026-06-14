@@ -1689,7 +1689,7 @@ function renderLog(){
       '<button onclick="manualSyncFlights()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;font-family:inherit;padding:0;font-weight:600;">Sync now</button>'+
       '</div>'
     : '';
-  var stats=syncBar+'<div class="log-stats">'+
+  var stats='<div class="log-stats">'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+totalFlights+'</div><div class="log-stat-lbl">Flights</div></div>'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+(totalFlights?timeStr:'—')+'</div><div class="log-stat-lbl">Total time</div></div>'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+thisMonth+'</div><div class="log-stat-lbl">This month</div></div>'+
@@ -1739,7 +1739,7 @@ function renderLog(){
           '<button class="log-export-btn" onclick="openProOverlay()" style="opacity:.55;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Restore <span style="font-size:9px;color:#f59e0b;margin-left:2px;">PRO</span></button>'
       )+
     '</div>';
-    entries+='<div class="log-actions">'+exportBtns+'<button class="log-clear" onclick="clearFlights()">Clear all</button></div>'+backupBtns;
+    entries+='<div class="log-actions">'+exportBtns+'<button class="log-clear" onclick="clearFlights()">Clear all</button></div>'+backupBtns+syncBar;
     // Sort by timestamp descending (newest first)
     var sorted=flights.slice().sort(function(a,b){
       var ta=a.ts?new Date(a.ts):new Date(a.date);

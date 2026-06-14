@@ -1607,6 +1607,9 @@ function saveFlights(f){
 
 function syncFlightsFromCloud(uid,callback){
   if(!_fbLoaded||!uid){if(callback)callback();return;}
+  // Show syncing indicator if log tab is visible
+  var syncEl=document.getElementById('log-sync-status');
+  if(syncEl)syncEl.textContent='☁️ Syncing...';
   try{
     var db=firebase.firestore();
     db.collection('users').doc(uid).get().then(function(snap){
@@ -1621,21 +1624,45 @@ function syncFlightsFromCloud(uid,callback){
         });
         merged.sort(function(a,b){return(b.date||'').localeCompare(a.date||'');});
         saveFlights(merged);
-        showToast('☁️ Flight log synced from cloud');
+        _lastCloudSync=new Date();
+        showToast('☁️ Flight log synced');
         renderLog();
       } else if(loadFlights().length){
+        // Nothing in cloud — push local flights up
         saveFlights(loadFlights());
+        _lastCloudSync=new Date();
+      } else {
+        _lastCloudSync=new Date();
       }
+      var syncEl2=document.getElementById('log-sync-status');
+      if(syncEl2)syncEl2.textContent='☁️ Synced just now';
       if(callback)callback();
     }).catch(function(e){
       console.error('[DC] syncFlightsFromCloud error:',e);
+      var syncEl2=document.getElementById('log-sync-status');
+      if(syncEl2)syncEl2.textContent='⚠️ Sync failed';
       if(callback)callback();
     });
   }catch(e){
     console.error('[DC] syncFlightsFromCloud error:',e);
+    var syncEl2=document.getElementById('log-sync-status');
+    if(syncEl2)syncEl2.textContent='⚠️ Sync failed';
     if(callback)callback();
   }
 }
+function manualSyncFlights(){
+  if(!isPro()||!proUser||!proUser.uid){showToast('Sign in to sync your flights');return;}
+  var syncEl=document.getElementById('log-sync-status');
+  if(syncEl)syncEl.textContent='☁️ Syncing...';
+  if(_fbLoaded){
+    syncFlightsFromCloud(proUser.uid,function(){renderLog();});
+  } else {
+    loadFirebase(function(){
+      syncFlightsFromCloud(proUser.uid,function(){renderLog();});
+    });
+  }
+}
+
 function renderLog(){
   var flights=loadFlights();
   var loc=document.getElementById('loc-name')?document.getElementById('loc-name').textContent:'';
@@ -1655,7 +1682,14 @@ function renderLog(){
   var totalHrs=Math.floor(totalMins/60),remMins=totalMins%60;
   var timeStr=totalHrs>0?totalHrs+'h '+remMins+'m':totalMins+'m';
   var thisMonth=flights.filter(function(f){var d=new Date(f.date);var n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}).length;
-  var stats='<div class="log-stats">'+
+  var syncStatus=_lastCloudSync?'☁️ Synced '+timeSince(_lastCloudSync):'☁️ Not yet synced';
+  var syncBar=isPro()
+    ? '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:rgba(245,158,11,.05);border-bottom:1px solid rgba(245,158,11,.1);">'+
+      '<span id="log-sync-status" style="font-size:11px;color:var(--muted);">'+syncStatus+'</span>'+
+      '<button onclick="manualSyncFlights()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;font-family:inherit;padding:0;font-weight:600;">Sync now</button>'+
+      '</div>'
+    : '';
+  var stats=syncBar+'<div class="log-stats">'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+totalFlights+'</div><div class="log-stat-lbl">Flights</div></div>'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+(totalFlights?timeStr:'—')+'</div><div class="log-stat-lbl">Total time</div></div>'+
     '<div class="log-stat-tile"><div class="log-stat-val">'+thisMonth+'</div><div class="log-stat-lbl">This month</div></div>'+
@@ -3222,14 +3256,12 @@ function goTab(id,btn){
       var logEl=document.getElementById('log-body');
       if(logEl)logEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Flight Log is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Log every flight with date, location, drone, duration and conditions. Export to Excel or Google Sheets.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
     } else {
-      // Always render immediately with whatever is in local storage
+      // Render immediately with local data, then sync from cloud in background
       renderLog();
-      // Then sync from cloud if local is empty and we're signed in
-      if(loadFlights().length===0&&proUser&&proUser.uid){
+      if(proUser&&proUser.uid){
         if(_fbLoaded){
           syncFlightsFromCloud(proUser.uid,function(){renderLog();});
         } else {
-          // Firebase not yet loaded — wait for it then sync
           loadFirebase(function(){
             syncFlightsFromCloud(proUser.uid,function(){renderLog();});
           });
@@ -3483,6 +3515,7 @@ var GOOGLE_CLIENT_ID='62546050100-qkdhvc5g77a1kn423u44jrisgmakgigg.apps.googleus
 var GSI_DEV_MODE=false; // Set to true to use mock sign-in without a real Google account
 
 var proUser=null;
+var _lastCloudSync=null; // timestamp of last successful cloud sync
 
 function loadProUser(){
   // First restore from localStorage for instant UI (no flicker)

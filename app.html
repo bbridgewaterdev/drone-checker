@@ -2645,13 +2645,14 @@ function renderFlightWindowCard(){
     var endLabel=wEndSameDay?endStr:wEndDay+' '+endStr;
     var col=winIsAmberOnly?'var(--amber)':(isNowOpen?'var(--green)':'var(--accent)');
     var label=isNowOpen?(winIsAmberOnly?'Open now · Caution':'Open now'):(winIsAmberOnly?'Flyable with caution'+(isTomorrow?' · Tomorrow':''):'Next window'+(isTomorrow?' · Tomorrow':''));
-    var timeStr=isNowOpen?'Until '+endStr:startStr+' – '+endStr;
+    var endLabelFull=wEndSameDay?endStr:wEndDay+' '+endStr;
+    var timeStr=isNowOpen?'Until '+endLabelFull:startStr+' – '+endStr;
     var longWindow=durationH>=6;
     var subStr=isNowOpen
       ?(winIsAmberOnly
         ?(longWindow?'Caution conditions until '+endLabel:'Not ideal — fly carefully')
         :(transitionHour
-          ?(longWindow?'Good until '+endLabel+' · Caution from '+pad(transitionHour.getHours())+':00':durationStr+' remaining · Caution from '+pad(transitionHour.getHours())+':00')
+          ?(function(){var tSameDay=transitionHour.toDateString()===now.toDateString();var tDay=transitionHour.toLocaleDateString('en-GB',{weekday:'short'});var tLabel=(tSameDay?'':tDay+' ')+pad(transitionHour.getHours())+':00';return longWindow?'Good until '+endLabel+' · Caution from '+tLabel:durationStr+' remaining · Caution from '+tLabel;})()
           :(longWindow?'Good until '+endLabel:durationStr+' remaining')))
       :(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
     mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+

@@ -2646,6 +2646,13 @@ function renderFlightWindowCard(){
     hourStrip+legend+'</div>';
 }
 function renderDash(){
+  if(!wxData||!wxData.current){
+    var dashEl=document.getElementById('dash');
+    if(dashEl&&dashEl.querySelector('.skel'))dashEl.innerHTML=
+      '<div class="err">Could not load weather data. Check your connection and try again.<br><br>'+
+      '<button onclick="fetchAll()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
+    return;
+  }
   var c=wxData.current,wind=c.wind_speed_10m||0,gust=c.wind_gusts_10m||0,vis=c.visibility||10000,wmo=c.weather_code||0;
   var rawTemp=c.temperature_2m||15,rawWind=c.wind_speed_10m||0,rawGust=c.wind_gusts_10m||0;
   var wind80=c.wind_speed_80m||0,wind120=c.wind_speed_120m||0;

@@ -94,8 +94,8 @@
     .tab{position:absolute;top:0;right:0;bottom:0;left:0;overflow-y:auto;overflow-x:hidden;display:none;padding-bottom:8px;}
     .tab.on{display:block;}
     #tab-restrict.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;}
-    #tab-radar.on,#tab-gh.on,#tab-log.on{display:flex;flex-direction:column;}
-    #wind-display,#gh-body,#log-body{flex:1;display:flex;flex-direction:column;}
+    #tab-radar.on,#tab-gh.on{display:flex;flex-direction:column;}
+    #wind-display,#gh-body{flex:1;display:flex;flex-direction:column;}
     .nav{height:58px;background:var(--bg2);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);}
     .nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;color:var(--muted);font-size:9.5px;cursor:pointer;font-family:inherit;padding:0 1px;}
     .nb.on{color:var(--accent);}
@@ -325,6 +325,7 @@
     .week-row .fc-dot.g,.week-dot.g{background:var(--green);border-radius:50%;}
     .week-row .fc-dot.a,.week-dot.a{background:var(--amber);border-radius:2px;transform:rotate(45deg);}
     .week-row .fc-dot.r,.week-dot.r{background:var(--red);border-radius:2px;}
+    .log-empty{display:none;}
     .toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:var(--bg3);color:var(--text);padding:10px 18px;border-radius:20px;font-size:13px;z-index:9999;border:1px solid var(--border);white-space:nowrap;pointer-events:none;transition:opacity .3s;}
     .myloc-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 8px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--muted);white-space:nowrap;flex-shrink:0;}
     @media(min-width:700px){
@@ -1736,6 +1737,7 @@ function renderLog(){
         '</div>';
     }
   }
+  document.getElementById('log-body').innerHTML=stats+form+entries+'<div style="height:14px;"></div>'+proAccountCard();
 }
 function addFlight(){
   var loc=document.getElementById('li-loc').value.trim();

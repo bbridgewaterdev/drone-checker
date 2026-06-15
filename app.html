@@ -2497,8 +2497,9 @@ function getHourlyRatings(numHours){
     var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;
     var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;
     var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
+    var precip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
     var kpT=getKpForTime(t);
-    var r=flyRating(w,g,v,wmo,kpT,tp,w80,w120);
+    var r=flyRating(w,g,v,precipAdjustWmo(wmo,precip),kpT,tp,w80,w120);
     results.push({hour:t.getHours(),rating:r.lvl,time:t,kp:kpT});
   }
   return results;
@@ -2919,7 +2920,7 @@ function renderFc(){
     var fcTempPrimary=tmp(rawTempHr)+tmpU();
     var fcTempSecondary=unitMode==='mph'?Math.round(rawTempHr)+'°C':Math.round(rawTempHr*9/5+32)+'°F';
     var precipBadge=precip>0?'<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':'var(--muted)')+';">💧'+precip+'% rain</span>':'';
-    var rating=flyRating(wind,gust,vis,precipAdjustWmo(wmo,precip),getKpForTime(t),temp,w80,w120);
+    var rating=flyRating(wind,gust,vis,wmo,getKpForTime(t),temp,w80,w120);
     var kpVal=getKpForTime(t);
     var ariaLabel=pad(t.getHours())+':00. '+info.desc+'.'+(precip>0?' '+precip+' percent chance of rain.':'')+' '+spd(wind)+' '+spdU()+' wind. '+(rating.lvl==='green'?'Good to fly.':'Caution: '+rating.desc)+'. Tap for full conditions.';
     var dayLabel=t.toDateString()!==now.toDateString()?'<span style="font-size:10px;color:var(--accent);font-weight:600;margin-left:4px;">'+t.toLocaleDateString('en-GB',{weekday:'short'})+'</span>':'';

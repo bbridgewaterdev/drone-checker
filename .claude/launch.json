@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "drone-checker",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "8787", "/Users/Ben/Documents/GitHub/drone-checker"],
+      "port": 8787
+    }
+  ]
+}

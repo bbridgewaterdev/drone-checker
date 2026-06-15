@@ -1407,6 +1407,7 @@ function saveUnits(){
 function toggleUnits(){unitMode=unitMode==='kmh'?'mph':unitMode==='mph'?'ms':'kmh';saveUnits();updateUnitToggle();updateDroneLimits();if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))initWindMap();}}
 function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;var current={kmh:'km/h',mph:'mph',ms:'m/s'};var next={kmh:'mph',mph:'m/s',ms:'km/h'};btn.textContent=current[unitMode]+' → '+next[unitMode];btn.setAttribute('aria-label','Currently '+current[unitMode]+'. Tap to switch to '+next[unitMode]);btn.title='Switch to '+next[unitMode];}
 function spd(v){if(unitMode==='mph')return Math.round(v*0.621);if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));if(unitMode==='kts')return parseFloat((v*0.539957).toFixed(1));return Math.round(v);}
+function spdExact(v){if(unitMode==='mph')return parseFloat((v*0.621).toFixed(1));if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));if(unitMode==='kts')return parseFloat((v*0.539957).toFixed(1));return parseFloat(v.toFixed(1));}
 function spdU(){return unitMode==='mph'?'mph':unitMode==='ms'?'m/s':unitMode==='kts'?'kt':'km/h';}
 function tmp(v){return tempMode==='f'?Math.round(v*9/5+32):Math.round(v);}
 function tmpU(){return tempMode==='f'?'°F':'°C';}
@@ -2830,14 +2831,14 @@ function buildFcHourDetail(wind,gust,vis,wmo,rawTemp,w80,w120,precip,kpVal){
       // Wind
       '<div class="fcd-tile">'+
         '<div class="fcd-lbl">Wind (10m)</div>'+
-        '<div class="fcd-val">'+spd(wind)+'<span> '+spdU()+'</span></div>'+
+        '<div class="fcd-val">'+spdExact(wind)+'<span> '+spdU()+'</span></div>'+
         '<div class="fcd-sub">'+(rWind==='green'?'Within limits':rWind==='amber'?'Approaching limit':'Exceeds limit')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rWind+'" style="width:'+barW(wind,drone.windRed)+';"></div></div>'+
       '</div>'+
       // Gusts
       '<div class="fcd-tile">'+
         '<div class="fcd-lbl">Gusts</div>'+
-        '<div class="fcd-val">'+spd(gust)+'<span> '+spdU()+'</span></div>'+
+        '<div class="fcd-val">'+spdExact(gust)+'<span> '+spdU()+'</span></div>'+
         '<div class="fcd-sub">'+(rGust==='green'?'Stable':rGust==='amber'?'Moderate':'Strong')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rGust+'" style="width:'+barW(gust,drone.gustRed)+';"></div></div>'+
       '</div>'+

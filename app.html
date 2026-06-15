@@ -1113,7 +1113,7 @@ var APP_VERSION='1.6.3';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',tempMode='c',lastUpdated=null,windMap=null,windAnimFrame=null;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',tempMode='c',lastUpdated=null,windMap=null,windAnimFrame=null,ghRefreshTimer=null;
 var UK_FRZS=[
   {n:'Heathrow',i:'EGLL',lat:51.4775,lng:-0.4614,r:5000},
   {n:'Gatwick',i:'EGKK',lat:51.1537,lng:-0.1821,r:5000},
@@ -3384,8 +3384,8 @@ function photoScore(wind,gust,vis,cloud,wmo,lat,lng){
   var grade,label,col;
   if(total>=85){grade='A+';label='Exceptional light';col='#22c55e';}
   else if(total>=72){grade='A';label='Excellent light';col='#22c55e';}
-  else if(total>=60){grade='B';label='Good conditions';col='#84cc16';}
-  else if(total>=46){grade='C';label='Decent conditions';col='#f59e0b';}
+  else if(total>=60){grade='B';label='Good light';col='#84cc16';}
+  else if(total>=46){grade='C';label='Fair light';col='#f59e0b';}
   else if(total>=30){grade='D';label='Poor light';col='#f97316';}
   else{grade='F';label='Not ideal';col='#ef4444';}
   var sunLabel=el<-6?'Dark':el<0?'Blue hour':el<6?'Golden hour':el<20?'Low sun':el<45?'Mid sun':'High sun';
@@ -3501,6 +3501,7 @@ function renderGolden(){
   }
 }
 function goTab(id,btn){
+  if(ghRefreshTimer){clearInterval(ghRefreshTimer);ghRefreshTimer=null;}
   if(id!=='radar' && windAnimFrame){cancelAnimationFrame(windAnimFrame);windAnimFrame=null;}
   var tabs=document.querySelectorAll('.tab');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('on');
   var nbs=document.querySelectorAll('.nb');for(var i=0;i<nbs.length;i++)nbs[i].classList.remove('on');
@@ -3517,7 +3518,7 @@ function goTab(id,btn){
     if(!isPro()){
       var ghEl=document.getElementById('gh-body');
       if(ghEl)ghEl.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:30px 20px;text-align:center;gap:14px;"><div style="width:60px;height:60px;border-radius:18px;background:rgba(245,158,11,.12);border:1.5px solid rgba(245,158,11,.3);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></div><div style="font-size:17px;font-weight:700;color:var(--text);">Golden Hour is Pro</div><div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:280px;">Get precise golden hour, blue hour, sunrise and sunset times with live countdowns for your exact location.</div><button onclick="openProOverlay()" style="background:#f59e0b;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Unlock with Pro</button></div>';
-    } else { renderGolden(); }
+    } else { renderGolden(); ghRefreshTimer=setInterval(renderGolden,600000); }
   }
   if(id==='cl')renderChecklist();
   if(id==='rules')renderRules();

@@ -165,7 +165,11 @@
     .fc-icon{font-size:20px;width:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .fc-temp{font-size:13px;font-weight:600;width:52px;color:var(--text);}
     .fc-desc{flex:1;font-size:12px;color:var(--muted);}
-    .fc-wind{font-size:12px;color:var(--muted);width:54px;text-align:right;}
+    .fc-wind{font-size:12px;color:var(--muted);width:58px;text-align:right;flex-shrink:0;}
+    .fc-wind-stack{display:flex;flex-direction:column;gap:2px;width:58px;flex-shrink:0;align-items:flex-end;}
+    .fc-wind-row{display:flex;align-items:center;gap:3px;justify-content:flex-end;}
+    .fc-wind-alt{font-size:9px;color:var(--muted);opacity:.7;flex-shrink:0;width:22px;text-align:right;}
+    .fc-wind-val{font-size:11px;font-weight:600;}
     .fc-dot{width:11px;height:11px;flex-shrink:0;display:inline-block;}
     .fc-dot.green{background:var(--green);border-radius:50%;}
     .fc-dot.amber{background:var(--amber);border-radius:2px;transform:rotate(45deg);}
@@ -2372,6 +2376,7 @@ function tileHum(v){return v>90?'red':v>75?'amber':'green';}
 function tilePres(v){return v<980?'red':v<1000?'amber':'green';}
 function tileTemp(v){return v<-10||v>40?'red':v<0||v>35?'amber':'green';}
 function tileCloudBase(m){return m<120?'red':m<150?'amber':'green';}
+function tileDensityAlt(m){return m>2000?'red':m>1000?'amber':'green';}
 function tileCol(r){return r==='green'?'var(--green)':r==='amber'?'var(--amber)':'var(--red)';}
 // ---- Pro: configurable fly rating thresholds ----
 var _allProThresholds={};
@@ -2721,6 +2726,12 @@ function renderDash(){
   var cloudBaseM=Math.max(0,Math.round((rawTemp-dewPoint)*125));
   var cloudBaseFt=Math.round(cloudBaseM*3.281);
   var rCloudBase=tileCloudBase(cloudBaseM);
+  // Density altitude: ICAO standard atmosphere formula
+  var _paFt=(1-Math.pow(pres/1013.25,0.190284))*145366.45;
+  var _isaTemp=15-(_paFt/1000)*1.98;
+  var densityAltFt=Math.round(_paFt+118.8*(rawTemp-_isaTemp));
+  var densityAltM=Math.round(densityAltFt*0.3048);
+  var rDensityAlt=tileDensityAlt(densityAltM);
   // Get current hour precipitation probability from hourly data
   var curPrecip=0;
   if(wxData.hourly&&wxData.hourly.precipitation_probability){
@@ -2777,6 +2788,7 @@ function renderDash(){
     '<div class="wx-tile '+kc+'"><div class="wx-lbl"><span>KP Index</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About KP Index"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+kc+'">'+kp.toFixed(1)+'</div><div class="wx-sub">'+klab+'</div><div class="wx-info-panel">The planetary K-index measures geomagnetic storm activity. Above KP 4, GPS accuracy can be reduced and compass drift may occur. Above KP 6, flying is not recommended. Data updates every few minutes from NOAA.</div></div>';})()+
     
     (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.75?'red':ratio>=0.35?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.75?'Turbulent':ratio>=0.35?'Choppy':'Smooth';var desc=ratio>=0.75?'Large gust spikes — difficult to control':ratio>=0.35?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile wx-tile-smooth '+r+'"><div class="wx-lbl"><span>Air Smoothness</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Air Smoothness"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div><div class="wx-info-panel">The ratio of gust speed to average wind. Turbulent, gusty air means unpredictable handling and jerky footage even within safe wind speed limits. Smooth, steady air is always preferable to gusty air of the same average speed.</div></div>';})()+
+    '<div class="wx-tile '+rDensityAlt+'"><div class="wx-lbl"><span>Density Alt</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Density Altitude"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rDensityAlt+'">'+densityAltM+'<span style="font-size:11px;font-weight:400;">m</span> <span style="font-size:11px;font-weight:400;color:var(--muted);">/ '+densityAltFt+'ft</span></div><div class="wx-sub">'+(rDensityAlt==='red'?'✕ Very thin air — reduced lift':rDensityAlt==='amber'?'⚠ Thinner air — monitor performance':'Normal air density')+'</div><div class="wx-info-panel">How hard your drone\'s motors must work to generate lift, combining the effects of altitude and temperature. Hot or low-pressure air is less dense — motors spin faster and batteries drain quicker for the same lift. Above 1000m density altitude expect noticeable performance reduction; above 2000m you are approaching the ceiling of most consumer drones.</div></div>'+
     '<div class="wx-tile wx-tile-wide"><div class="wx-lbl"><span>Wind at Altitude</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Wind at Altitude"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">'+
     (function(){var d=getDrone(),rows='',levels=[{h:'120m',v:wind120},{h:'80m',v:wind80},{h:'10m',v:rawWind}];levels.forEach(function(l){var r=l.v>=d.windRed?'red':l.v>=d.windAmber?'amber':'green';var col=r==='red'?'#ef4444':r==='amber'?'#f59e0b':'#22c55e';var pct=Math.min(Math.round((l.v/d.windRed)*100),100);rows+='<div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:var(--muted);width:28px;flex-shrink:0;">'+l.h+'</div><div style="flex:1;background:var(--bg);border-radius:3px;height:4px;overflow:hidden;"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:3px;"></div></div><div style="font-size:12px;font-weight:600;color:'+col+';flex-shrink:0;min-width:44px;text-align:right;">'+spd(l.v)+' '+spdU()+'</div></div>';});return rows;})()+'</div><div class="wx-info-panel">Wind speed typically increases with height as surface friction reduces. Ground conditions can feel calm while your drone faces much stronger winds at 80–120m. Always check altitude readings before climbing, especially near trees or obstacles.</div></div>'+
     '</div>'+warningsRow+'</div>'+
@@ -2943,7 +2955,24 @@ function renderFc(){
         '<div class="fc-icon">'+info.emoji+'</div>'+
         '<div class="fc-temp">'+fcTempPrimary+'<br><span style="font-size:11px;color:var(--muted);">'+fcTempSecondary+'</span></div>'+
         '<div class="fc-desc">'+info.desc+(precipBadge?' &middot; '+precipBadge:'')+'</div>'+
-        '<div class="fc-wind">'+spd(wind)+' '+spdU()+'</div>'+
+        (function(){
+          var d=getDrone();
+          var r10=wind>=d.windRed?'red':wind>=d.windAmber?'amber':'green';
+          var r80=w80>=d.windRed?'red':w80>=d.windAmber?'amber':'green';
+          var r120=w120>=d.windRed?'red':w120>=d.windAmber?'amber':'green';
+          var col10=r10==='red'?'var(--red)':r10==='amber'?'var(--amber)':'var(--green)';
+          var col80=r80==='red'?'var(--red)':r80==='amber'?'var(--amber)':'var(--green)';
+          var col120=r120==='red'?'var(--red)':r120==='amber'?'var(--amber)':'var(--green)';
+          var altWorse=r80!=='green'||r120!=='green';
+          if(!altWorse){
+            return'<div class="fc-wind" style="color:'+col10+';">'+spd(wind)+' '+spdU()+'</div>';
+          }
+          return'<div class="fc-wind-stack">'+
+            '<div class="fc-wind-row"><span class="fc-wind-alt">↑120</span><span class="fc-wind-val" style="color:'+col120+';">'+spd(w120)+'</span></div>'+
+            '<div class="fc-wind-row"><span class="fc-wind-alt">↑80</span><span class="fc-wind-val" style="color:'+col80+';">'+spd(w80)+'</span></div>'+
+            '<div class="fc-wind-row"><span class="fc-wind-alt">↑10</span><span class="fc-wind-val" style="color:'+col10+';">'+spd(wind)+'</span></div>'+
+          '</div>';
+        })()+
         '<div class="fc-dot '+rating.lvl+'"></div>'+
         '<div class="fc-chevron">▾</div>'+
       '</div>'+

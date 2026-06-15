@@ -2377,6 +2377,27 @@ function tilePres(v){return v<980?'red':v<1000?'amber':'green';}
 function tileTemp(v){return v<-10||v>40?'red':v<0||v>35?'amber':'green';}
 function tileCloudBase(m){return m<120?'red':m<150?'amber':'green';}
 function tileDensityAlt(m){return m>2000?'red':m>1000?'amber':'green';}
+function gpsQuality(kp,hourOfDay){
+  // Ionospheric scintillation model for mid-latitude (UK ~53N)
+  // Base score 10; KP degrades it; time-of-day adds minor modifier
+  // Peak ionospheric disturbance: 13-16 UTC and 20-22 UTC
+  var score=10;
+  if(kp>=6)score-=6;
+  else if(kp>=5)score-=4;
+  else if(kp>=4)score-=3;
+  else if(kp>=3)score-=2;
+  else if(kp>=2)score-=1;
+  // Time-of-day modifier (-1 during peak ionospheric hours)
+  if(hourOfDay>=13&&hourOfDay<=16)score-=1;
+  else if(hourOfDay>=20&&hourOfDay<=22)score-=1;
+  score=Math.max(0,Math.min(10,score));
+  var label,sub,col;
+  if(score>=8){label='Good';sub='No ionospheric interference';col='green';}
+  else if(score>=6){label='Fair';sub='Minor interference — accuracy may vary';col='amber';}
+  else if(score>=4){label='Degraded';sub='Avoid autonomous flight modes';col='amber';}
+  else{label='Unreliable';sub='Avoid GPS-dependent flight';col='red';}
+  return{label:label,sub:sub,col:col,score:score};
+}
 function tileCol(r){return r==='green'?'var(--green)':r==='amber'?'var(--amber)':'var(--red)';}
 // ---- Pro: configurable fly rating thresholds ----
 var _allProThresholds={};
@@ -2386,6 +2407,15 @@ function saveProThresholds(t){
   var key=selectedDrone||'mini4pro';
   _allProThresholds[key]=t;
   try{localStorage.setItem('dc_all_pro_thresholds',JSON.stringify(_allProThresholds));}catch(e){}
+  if(isPro()&&proUser&&proUser.uid&&_fbLoaded){
+    try{
+      var db=firebase.firestore();
+      db.collection('users').doc(proUser.uid).set(
+        {windThresholds:_allProThresholds,thresholdsUpdated:firebase.firestore.FieldValue.serverTimestamp()},
+        {merge:true}
+      ).catch(function(e){console.error('[DC] Firestore saveProThresholds error:',e);});
+    }catch(e){console.error('[DC] saveProThresholds cloud error:',e);}
+  }
 }
 function getThresholds(){
   var key=selectedDrone||'mini4pro';
@@ -2401,9 +2431,40 @@ function resetProThresholds(){
   var key=selectedDrone||'mini4pro';
   delete _allProThresholds[key];
   try{localStorage.setItem('dc_all_pro_thresholds',JSON.stringify(_allProThresholds));}catch(e){}
+  if(isPro()&&proUser&&proUser.uid&&_fbLoaded){
+    try{
+      var db=firebase.firestore();
+      db.collection('users').doc(proUser.uid).set(
+        {windThresholds:_allProThresholds,thresholdsUpdated:firebase.firestore.FieldValue.serverTimestamp()},
+        {merge:true}
+      ).catch(function(e){console.error('[DC] Firestore resetProThresholds error:',e);});
+    }catch(e){console.error('[DC] resetProThresholds cloud error:',e);}
+  }
   if(wxData){renderDash();renderFc();}renderFavBar();
   if(typeof showProSignedIn==='function')showProSignedIn();
   showToast('Thresholds reset to '+getDrone().name+' defaults');
+}
+function syncThresholdsFromCloud(uid,callback){
+  if(!_fbLoaded||!uid){if(callback)callback();return;}
+  try{
+    var db=firebase.firestore();
+    db.collection('users').doc(uid).get().then(function(snap){
+      if(snap.exists&&snap.data().windThresholds){
+        var cloud=snap.data().windThresholds;
+        // Cloud wins per drone key; keep any local keys not in cloud
+        Object.keys(cloud).forEach(function(k){_allProThresholds[k]=cloud[k];});
+        try{localStorage.setItem('dc_all_pro_thresholds',JSON.stringify(_allProThresholds));}catch(e){}
+        if(wxData){renderDash();renderFc();}
+      }
+      if(callback)callback();
+    }).catch(function(e){
+      console.error('[DC] syncThresholdsFromCloud error:',e);
+      if(callback)callback();
+    });
+  }catch(e){
+    console.error('[DC] syncThresholdsFromCloud error:',e);
+    if(callback)callback();
+  }
 }
 function thrDisp(kmh){return spd(kmh)+' '+spdU();}
 function buildThresholdUI(){
@@ -2786,6 +2847,7 @@ function renderDash(){
     '<div class="wx-tile '+rTemp+'"><div class="wx-lbl"><span>Dew Point</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Dew Point"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rTemp+'">'+dewPoint+'°C</div><div class="wx-sub">'+(dewSpread<2?'⚠ Condensation risk':dewSpread<4?'Watch for dew':'Low dew risk')+'</div><div class="wx-info-panel">The temperature at which moisture condenses into liquid. Within 2–3°C of dew point, condensation forms on your drone\'s cold lens, sensors and motor housings — even on a dry-feeling day.</div></div>'+
     '<div class="wx-tile '+rCloudBase+'"><div class="wx-lbl"><span>Cloud Base</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Cloud Base"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rCloudBase+'">'+cloudBaseM+'<span style="font-size:11px;font-weight:400;">m</span> <span style="font-size:11px;font-weight:400;color:var(--muted);">/ '+cloudBaseFt+'ft</span></div><div class="wx-sub">'+(rCloudBase==='red'?'✕ Below 120m — legal ceiling':rCloudBase==='amber'?'⚠ Low ceiling — caution':'Clear above 150m')+'</div><div class="wx-info-panel">Estimated altitude where cloud forms, derived from temperature and dew point. UK drone rules require staying below cloud at all times — entering cloud is not permitted and removes visual contact. Below 150m cloud base leaves very little usable sky. Below 120m flying is effectively prohibited — cloud and legal ceiling coincide.</div></div>'+
     '<div class="wx-tile '+kc+'"><div class="wx-lbl"><span>KP Index</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About KP Index"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+kc+'">'+kp.toFixed(1)+'</div><div class="wx-sub">'+klab+'</div><div class="wx-info-panel">The planetary K-index measures geomagnetic storm activity. Above KP 4, GPS accuracy can be reduced and compass drift may occur. Above KP 6, flying is not recommended. Data updates every few minutes from NOAA.</div></div>';})()+
+    (function(){var _gq=gpsQuality(currentKp,new Date().getHours());return'<div class="wx-tile '+_gq.col+'">'+'<div class="wx-lbl"><span>GPS Accuracy</span>'+'<button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About GPS Accuracy">'+'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+'<circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>'+'<rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/>'+'<rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/>'+'</svg></button></div>'+'<div class="wx-val wx-val-\'+_gq.col+\'">\'+ _gq.label +\'</div>'+'<div class="wx-sub">\'+ _gq.sub +\'</div>'+'<div class="wx-info-panel">Estimated GPS positioning accuracy based on geomagnetic activity (KP index) and time of day. Elevated KP causes ionospheric scintillation — phase errors in satellite signals that reduce accuracy and can cause compass drift. This is independent of how many satellites your drone can see. At KP 4+ avoid autonomous modes (Return-to-Home, Waypoints). At KP 6+ GPS-dependent flight is not recommended.</div>'+'</div>';})()+
     
     (function(){var ratio=rawWind>0?(rawGust-rawWind)/rawWind:0;var r=ratio>=0.75?'red':ratio>=0.35?'amber':'green';var col=r==='red'?'var(--red)':r==='amber'?'var(--amber)':'var(--green)';var lbl=ratio>=0.75?'Turbulent':ratio>=0.35?'Choppy':'Smooth';var desc=ratio>=0.75?'Large gust spikes — difficult to control':ratio>=0.35?'Moderate variation — fly with care':'Steady air — good flying conditions';return'<div class="wx-tile wx-tile-smooth '+r+'"><div class="wx-lbl"><span>Air Smoothness</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Air Smoothness"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+r+'">'+lbl+'</div><div class="wx-sub">'+desc+'</div><div class="wx-info-panel">The ratio of gust speed to average wind. Turbulent, gusty air means unpredictable handling and jerky footage even within safe wind speed limits. Smooth, steady air is always preferable to gusty air of the same average speed.</div></div>';})()+
     '<div class="wx-tile '+rDensityAlt+'"><div class="wx-lbl"><span>Density Alt</span><button class="wx-info-btn" onclick="toggleTileInfo(this)" aria-label="About Density Altitude"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg></button></div><div class="wx-val wx-val-'+rDensityAlt+'">'+densityAltM+'<span style="font-size:11px;font-weight:400;">m</span> <span style="font-size:11px;font-weight:400;color:var(--muted);">/ '+densityAltFt+'ft</span></div><div class="wx-sub">'+(rDensityAlt==='red'?'✕ Very thin air — reduced lift':rDensityAlt==='amber'?'⚠ Thinner air — monitor performance':'Normal air density')+'</div><div class="wx-info-panel">How hard your drone\'s motors must work to generate lift, combining the effects of altitude and temperature. Hot or low-pressure air is less dense — motors spin faster and batteries drain quicker for the same lift. Above 1000m density altitude expect noticeable performance reduction; above 2000m you are approaching the ceiling of most consumer drones.</div></div>'+
@@ -3862,6 +3924,7 @@ function onGoogleSignInSuccess(user){
     renderFavBar();
     if(wxData){renderDash();renderFc();}
     syncFlightsFromCloud(user.uid,null);
+    syncThresholdsFromCloud(user.uid,null);
   } else {
     showProUpgrade();
   }
@@ -3884,6 +3947,8 @@ function signOutPro(){
 }
 function openThresholdSheet(){
   if(!isPro()){openProOverlay();return;}
+  // Pull latest thresholds from Firestore before rendering the sheet
+  if(proUser&&proUser.uid)syncThresholdsFromCloud(proUser.uid,null);
   var overlay=document.getElementById('thr-sheet-overlay');
   var body=document.getElementById('thr-sheet-body');
   if(!overlay||!body)return;

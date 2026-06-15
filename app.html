@@ -1374,11 +1374,10 @@ function wmoInfo(code,date){
 }
 function precipAdjustWmo(wmo,precip){
   var p=precip||0;
-  // Only adjust sky-state codes — don't override actual precipitation WMO codes
   if(wmo<=3){
-    if(p>=80) return 63; // near-certain rain → red
-    if(p>=50) return 61; // more likely than not → amber
-    if(p>=30) return 61; // meaningful chance → amber
+    if(p>=80) return 63;
+    if(p>=50) return 61;
+    if(p>=30) return 61;
   }
   return wmo;
 }
@@ -1407,7 +1406,6 @@ function saveUnits(){
 function toggleUnits(){unitMode=unitMode==='kmh'?'mph':unitMode==='mph'?'ms':'kmh';saveUnits();updateUnitToggle();updateDroneLimits();if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))initWindMap();}}
 function updateUnitToggle(){var btn=document.getElementById('unit-toggle');if(!btn)return;var current={kmh:'km/h',mph:'mph',ms:'m/s'};var next={kmh:'mph',mph:'m/s',ms:'km/h'};btn.textContent=current[unitMode]+' → '+next[unitMode];btn.setAttribute('aria-label','Currently '+current[unitMode]+'. Tap to switch to '+next[unitMode]);btn.title='Switch to '+next[unitMode];}
 function spd(v){if(unitMode==='mph')return Math.round(v*0.621);if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));if(unitMode==='kts')return parseFloat((v*0.539957).toFixed(1));return Math.round(v);}
-function spdExact(v){if(unitMode==='mph')return parseFloat((v*0.621).toFixed(1));if(unitMode==='ms')return parseFloat((v/3.6).toFixed(1));if(unitMode==='kts')return parseFloat((v*0.539957).toFixed(1));return parseFloat(v.toFixed(1));}
 function spdU(){return unitMode==='mph'?'mph':unitMode==='ms'?'m/s':unitMode==='kts'?'kt':'km/h';}
 function tmp(v){return tempMode==='f'?Math.round(v*9/5+32):Math.round(v);}
 function tmpU(){return tempMode==='f'?'°F':'°C';}
@@ -2656,14 +2654,20 @@ function renderFlightWindowCard(){
     var endLabel=wEndSameDay?endStr:wEndDay+' '+endStr;
     var col=winIsAmberOnly?'var(--amber)':(isNowOpen?'var(--green)':'var(--accent)');
     var label=isNowOpen?(winIsAmberOnly?'Open now · Caution':'Open now'):(winIsAmberOnly?'Flyable with caution'+(isTomorrow?' · Tomorrow':''):'Next window'+(isTomorrow?' · Tomorrow':''));
-    var timeStr=isNowOpen?'Until '+endStr:startStr+' – '+endStr;
+    var endLabelFull=wEndSameDay?endStr:wEndDay+' '+endStr;
+    var timeStr=isNowOpen?'Until '+endLabelFull:startStr+' – '+endStr;
     var longWindow=durationH>=6;
     var subStr=isNowOpen
       ?(winIsAmberOnly
         ?(longWindow?'Caution conditions until '+endLabel:'Not ideal — fly carefully')
         :(transitionHour
-          ?durationStr+' remaining · Caution from '+pad(transitionHour.getHours())+':00'
-          :(longWindow?'Good until '+endLabel:durationStr+' remaining')))
+          ?(function(){
+            var tSameDay=transitionHour.toDateString()===now.toDateString();
+            var tDay=transitionHour.toLocaleDateString('en-GB',{weekday:'short'});
+            var tLabel=(tSameDay?'':tDay+' ')+pad(transitionHour.getHours())+':00';
+            return longWindow?'Caution from '+tLabel:durationStr+' remaining · Caution from '+tLabel;
+          })()
+          :(longWindow?'':durationStr+' remaining')))
       :(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
     mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
       (isNowOpen?'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><circle cx="20" cy="20" r="13" fill="rgba(34,197,94,.2)" stroke="#22c55e" stroke-width="1.5"/><polyline points="12,20 17,26 28,13" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(6,182,212,.10)" stroke="#06b6d4" stroke-width="1.5"/><circle cx="20" cy="20" r="11" fill="rgba(6,182,212,.12)" stroke="#06b6d4" stroke-width="1.5"/><line x1="20" y1="20" x2="20" y2="12" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="20" x2="26" y2="20" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#06b6d4"/><line x1="20" y1="9.5" x2="20" y2="11" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="30.5" y1="20" x2="29" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="20" y1="30.5" x2="20" y2="29" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="9.5" y1="20" x2="11" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>')+
@@ -2831,14 +2835,14 @@ function buildFcHourDetail(wind,gust,vis,wmo,rawTemp,w80,w120,precip,kpVal){
       // Wind
       '<div class="fcd-tile">'+
         '<div class="fcd-lbl">Wind (10m)</div>'+
-        '<div class="fcd-val">'+spdExact(wind)+'<span> '+spdU()+'</span></div>'+
+        '<div class="fcd-val">'+spd(wind)+'<span> '+spdU()+'</span></div>'+
         '<div class="fcd-sub">'+(rWind==='green'?'Within limits':rWind==='amber'?'Approaching limit':'Exceeds limit')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rWind+'" style="width:'+barW(wind,drone.windRed)+';"></div></div>'+
       '</div>'+
       // Gusts
       '<div class="fcd-tile">'+
         '<div class="fcd-lbl">Gusts</div>'+
-        '<div class="fcd-val">'+spdExact(gust)+'<span> '+spdU()+'</span></div>'+
+        '<div class="fcd-val">'+spd(gust)+'<span> '+spdU()+'</span></div>'+
         '<div class="fcd-sub">'+(rGust==='green'?'Stable':rGust==='amber'?'Moderate':'Strong')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+rGust+'" style="width:'+barW(gust,drone.gustRed)+';"></div></div>'+
       '</div>'+

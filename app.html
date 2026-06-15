@@ -2645,15 +2645,19 @@ function renderFlightWindowCard(){
     var endLabel=wEndSameDay?endStr:wEndDay+' '+endStr;
     var col=winIsAmberOnly?'var(--amber)':(isNowOpen?'var(--green)':'var(--accent)');
     var label=isNowOpen?(winIsAmberOnly?'Open now · Caution':'Open now'):(winIsAmberOnly?'Flyable with caution'+(isTomorrow?' · Tomorrow':''):'Next window'+(isTomorrow?' · Tomorrow':''));
-    var endLabelFull=wEndSameDay?endStr:wEndDay+' '+endStr;
-    var timeStr=isNowOpen?'Until '+endLabelFull:startStr+' – '+endStr;
+    var timeStr=isNowOpen?'Until '+endStr:startStr+' – '+endStr;
     var longWindow=durationH>=6;
     var subStr=isNowOpen
       ?(winIsAmberOnly
         ?(longWindow?'Caution conditions until '+endLabel:'Not ideal — fly carefully')
         :(transitionHour
-          ?(function(){var tSameDay=transitionHour.toDateString()===now.toDateString();var tDay=transitionHour.toLocaleDateString('en-GB',{weekday:'short'});var tLabel=(tSameDay?'':tDay+' ')+pad(transitionHour.getHours())+':00';return longWindow?'Good until '+endLabel+' · Caution from '+tLabel:durationStr+' remaining · Caution from '+tLabel;})()
-          :(longWindow?'Good until '+endLabel:durationStr+' remaining')))
+          ?(function(){
+            var tSameDay=transitionHour.toDateString()===now.toDateString();
+            var tDay=transitionHour.toLocaleDateString('en-GB',{weekday:'short'});
+            var tLabel=(tSameDay?'':tDay+' ')+pad(transitionHour.getHours())+':00';
+            return longWindow?'Caution from '+tLabel:durationStr+' remaining · Caution from '+tLabel;
+          })()
+          :(longWindow?'':durationStr+' remaining')))
       :(isTomorrow?'Starts tomorrow':('Opens in '+countdown(primaryWin.start).replace('in ','')));
     mainHtml='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
       (isNowOpen?'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(34,197,94,.12)" stroke="#22c55e" stroke-width="1.5"/><circle cx="20" cy="20" r="13" fill="rgba(34,197,94,.2)" stroke="#22c55e" stroke-width="1.5"/><polyline points="12,20 17,26 28,13" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="19" fill="rgba(6,182,212,.10)" stroke="#06b6d4" stroke-width="1.5"/><circle cx="20" cy="20" r="11" fill="rgba(6,182,212,.12)" stroke="#06b6d4" stroke-width="1.5"/><line x1="20" y1="20" x2="20" y2="12" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="20" x2="26" y2="20" stroke="#06b6d4" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="1.5" fill="#06b6d4"/><line x1="20" y1="9.5" x2="20" y2="11" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="30.5" y1="20" x2="29" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="20" y1="30.5" x2="20" y2="29" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><line x1="9.5" y1="20" x2="11" y2="20" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/></svg>')+

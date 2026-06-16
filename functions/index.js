@@ -376,11 +376,11 @@ exports.sendFlightAlerts = onSchedule(
         const locationName = alertSettings.locationName || 'your saved location';
         const ratingWord = rating === 'green' ? 'good' : 'marginal';
         const message = {
-          notification: {
+          data: {
             title: `✈ Fly window open — ${locationName}`,
             body: `Conditions are now ${ratingWord} for flying. Tap to check before you launch.`,
+            url: '/app.html',
           },
-          data: {url: '/app.html'},
           token: fcmToken,
         };
 

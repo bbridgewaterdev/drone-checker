@@ -14,12 +14,12 @@ const messaging = firebase.messaging();
 
 // Background push — app not in foreground
 messaging.onBackgroundMessage(function(payload) {
-  const n = payload.notification || {};
-  self.registration.showNotification(n.title || 'DroneChecker', {
-    body: n.body || 'A fly window has opened at your alert location.',
+  const d = payload.data || {};
+  self.registration.showNotification(d.title || 'DroneChecker', {
+    body: d.body || 'A fly window has opened at your alert location.',
     icon: '/icons/icon-192.png',
     badge: '/icons/icon-96.png',
-    data: payload.data || {}
+    data: {url: d.url || '/app.html'}
   });
 });
 

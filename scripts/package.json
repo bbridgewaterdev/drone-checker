@@ -1,0 +1,11 @@
+{
+  "name": "drone-checker-hazard-tiles",
+  "version": "1.0.0",
+  "description": "Generates pre-tiled UK ground hazard GeoJSON for DroneChecker",
+  "scripts": {
+    "generate": "node --max-old-space-size=4096 generate-hazard-tiles.js"
+  },
+  "dependencies": {
+    "osmtogeojson": "^3.0.0-beta.5"
+  }
+}

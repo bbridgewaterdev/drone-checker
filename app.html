@@ -2733,7 +2733,7 @@ function getFlightWindows(hourlyRatings){
   var windows=[],inWindow=false,winStart=null,winEnd=null;
   for(var i=0;i<hourlyRatings.length;i++){
     var entry=hourlyRatings[i];
-    if(entry.rating==='green'||entry.rating==='amber'){if(!inWindow){inWindow=true;winStart=entry.time;}winEnd=entry.time;}
+    if(entry.rating==='green'){if(!inWindow){inWindow=true;winStart=entry.time;}winEnd=entry.time;}
     else{if(inWindow){windows.push({start:winStart,end:winEnd});inWindow=false;}}
   }
   if(inWindow)windows.push({start:winStart,end:winEnd});

@@ -2644,10 +2644,14 @@ function getHourlyRatings(numHours){
   for(var i=0;i<hours.time.length;i++){
     var t=new Date(hours.time[i]);
     if(t<windowStart||t>=windowEnd)continue;
-    var w=hours.wind_speed_10m[i]||0,g=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
-    var v=hours.visibility?hours.visibility[i]||10000:10000,wmo=hours.weather_code?hours.weather_code[i]||0:0;
-    var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;
-    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0,w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
+    var cur=wxData.current,isNow=cur&&t.getHours()===now.getHours()&&t.getDate()===now.getDate();
+    var w=isNow?(cur.wind_speed_10m||0):(hours.wind_speed_10m[i]||0);
+    var g=isNow?(cur.wind_gusts_10m||0):(hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0);
+    var v=isNow?(cur.visibility||10000):(hours.visibility?hours.visibility[i]||10000:10000);
+    var wmo=isNow?(cur.weather_code||0):(hours.weather_code?hours.weather_code[i]||0:0);
+    var tp=isNow?(cur.temperature_2m||15):(hours.temperature_2m?hours.temperature_2m[i]||15:15);
+    var w80=isNow?(cur.wind_speed_80m||0):(hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0);
+    var w120=isNow?(cur.wind_speed_120m||0):(hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0);
     var precip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
     var kpT=getKpForTime(t);
     var r=flyRating(w,g,v,precipAdjustWmo(wmo,precip),kpT,tp,w80,w120);

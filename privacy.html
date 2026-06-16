@@ -38,7 +38,7 @@
 
 <div class="doc">
   <h1>Privacy Policy</h1>
-  <div class="updated">DroneChecker — Last updated: May 2026</div>
+  <div class="updated">DroneChecker — Last updated: June 2026</div>
 
   <h2>1. Introduction</h2>
   <p>Welcome to DroneChecker. This Privacy Policy explains how we collect, use, and protect your information when you use our application available at dronechecker.co.uk and on the Google Play Store.</p>
@@ -47,7 +47,7 @@
   <h2>2. Who We Are</h2>
   <p>DroneChecker is an independent application providing drone flying condition information for users worldwide, with a focus on the United Kingdom.</p>
   <p>For any privacy-related queries, please contact us at: <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a></p>
-  <p>We have assessed our data processing activities and determined that we are not required to register with the Information Commissioner's Office (ICO) at this time, as we do not store or control any personal data on our own servers. If you believe this assessment is incorrect, please contact us. You may also contact the ICO directly at <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">ico.org.uk</a>.</p>
+  <p>We have assessed our data processing activities and determined that we are not required to register with the Information Commissioner's Office (ICO) at this time. Free users' data is stored only on their own device. Pro subscriber data (name, email, and related account data) is processed via Google Firebase and Stripe, which are listed as data processors in Section 4. If you believe this assessment is incorrect, please contact us. You may also contact the ICO directly at <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">ico.org.uk</a>.</p>
 
   <h2>3. Information We Collect</h2>
   <p>DroneChecker is designed to collect as little information as possible. The sections below describe what data is used and why.</p>
@@ -68,12 +68,28 @@
     <li>Approximate geographic location (city or region level — not precise GPS coordinates)</li>
     <li>How you arrived at the app (direct, search, referral)</li>
   </ul>
-  <p><strong>No personally identifiable information is collected through Google Analytics.</strong> Google Analytics 4 anonymises IP addresses by default. Google Analytics sets cookies on your device to distinguish users and sessions (see Section 3.6 for details). Analytics are only enabled after you accept the in-app disclaimer; you can withdraw this consent at any time using the "Reset Data" option in the app footer, which clears all stored data including the consent flag. We do not share this data with any third parties beyond Google's own analytics processing. You can learn more about how Google handles this data at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.</p>
+  <p><strong>No personally identifiable information is collected through Google Analytics.</strong> Google Analytics 4 anonymises IP addresses by default. Google Analytics sets cookies on your device to distinguish users and sessions (see Section 3.7 for details). Analytics are only enabled if you tick the optional <em>"Allow anonymous usage analytics"</em> checkbox shown when you first open the app — this is separate from the safety disclaimer and is entirely optional. You can withdraw this consent at any time using the "Reset Data" option in the app footer, which clears all stored data including the analytics consent flag. We do not share this data with any third parties beyond Google's own analytics processing. You can learn more about how Google handles this data at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">policies.google.com/privacy</a>.</p>
 
-  <h2>3.4 No Accounts Required</h2>
-  <p>DroneChecker does not require you to create an account. We do not collect your name, email address, or any other personal identifiers.</p>
+  <h2>3.4 Free Users — No Account Required</h2>
+  <p>Free users are not required to create an account. We do not collect your name, email address, or any other personal identifier. All data is stored locally on your device as described in Section 3.6.</p>
 
-  <h2>3.5 Device Preferences and Local Data</h2>
+  <h2>3.5 Pro Subscriber Accounts</h2>
+  <p>DroneChecker Pro requires you to sign in with a Google account via Google Sign-In. When you do, we receive from Google your <strong>display name</strong>, <strong>email address</strong>, and <strong>profile photo URL</strong>. We also assign you a unique user ID (UID) via Firebase Authentication.</p>
+  <p>The following data is stored in Firebase Firestore (Google Cloud, EU region) and used solely to operate your Pro subscription:</p>
+  <ul>
+    <li><strong>Name and email address</strong> — received from Google Sign-In; used to identify your account and pre-fill the Stripe checkout form</li>
+    <li><strong>Firebase UID</strong> — your unique account identifier, used to associate all data below with your account</li>
+    <li><strong>Subscription status</strong> — whether your Pro subscription is active, plus activation and renewal timestamps</li>
+    <li><strong>Stripe customer and subscription IDs</strong> — used to manage your billing via Stripe (see Section 4)</li>
+    <li><strong>Cloud-synced flight log entries</strong> — dates, location names, drone model, duration, conditions and notes that you choose to record; synced so you can access them across devices</li>
+    <li><strong>Saved locations</strong> — the names and GPS coordinates of flying spots you save as favourites</li>
+    <li><strong>Push alert settings</strong> — the location, time window, and drone profile you configure for fly-window notifications</li>
+    <li><strong>FCM device token</strong> — a push notification token issued by Firebase Cloud Messaging, used to deliver flight-condition alerts to your device</li>
+    <li><strong>Custom wind thresholds</strong> — any drone wind threshold settings you configure beyond the defaults</li>
+  </ul>
+  <p>You can export or delete your flight log at any time within the app. To request full account and data deletion, contact us at <a href="mailto:bbridgewater.dev@gmail.com">bbridgewater.dev@gmail.com</a> and we will delete your Firestore data within 30 days.</p>
+
+  <h2>3.6 Device Preferences and Local Data</h2>
   <p>To improve your experience, the following data is saved locally on your device using browser local storage. None of this data is transmitted to us or any third party:</p>
   <ul>
     <li><strong>Drone profile</strong> — your selected drone model, used to personalise wind limit thresholds.</li>
@@ -89,7 +105,7 @@
   </ul>
   <p>You can clear all locally stored data at any time by clearing your browser or app cache, or by using the "Reset Data" option in the app footer, or by uninstalling the app.</p>
 
-  <h2>3.6 Cookies</h2>
+  <h2>3.7 Cookies</h2>
   <p>DroneChecker itself does not set any first-party cookies. However, Google Analytics 4 — which is loaded only after you accept the in-app disclaimer — sets the following cookies on your device:</p>
   <ul>
     <li><strong>_ga</strong> — distinguishes unique users. Expires after 2 years.</li>
@@ -101,14 +117,17 @@
   <p>DroneChecker uses the following third-party services to function. Each has its own privacy policy governing how they handle data. When you use features such as weather, map display or location search, your coordinates or search query may be sent to the relevant service. No personal identifying information is included in these requests.</p>
 
   <table>
-    <tr><th>Service</th><th>Purpose</th><th>Privacy Policy</th></tr>
-    <tr><td>Open-Meteo</td><td>Live weather, forecast data and town/city geocoding</td><td><a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener noreferrer">View</a></td></tr>
-    <tr><td>Postcodes.io</td><td>UK postcode lookup</td><td><a href="https://postcodes.io" target="_blank" rel="noopener noreferrer">View</a></td></tr>
-    <tr><td>OpenStreetMap Nominatim</td><td>Reverse geocoding (place names from coordinates)</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
-    <tr><td>OpenFreeMap</td><td>Map tile rendering for the Wind Detail tab</td><td><a href="https://openfreemap.org/privacy/" target="_blank" rel="noopener noreferrer">View</a></td></tr>
-    <tr><td>NOAA Space Weather</td><td>KP geomagnetic index data</td><td><a href="https://www.noaa.gov/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
-    <tr><td>Google Analytics 4</td><td>Anonymous usage analytics to improve the app</td><td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
-    <tr><td>GitHub Pages</td><td>App hosting and delivery</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><th>Service</th><th>Purpose</th><th>Data shared (Pro only where noted)</th><th>Privacy Policy</th></tr>
+    <tr><td>Open-Meteo</td><td>Live weather, forecast data and town/city geocoding</td><td>Your GPS coordinates or search query</td><td><a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>Postcodes.io</td><td>UK postcode lookup</td><td>Your postcode search query</td><td><a href="https://postcodes.io" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>OpenStreetMap Nominatim</td><td>Reverse geocoding (place names from coordinates)</td><td>Your GPS coordinates</td><td><a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>OpenFreeMap</td><td>Map tile rendering for the Wind Detail tab</td><td>Map tile requests (no personal data)</td><td><a href="https://openfreemap.org/privacy/" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>NOAA Space Weather</td><td>KP geomagnetic index data</td><td>No personal data</td><td><a href="https://www.noaa.gov/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>Google Analytics 4</td><td>Anonymous usage analytics (only if you opt in)</td><td>Anonymous usage data — no personal identifiers</td><td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>Google Sign-In / Firebase Authentication</td><td><strong>Pro only</strong> — sign-in and account identity</td><td>Your Google display name, email address, and profile photo URL</td><td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>Firebase Firestore (Google Cloud, EU region)</td><td><strong>Pro only</strong> — cloud storage of subscription status, flight log, saved locations, and alert settings</td><td>Name, email, UID, subscription metadata, flight log entries, saved locations, push token, alert settings</td><td><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>Stripe</td><td><strong>Pro only</strong> — payment processing for DroneChecker Pro subscriptions</td><td>Your email address (pre-filled at checkout); payment data is entered directly on Stripe's servers and never passes through DroneChecker</td><td><a href="https://stripe.com/gb/privacy" target="_blank" rel="noopener noreferrer">View</a></td></tr>
+    <tr><td>GitHub Pages</td><td>App hosting and delivery</td><td>Standard web server logs (IP address, browser type)</td><td><a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer">View</a></td></tr>
   </table>
 
   <h2>5. Local Storage and Offline Mode</h2>

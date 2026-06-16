@@ -14,9 +14,9 @@
       gtag('js', new Date());
       gtag('config', 'G-VQTQPMQZY4', {anonymize_ip: true});
     }
-    // If user has previously accepted, fire analytics on load
+    // Fire analytics only if user explicitly consented (separate from safety disclaimer)
     try{
-      if(localStorage.getItem('dc_disclaimer')==='accepted'){
+      if(localStorage.getItem('dc_analytics_consent')==='accepted'){
         window.addEventListener('load', initAnalytics);
       }
     }catch(e){}
@@ -749,6 +749,10 @@
         <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
         <span class="disclaimer-check-lbl">I understand DroneChecker is advisory only. I accept all liability for my drone operations and agree DroneChecker bears no responsibility for any outcome.</span>
       </label>
+      <label class="disclaimer-check" style="margin-top:-8px;">
+        <input type="checkbox" id="analytics-cb"/>
+        <span class="disclaimer-check-lbl" style="color:var(--muted);font-size:12px;">Allow anonymous usage analytics (optional) — helps us improve the app. Uses Google Analytics cookies. You can withdraw this at any time via Reset Data.</span>
+      </label>
     </div>
     <div class="disclaimer-footer">
       <button class="disclaimer-btn" id="disclaimer-btn" onclick="acceptDisclaimer()" disabled>Enter DroneChecker</button>
@@ -1126,6 +1130,21 @@ var DRONES={
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
+// Refresh thresholds from the canonical /drone-thresholds.json (single source of truth
+// shared with Cloud Functions). Falls back silently to hardcoded values above if offline.
+(function(){
+  var CACHE_KEY='dc_drone_thresholds',TS_KEY='dc_drone_thresholds_ts',TTL=86400000;
+  try{
+    var cached=JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+    var ts=parseInt(localStorage.getItem(TS_KEY)||'0');
+    if(cached&&Date.now()-ts<TTL){Object.assign(DRONES,cached);return;}
+  }catch(e){}
+  fetch('/drone-thresholds.json').then(function(r){return r.ok?r.json():null;}).then(function(data){
+    if(!data)return;
+    Object.assign(DRONES,data);
+    try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
+  }).catch(function(){});
+}());
 var APP_VERSION='1.7.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
@@ -1453,7 +1472,7 @@ function buildFeedbackMailto(){
 function resetAllData(){
   if(!confirm('Reset all DroneChecker data on this device?\n\nThis will delete:\n• Your drone profile and unit preference\n• Saved favourite locations\n• Flight log entries\n• Pre-flight checklist progress\n• Disclaimer and onboarding state\n• Cached weather data\n\nThe page will then reload. This cannot be undone.'))return;
   try{
-    var keys=['dc_drone','dc_units','dc_checklist','dc_disclaimer','dc_onboarded','dc_favs','dc_flights','dc_wx','dc_lastloc'];
+    var keys=['dc_drone','dc_units','dc_checklist','dc_disclaimer','dc_analytics_consent','dc_onboarded','dc_favs','dc_flights','dc_wx','dc_lastloc'];
     keys.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
   }catch(e){}
   if('caches' in window){
@@ -2102,8 +2121,12 @@ function acceptDisclaimer(){
   disclaimerAccepted=true;
   document.body.style.overflow='';
   try{localStorage.setItem('dc_disclaimer','accepted');}catch(e){}
+  // Analytics consent is separate — only fire if the optional checkbox was ticked
+  var analyticsCb=document.getElementById('analytics-cb');
+  var analyticsConsent=analyticsCb&&analyticsCb.checked;
+  try{localStorage.setItem('dc_analytics_consent',analyticsConsent?'accepted':'declined');}catch(e){}
   overlay.style.display='none';
-  if(typeof initAnalytics==='function')initAnalytics();
+  if(analyticsConsent&&typeof initAnalytics==='function')initAnalytics();
   checkOnboarding();
   setTimeout(applyDeepLink,300);
 }
@@ -3741,23 +3764,23 @@ function handleSubscribe(){
 function startStripeCheckout(){
   var btn=document.getElementById('pro-subscribe-btn');
   if(btn){btn.textContent='Loading…';btn.disabled=true;}
-  fetch(CHECKOUT_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({uid:proUser.uid,email:proUser.email,plan:_selectedPlan})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.url){
-      window.location.href=data.url;
-    } else {
-      showToast('Could not start checkout. Please try again.');
-      if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
-    }
-  })
-  .catch(function(){
+  var reset=function(){if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}};
+  if(!_fbLoaded||!firebase.auth().currentUser){
+    showToast('Authentication error. Please sign in again.');
+    reset();return;
+  }
+  firebase.auth().currentUser.getIdToken().then(function(idToken){
+    return fetch(CHECKOUT_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+      body:JSON.stringify({uid:proUser.uid,email:proUser.email,plan:_selectedPlan})
+    }).then(function(r){return r.json();}).then(function(data){
+      if(data.url){window.location.href=data.url;}
+      else{showToast('Could not start checkout. Please try again.');reset();}
+    });
+  }).catch(function(){
     showToast('Could not start checkout. Check your connection.');
-    if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}
+    reset();
   });
 }
 
@@ -4343,7 +4366,7 @@ function saveTempUnit(val){
 function resetDataFromSettings(){
   if(confirm('Reset all app data? This will clear your settings, checklist progress and consent. Your flight log will not be deleted.')){
     closeSettings();
-    var keys=['dc_drone','dc_units','dc_checklist','dc_disclaimer','dc_onboarded','dc_favs','dc_wx','dc_lastloc','dc_theme','dc_alert_settings'];
+    var keys=['dc_drone','dc_units','dc_checklist','dc_disclaimer','dc_analytics_consent','dc_onboarded','dc_favs','dc_wx','dc_lastloc','dc_theme','dc_alert_settings'];
     keys.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
     location.reload();
   }
@@ -4360,6 +4383,14 @@ function syncAlertSettingsFromCloud(uid,cb){
       var d=snap.data();
       if(d.alertSettings){_alertSettings=d.alertSettings;saveAlertSettingsLocal(_alertSettings);}
       if(d.fcmToken)_fcmToken=d.fcmToken;
+      // If the cloud function silently disabled alerts (stale FCM token), notify the user
+      if(d.alertAutoDisabled){
+        setTimeout(function(){
+          showToast('Push alerts were auto-disabled (notification token expired). Open Settings → Alerts to re-enable.');
+        },2500);
+        // Clear the flag so we don't show the message again
+        db.collection('users').doc(uid).set({alertAutoDisabled:false},{merge:true}).catch(function(){});
+      }
     }
     cb&&cb(_alertSettings);
   }).catch(function(){cb&&cb(null);});
@@ -4572,23 +4603,23 @@ function openBillingPortal(){
   if(!proUser||!proUser.uid){showToast('Please sign in first');return;}
   var btn=event&&event.target;
   if(btn){btn.textContent='Loading…';btn.disabled=true;}
-  fetch('https://us-central1-dronechecker.cloudfunctions.net/createPortalSession',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({uid:proUser.uid})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    if(data.url){
-      window.location.href=data.url;
-    } else {
-      showToast('Could not open billing portal. Please try again.');
-      if(btn){btn.textContent='Manage subscription';btn.disabled=false;}
-    }
-  })
-  .catch(function(){
+  var reset=function(){if(btn){btn.textContent='Manage subscription';btn.disabled=false;}};
+  if(!_fbLoaded||!firebase.auth().currentUser){
+    showToast('Authentication error. Please sign in again.');
+    reset();return;
+  }
+  firebase.auth().currentUser.getIdToken().then(function(idToken){
+    return fetch('https://us-central1-dronechecker.cloudfunctions.net/createPortalSession',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+      body:JSON.stringify({uid:proUser.uid})
+    }).then(function(r){return r.json();}).then(function(data){
+      if(data.url){window.location.href=data.url;}
+      else{showToast('Could not open billing portal. Please try again.');reset();}
+    });
+  }).catch(function(){
     showToast('Could not open billing portal. Check your connection.');
-    if(btn){btn.textContent='Manage subscription';btn.disabled=false;}
+    reset();
   });
 }
 function getMaxFavs(){return isPro()?999:2;}

@@ -46,6 +46,7 @@ const STATIC = [
   '/privacy.html',
   '/terms.html',
   '/manifest.json',
+  '/drone-thresholds.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',

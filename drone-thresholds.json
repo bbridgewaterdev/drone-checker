@@ -1,0 +1,21 @@
+{
+  "lito1":        {"name":"DJI Lito 1",                "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "litox1":       {"name":"DJI Lito X1",               "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "neo":          {"name":"DJI Neo",                    "windAmber":18,"windRed":29,"gustAmber":21,"gustRed":29},
+  "neo2":         {"name":"DJI Neo 2",                  "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "flip":         {"name":"DJI Flip",                   "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "mini4k":       {"name":"DJI Mini 4K",                "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "mini2":        {"name":"DJI Mini 2",                 "windAmber":22,"windRed":38,"gustAmber":25,"gustRed":38},
+  "mini3pro":     {"name":"DJI Mini 3 Pro",             "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "mini4pro":     {"name":"DJI Mini 4 Pro",             "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "mini5pro":     {"name":"DJI Mini 5 Pro",             "windAmber":33,"windRed":43,"gustAmber":36,"gustRed":43},
+  "air3":         {"name":"DJI Air 3 / 3S",             "windAmber":33,"windRed":43,"gustAmber":36,"gustRed":43},
+  "mavic3":       {"name":"DJI Mavic 3 Pro / Classic",  "windAmber":33,"windRed":43,"gustAmber":36,"gustRed":43},
+  "mavic4pro":    {"name":"DJI Mavic 4 Pro",            "windAmber":33,"windRed":43,"gustAmber":36,"gustRed":43},
+  "avata2":       {"name":"DJI Avata 2",                "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "avata360":     {"name":"DJI Avata 360",              "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39},
+  "autel_nano":   {"name":"Autel EVO Nano+",            "windAmber":29,"windRed":38,"gustAmber":32,"gustRed":38},
+  "autel_lite":   {"name":"Autel EVO Lite+",            "windAmber":33,"windRed":43,"gustAmber":36,"gustRed":43},
+  "generic_light":{"name":"Generic Light (<500g)",      "windAmber":22,"windRed":29,"gustAmber":25,"gustRed":29},
+  "generic_heavy":{"name":"Generic Heavy (>500g)",      "windAmber":29,"windRed":39,"gustAmber":32,"gustRed":39}
+}

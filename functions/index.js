@@ -11,6 +11,17 @@ admin.initializeApp();
 const STRIPE_SECRET_KEY = defineSecret('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = defineSecret('STRIPE_WEBHOOK_SECRET');
 
+// Helper: verify Firebase Auth ID token from Authorization: Bearer <token> header
+async function verifyAuthToken(req) {
+  const authHeader = req.headers.authorization || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    const err = new Error('Missing or invalid Authorization header');
+    err.status = 401;
+    throw err;
+  }
+  return admin.auth().verifyIdToken(authHeader.slice(7));
+}
+
 // ---- Your Stripe price IDs for DroneChecker Pro ----
 const PRICE_ID_MONTHLY = 'price_1TgjvDBwELWfTObfoMWjvt6N';
 const PRICE_ID_YEARLY  = 'price_1ThSwBBwELWfTObfULMmiYjp';
@@ -18,29 +29,30 @@ const PRICE_ID_YEARLY  = 'price_1ThSwBBwELWfTObfULMmiYjp';
 // ---- App URL — where Stripe redirects after checkout ----
 const APP_URL = 'https://dronechecker.co.uk/app.html';
 
-// ---- Drone wind thresholds (km/h) — keep in sync with app.html ----
-const DRONE_THRESHOLDS = {
-  lito1:        {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  litox1:       {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  neo:          {windAmber:18,windRed:29,gustAmber:21,gustRed:29},
-  neo2:         {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  flip:         {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  mini4k:       {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  mini2:        {windAmber:22,windRed:38,gustAmber:25,gustRed:38},
-  mini3pro:     {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  mini4pro:     {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  mini5pro:     {windAmber:33,windRed:43,gustAmber:36,gustRed:43},
-  air3:         {windAmber:33,windRed:43,gustAmber:36,gustRed:43},
-  mavic3:       {windAmber:33,windRed:43,gustAmber:36,gustRed:43},
-  mavic4pro:    {windAmber:33,windRed:43,gustAmber:36,gustRed:43},
-  avata2:       {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  avata360:     {windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  autel_nano:   {windAmber:29,windRed:38,gustAmber:32,gustRed:38},
-  autel_lite:   {windAmber:33,windRed:43,gustAmber:36,gustRed:43},
-  generic_light:{windAmber:22,windRed:29,gustAmber:25,gustRed:29},
-  generic_heavy:{windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-};
+// ---- Drone wind thresholds (km/h) — single source of truth in ../drone-thresholds.json ----
+const _DRONES_RAW = require('../drone-thresholds.json');
+const DRONE_THRESHOLDS = Object.fromEntries(
+  Object.entries(_DRONES_RAW).map(([k, {name, ...t}]) => [k, t])
+);
 const DEFAULT_THRESHOLDS = {windAmber:29,windRed:39,gustAmber:32,gustRed:39};
+
+// ---- In-memory rate limiter for createCheckoutSession ----
+// Limits each uid to MAX_CHECKOUT_CALLS per CHECKOUT_WINDOW_MS
+const _checkoutCalls = new Map();
+const CHECKOUT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_CHECKOUT_CALLS = 10;
+
+function isCheckoutRateLimited(uid) {
+  const now = Date.now();
+  const entry = _checkoutCalls.get(uid);
+  if (!entry || now - entry.ts > CHECKOUT_WINDOW_MS) {
+    _checkoutCalls.set(uid, {ts: now, count: 1});
+    return false;
+  }
+  if (entry.count >= MAX_CHECKOUT_CALLS) return true;
+  entry.count++;
+  return false;
+}
 
 // WMO codes that indicate bad weather — matches app.html flyRating logic
 const WMO_RED   = [95,96,99,65,75,77,82];
@@ -91,10 +103,28 @@ exports.createCheckoutSession = onRequest(
       return;
     }
 
+    let decodedToken;
+    try {
+      decodedToken = await verifyAuthToken(req);
+    } catch (err) {
+      res.status(401).json({error: 'Unauthorised'});
+      return;
+    }
+
     const {uid, email, plan} = req.body;
 
     if (!uid || !email) {
       res.status(400).json({error: 'Missing uid or email'});
+      return;
+    }
+
+    if (decodedToken.uid !== uid) {
+      res.status(403).json({error: 'Forbidden'});
+      return;
+    }
+
+    if (isCheckoutRateLimited(uid)) {
+      res.status(429).json({error: 'Too many requests. Please try again later.'});
       return;
     }
 
@@ -138,10 +168,23 @@ exports.createPortalSession = onRequest(
       return;
     }
 
+    let decodedToken;
+    try {
+      decodedToken = await verifyAuthToken(req);
+    } catch (err) {
+      res.status(401).json({error: 'Unauthorised'});
+      return;
+    }
+
     const {uid} = req.body;
 
     if (!uid) {
       res.status(400).json({error: 'Missing uid'});
+      return;
+    }
+
+    if (decodedToken.uid !== uid) {
+      res.status(403).json({error: 'Forbidden'});
       return;
     }
 
@@ -397,6 +440,7 @@ exports.sendFlightAlerts = onSchedule(
           ) {
             update.fcmToken = admin.firestore.FieldValue.delete();
             update['alertSettings.enabled'] = false;
+            update.alertAutoDisabled = true;
           }
         }
       }
@@ -406,5 +450,64 @@ exports.sendFlightAlerts = onSchedule(
 
     await Promise.allSettled(tasks);
     console.log(`Alert check done — ${snapshot.docs.length} Pro users scanned`);
+  }
+);
+
+// ----------------------------------------------------------------
+// cleanupExpiredAccounts
+// Runs weekly. Deletes Firestore documents for non-Pro users whose
+// subscription was revoked 90+ days ago, or who signed up but never
+// subscribed and created their account 90+ days ago.
+// Satisfies GDPR storage-limitation principle (see Privacy Policy §3.5).
+// ----------------------------------------------------------------
+exports.cleanupExpiredAccounts = onSchedule(
+  {schedule: 'every sunday 02:00', timeZone: 'UTC', timeoutSeconds: 300},
+  async () => {
+    const db = admin.firestore();
+    const RETENTION_DAYS = 90;
+    const cutoff = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000);
+
+    let snapshot;
+    try {
+      snapshot = await db.collection('users').where('isPro', '==', false).get();
+    } catch (err) {
+      console.error('cleanupExpiredAccounts: Firestore query failed:', err);
+      return;
+    }
+
+    if (snapshot.empty) {
+      console.log('cleanupExpiredAccounts: no non-Pro users found');
+      return;
+    }
+
+    const toDelete = [];
+    snapshot.docs.forEach(doc => {
+      const d = doc.data();
+      const revokedAt = d.proRevokedAt && d.proRevokedAt.toDate ? d.proRevokedAt.toDate() : null;
+      const createdAt  = d.createdAt  && d.createdAt.toDate  ? d.createdAt.toDate()  : null;
+
+      if (revokedAt && revokedAt < cutoff) {
+        // Subscription was cancelled/revoked more than 90 days ago
+        toDelete.push(doc.ref);
+      } else if (!revokedAt && createdAt && createdAt < cutoff) {
+        // Account created 90+ days ago but user never subscribed — minimal data, safe to clear
+        toDelete.push(doc.ref);
+      }
+    });
+
+    if (toDelete.length === 0) {
+      console.log('cleanupExpiredAccounts: no expired accounts to delete');
+      return;
+    }
+
+    // Firestore batch max is 500 writes — process in chunks
+    const CHUNK = 500;
+    for (let i = 0; i < toDelete.length; i += CHUNK) {
+      const batch = db.batch();
+      toDelete.slice(i, i + CHUNK).forEach(ref => batch.delete(ref));
+      await batch.commit();
+    }
+
+    console.log(`cleanupExpiredAccounts: deleted ${toDelete.length} expired account(s)`);
   }
 );

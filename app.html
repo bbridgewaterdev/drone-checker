@@ -1395,6 +1395,10 @@ function wmoInfo(code,date){
   };
   return {desc:descs[code]||'Unknown',emoji:wxIcon(code,isNight)};
 }
+function qualifyPrecipDesc(desc,precip){
+  if(precip>=10)return desc;
+  return desc.replace(/\b(Thunderstorm|Heavy precipitation|Freezing precipitation|Heavy drizzle|Drizzle|Light rain|Rain|Light snow|Snow)\b/g,function(m){return'Potential '+m.charAt(0).toLowerCase()+m.slice(1);});
+}
 function precipAdjustWmo(wmo,precip){
   var p=precip||0;
   if(wmo<=3){
@@ -2362,8 +2366,10 @@ function updateCondBanner(){
   if(ring)ring.className='cond-ring '+cond.lvl;
   var lbl=condEl.querySelector('.cond-lbl');
   if(lbl){lbl.className='cond-lbl '+cond.lvl;lbl.textContent=cond.label;}
+  var curPrecipB=0;
+  if(wxData.hourly&&wxData.hourly.precipitation_probability){var _now=new Date(),_nowH=_now.getHours();for(var _pi=0;_pi<wxData.hourly.time.length;_pi++){var _pt=new Date(wxData.hourly.time[_pi]);if(_pt.getHours()===_nowH&&_pt.getDate()===_now.getDate()){curPrecipB=Math.round(wxData.hourly.precipitation_probability[_pi]||0);break;}}}
   var desc=condEl.querySelector('.cond-desc');
-  if(desc)desc.textContent=cond.desc;
+  if(desc)desc.textContent=qualifyPrecipDesc(cond.desc,curPrecipB);
 }
 function renderKpCard(){
   var kp=currentKp;
@@ -2897,6 +2903,7 @@ function renderDash(){
   var rPrecip=tilePrecip(curPrecip);
   var PRECIP_WMO_CODES=[51,53,55,56,57,61,63,65,66,67,71,73,75,77,80,81,82,85,86,95,96,99];
   var wxDesc=PRECIP_WMO_CODES.indexOf(wmo)!==-1&&curPrecip<10?(cloud>=90?'Overcast':cloud>=70?'Mostly cloudy':cloud>=30?'Partly cloudy':'Mainly clear'):info.desc;
+  var condDesc=qualifyPrecipDesc(cond.desc,curPrecip);
   var vDisp=visDisp(vis);
   var tPrimary=tempMode==='f'?Math.round(rawTemp*9/5+32)+'°F':Math.round(rawTemp)+'°C';
   var tSecondary=tempMode==='f'?Math.round(rawTemp)+'°C':Math.round(rawTemp*9/5+32)+'°F';
@@ -2927,7 +2934,7 @@ function renderDash(){
   }
   var warningsRow=(lipoWarnInner||nightWarnInner)?'<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">'+lipoWarnInner+nightWarnInner+'</div>':'';
   document.getElementById('dash').innerHTML=
-    '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+cond.desc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share</button></div>'+
+    '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+condDesc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share</button></div>'+
     renderBestTimeCard()+renderFlightWindowCard()+
     proUpsellStrip()+
     '<div class="card"><div class="card-ttl">Current Weather</div><div class="wx-hero"><span class="wx-icon">'+info.emoji+'</span><div><div class="wx-temp">'+tPrimary+' <span style="font-size:22px;font-weight:600;color:var(--muted);">/ '+tSecondary+'</span></div><div class="wx-desc">'+wxDesc+' &middot; feels '+fPrimary+' / '+fSecondary+'</div></div></div>'+
@@ -2988,7 +2995,7 @@ function renderDash(){
     proAccountCard()+'<div style="font-size:11px;color:var(--border);margin-top:8px;">v'+APP_VERSION+'</div>'+
     '</div><div style="height:14px;"></div>';
   var announcer=document.getElementById('a11y-announce');
-  if(announcer)announcer.textContent=cond.label+'. '+cond.desc;
+  if(announcer)announcer.textContent=cond.label+'. '+condDesc;
   initMoreConditions();
 }
 function timeSince(date){

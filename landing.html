@@ -96,8 +96,8 @@
     .feature-icon.sky{background:rgba(56,189,248,.15);}
     .feature-icon.purple{background:rgba(139,92,246,.15);}
     .feature-icon.pink{background:rgba(236,72,153,.15);}
-    .feature-title{font-family:var(--font-head);font-size:17px;font-weight:700;margin-bottom:8px;}
-    .feature-desc{font-size:14px;color:var(--muted2);line-height:1.6;}
+    .feature-title{font-family:var(--font-head);font-size:19px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;}
+    .feature-desc{font-size:14px;color:var(--muted2);line-height:1.6;font-weight:400;}
 
     /* ---- FLY RATING SPOTLIGHT ---- */
     .spotlight{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:48px;margin-top:48px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;}
@@ -153,7 +153,7 @@
     .pro-card-glow{position:absolute;top:-80px;right:-80px;width:240px;height:240px;background:radial-gradient(ellipse,rgba(245,158,11,.12) 0%,transparent 70%);pointer-events:none;}
     .pricing-tier{font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--muted2);}
     .pricing-tier.pro{color:var(--amber);}
-    .pricing-price{font-family:var(--font-head);font-size:38px;font-weight:800;line-height:1;margin-bottom:6px;}
+    .pricing-price{font-family:var(--font-body);font-size:38px;font-weight:800;line-height:1;margin-bottom:6px;}
     .pricing-per{font-size:17px;font-weight:400;color:var(--muted2);}
     .pricing-desc{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
     .pricing-popular{font-size:11px;font-weight:600;color:var(--amber);background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:3px 10px;}
@@ -222,7 +222,7 @@
   <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;">
     <div class="hero-badge">
       <div class="hero-badge-dot"></div>
-      Free · No account required · UK drone pilots
+      Free tier · Pro from £2.99/mo · UK drone pilots
     </div>
     <h1>Know Before<br/><span>You Fly</span></h1>
     <p class="hero-sub">The complete pre-flight companion for UK drone pilots. Live fly ratings, wind analysis, golden hour and geomagnetic data — all in one place.</p>
@@ -236,7 +236,7 @@
         Google Play — Coming Soon
       </a>
     </div>
-    <p class="hero-note">Also available on iPhone — no App Store needed</p>
+    <p class="hero-note">Also available on iPhone — install as a home screen app, no App Store needed</p>
     <p class="hero-note" style="margin-top:6px;">Built for UK pilots — but the weather checker, wind ratings and golden hour calculator work anywhere in the world.</p>
 
     <!-- Status strip — pointer-events:none makes it clearly non-interactive -->
@@ -300,7 +300,7 @@
           </svg>
         </div>
         <div class="feature-title">Golden Hour Calculator<span class="feat-pro-badge">PRO</span></div>
-        <div class="feature-desc">Astronomically precise golden hour, blue hour, sunrise and sunset times for your exact location. Live countdowns and a "LIVE NOW" indicator — no internet required.</div>
+        <div class="feature-desc">Astronomically precise golden hour, blue hour, sunrise and sunset times calculated from your GPS coordinates — no internet required. Includes live countdowns and a "LIVE NOW" indicator for the current window.</div>
       </div>
 
       <!-- KP Index — activity waveform SVG -->
@@ -341,6 +341,18 @@
         </div>
         <div class="feature-title">7-Day Best Day Planner<span class="feat-pro-badge">PRO</span></div>
         <div class="feature-desc">Can't fly today? See the best day to fly across the next week at a glance. DroneChecker analyses the full forecast and highlights the optimal window for your drone.</div>
+      </div>
+
+      <!-- Fly Window Alerts — bell SVG -->
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(20,184,166,.15);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </div>
+        <div class="feature-title">Fly Window Alerts<span class="feat-pro-badge">PRO</span></div>
+        <div class="feature-desc">Get notified the moment conditions turn flyable at your saved locations — so you stop manually checking and never miss a weather window.</div>
       </div>
 
     </div>
@@ -401,15 +413,15 @@
     <h2 class="section-title" style="margin-bottom:0;">Built for serious pilots</h2>
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-num">19</div>
-        <div class="stat-label">Supported drone models</div>
+        <div class="stat-num">19+</div>
+        <div class="stat-label">Drone models — add your own with Pro</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">7</div>
         <div class="stat-label">Factors checked per rating</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num">48h</div>
+        <div class="stat-num">72h</div>
         <div class="stat-label">Hourly forecast with Pro</div>
       </div>
       <div class="stat-card">
@@ -444,6 +456,7 @@
           <li><span class="pc-check free">✓</span> KP geomagnetic index</li>
           <li><span class="pc-check free">✓</span> 2 saved locations</li>
           <li><span class="pc-check free">✓</span> UK drone law &amp; rules</li>
+          <li><span class="pc-check free">✓</span> Works offline with cached weather data</li>
         </ul>
         <a href="/app.html" class="pricing-btn free-btn">Open for free →</a>
       </div>
@@ -456,17 +469,17 @@
           <div class="pricing-popular">Most popular</div>
         </div>
         <div class="pricing-price">£2.99 <span class="pricing-per">/ month</span></div>
-        <div class="pricing-desc">Or £29.99/year — save 16%. Cancel anytime.</div>
+        <div class="pricing-desc" style="margin-bottom:16px;">Or <strong style="color:var(--text);">£29.99/year</strong> <span style="background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.25);border-radius:10px;font-size:11px;padding:2px 8px;font-weight:600;white-space:nowrap;">Save 16%</span> &nbsp;·&nbsp; Cancel anytime.</div>
         <ul class="pricing-list">
           <li><span class="pc-check pro">✓</span> Everything in Free</li>
-          <li><span class="pc-check pro">✓</span> 48-hour hourly forecast</li>
+          <li><span class="pc-check pro">✓</span> 72-hour hourly forecast</li>
           <li><span class="pc-check pro">✓</span> 7-day best day planner</li>
           <li><span class="pc-check pro">✓</span> Golden Hour tab</li>
-          <li><span class="pc-check pro">✓</span> Restrictions map</li>
+          <li><span class="pc-check pro">✓</span> Restrictions map — schools, railways, military, nature reserves &amp; more</li>
           <li><span class="pc-check pro">✓</span> Flight Log + cloud sync</li>
           <li><span class="pc-check pro">✓</span> Export to Excel &amp; Google Sheets</li>
           <li><span class="pc-check pro">✓</span> Unlimited saved locations with live ratings</li>
-          <li><span class="pc-check pro">✓</span> Custom wind thresholds</li>
+          <li><span class="pc-check pro">✓</span> Custom drone profiles with adjustable wind thresholds, synced across devices</li>
           <li><span class="pc-check pro">✓</span> Fly window alerts</li>
         </ul>
         <a href="/app.html" class="pricing-btn pro-btn">Get Pro · £2.99/month</a>
@@ -525,7 +538,7 @@
           </svg>
         </div>
         <div class="platform-title">iOS</div>
-        <div class="platform-desc">No App Store needed — install directly from Safari in three taps.</div>
+        <div class="platform-desc">Install as a home screen app from Safari — no App Store needed. Works just like a native app.</div>
         <div class="platform-steps">
           <div class="platform-step"><div class="step-num">1</div><span>Open <strong style="color:var(--text);">dronechecker.co.uk</strong> in Safari</span></div>
           <div class="platform-step"><div class="step-num">2</div><span>Tap the <strong style="color:var(--text);">Share button ⎋</strong> at the bottom</span></div>

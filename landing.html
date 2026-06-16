@@ -143,12 +143,38 @@
     .footer-links a{color:var(--muted);transition:color .15s;}
     .footer-links a:hover{color:var(--text);}
 
+    /* ---- FEATURE PRO BADGE ---- */
+    .feat-pro-badge{font-size:10px;font-weight:700;color:var(--amber);background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:12px;padding:2px 8px;vertical-align:middle;margin-left:6px;font-family:var(--font-body);letter-spacing:.5px;text-transform:uppercase;}
+
+    /* ---- PRICING ---- */
+    .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:0;}
+    .pricing-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;position:relative;overflow:hidden;}
+    .pricing-card.pro-card{border-color:rgba(245,158,11,.35);}
+    .pro-card-glow{position:absolute;top:-80px;right:-80px;width:240px;height:240px;background:radial-gradient(ellipse,rgba(245,158,11,.12) 0%,transparent 70%);pointer-events:none;}
+    .pricing-tier{font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;color:var(--muted2);}
+    .pricing-tier.pro{color:var(--amber);}
+    .pricing-price{font-family:var(--font-head);font-size:38px;font-weight:800;line-height:1;margin-bottom:6px;}
+    .pricing-per{font-size:17px;font-weight:400;color:var(--muted2);}
+    .pricing-desc{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+    .pricing-popular{font-size:11px;font-weight:600;color:var(--amber);background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:3px 10px;}
+    .pricing-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+    .pricing-list li{font-size:14px;color:var(--muted2);display:flex;align-items:center;gap:10px;line-height:1.4;}
+    .pc-check{width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:700;}
+    .pc-check.free{background:rgba(34,197,94,.15);color:var(--green);}
+    .pc-check.pro{background:rgba(245,158,11,.15);color:var(--amber);}
+    .pricing-btn{display:block;text-align:center;padding:14px 20px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;transition:opacity .15s;}
+    .pricing-btn.free-btn{background:var(--bg3);color:var(--text);border:1px solid var(--border2);}
+    .pricing-btn.free-btn:hover{opacity:.8;}
+    .pricing-btn.pro-btn{background:var(--amber);color:#000;}
+    .pricing-btn.pro-btn:hover{opacity:.9;}
+
     /* ---- RESPONSIVE ---- */
     @media(max-width:768px){
       .spotlight{grid-template-columns:1fr;gap:28px;}
       .platforms{grid-template-columns:1fr;}
       nav .nav-links .nav-link{display:none;}
     }
+    @media(max-width:640px){.pricing-grid{grid-template-columns:1fr;}}
     @media(max-width:480px){
       .stats-row{grid-template-columns:1fr 1fr;}
       h1{letter-spacing:-1px;}
@@ -182,6 +208,7 @@
   </div>
   <div class="nav-links">
     <a href="#features" class="nav-link">Features</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
     <a href="#platforms" class="nav-link">Get the app</a>
     <a href="/faq.html" class="nav-link">FAQ</a>
     <a href="/app.html" class="nav-cta">Open app →</a>
@@ -228,7 +255,7 @@
   <div class="container">
     <div class="section-label">Features</div>
     <h2 class="section-title">Everything you need,<br/>before every flight</h2>
-    <p class="section-sub">DroneChecker brings together the data that matters into a single pre-flight check. No faff, no subscriptions, no nonsense.</p>
+    <p class="section-sub">DroneChecker brings together the data that matters into a single pre-flight check. No faff, no account needed. Free for every pilot.</p>
 
     <div class="feature-grid">
 
@@ -254,7 +281,7 @@
           </svg>
         </div>
         <div class="feature-title">Wind Analysis</div>
-        <div class="feature-desc">Live wind speed, direction and gusts in km/h or mph, with a colour-coded compass and 24-hour hourly wind forecast so you can see exactly when conditions improve.</div>
+        <div class="feature-desc">Live wind speed, direction and gusts in km/h or mph, with a colour-coded compass and hourly wind forecast so you can see exactly when conditions improve.</div>
       </div>
 
       <!-- Golden Hour — sun SVG -->
@@ -272,7 +299,7 @@
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
           </svg>
         </div>
-        <div class="feature-title">Golden Hour Calculator</div>
+        <div class="feature-title">Golden Hour Calculator<span class="feat-pro-badge">PRO</span></div>
         <div class="feature-desc">Astronomically precise golden hour, blue hour, sunrise and sunset times for your exact location. Live countdowns and a "LIVE NOW" indicator — no internet required.</div>
       </div>
 
@@ -295,8 +322,8 @@
             <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
           </svg>
         </div>
-        <div class="feature-title">Flight Logger</div>
-        <div class="feature-desc">Log every flight with date, location, drone, duration, conditions and notes. Export to CSV for insurance records, compliance documentation or personal reference.</div>
+        <div class="feature-title">Flight Logger<span class="feat-pro-badge">PRO</span></div>
+        <div class="feature-desc">Log every flight with date, location, drone, duration, conditions and notes. Export to Excel or Google Sheets for insurance records, compliance documentation or personal reference.</div>
       </div>
 
       <!-- 7-Day Planner — calendar SVG -->
@@ -312,7 +339,7 @@
             <line x1="16" y1="14" x2="16.01" y2="14"/>
           </svg>
         </div>
-        <div class="feature-title">7-Day Best Day Planner</div>
+        <div class="feature-title">7-Day Best Day Planner<span class="feat-pro-badge">PRO</span></div>
         <div class="feature-desc">Can't fly today? See the best day to fly across the next week at a glance. DroneChecker analyses the full forecast and highlights the optimal window for your drone.</div>
       </div>
 
@@ -382,8 +409,8 @@
         <div class="stat-label">Factors checked per rating</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num">24h</div>
-        <div class="stat-label">Hourly forecast</div>
+        <div class="stat-num">48h</div>
+        <div class="stat-label">Hourly forecast with Pro</div>
       </div>
       <div class="stat-card">
         <div class="stat-num">29</div>
@@ -395,12 +422,68 @@
 
 <div class="divider"></div>
 
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-label" style="text-align:center;">Pricing</div>
+    <h2 class="section-title" style="text-align:center;margin-bottom:8px;">Start free. Fly further with Pro.</h2>
+    <p class="section-sub" style="text-align:center;margin:0 auto 48px;">No credit card for the free tier. Upgrade any time, cancel any time.</p>
+    <div class="pricing-grid">
+
+      <!-- FREE -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Free</div>
+        <div class="pricing-price">£0 <span class="pricing-per">forever</span></div>
+        <div class="pricing-desc">No account needed. No card required.</div>
+        <ul class="pricing-list">
+          <li><span class="pc-check free">✓</span> Fly rating calibrated to your drone</li>
+          <li><span class="pc-check free">✓</span> Live weather dashboard</li>
+          <li><span class="pc-check free">✓</span> 6-hour hourly forecast</li>
+          <li><span class="pc-check free">✓</span> Wind radar map</li>
+          <li><span class="pc-check free">✓</span> 29-point pre-flight checklist</li>
+          <li><span class="pc-check free">✓</span> KP geomagnetic index</li>
+          <li><span class="pc-check free">✓</span> 2 saved locations</li>
+          <li><span class="pc-check free">✓</span> UK drone law &amp; rules</li>
+        </ul>
+        <a href="/app.html" class="pricing-btn free-btn">Open for free →</a>
+      </div>
+
+      <!-- PRO -->
+      <div class="pricing-card pro-card">
+        <div class="pro-card-glow"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div class="pricing-tier pro" style="margin-bottom:0;">Pro</div>
+          <div class="pricing-popular">Most popular</div>
+        </div>
+        <div class="pricing-price">£2.99 <span class="pricing-per">/ month</span></div>
+        <div class="pricing-desc">Or £29.99/year — save 16%. Cancel anytime.</div>
+        <ul class="pricing-list">
+          <li><span class="pc-check pro">✓</span> Everything in Free</li>
+          <li><span class="pc-check pro">✓</span> 48-hour hourly forecast</li>
+          <li><span class="pc-check pro">✓</span> 7-day best day planner</li>
+          <li><span class="pc-check pro">✓</span> Golden Hour tab</li>
+          <li><span class="pc-check pro">✓</span> Restrictions map</li>
+          <li><span class="pc-check pro">✓</span> Flight Log + cloud sync</li>
+          <li><span class="pc-check pro">✓</span> Export to Excel &amp; Google Sheets</li>
+          <li><span class="pc-check pro">✓</span> Unlimited saved locations with live ratings</li>
+          <li><span class="pc-check pro">✓</span> Custom wind thresholds</li>
+          <li><span class="pc-check pro">✓</span> Fly window alerts</li>
+        </ul>
+        <a href="/app.html" class="pricing-btn pro-btn">Get Pro · £2.99/month</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
 <!-- PLATFORMS -->
 <section id="platforms">
   <div class="container">
     <div class="section-label">Get the app</div>
     <h2 class="section-title">Available on Android and iPhone</h2>
-    <p class="section-sub">Free on every platform. No account, no subscription, no data collected.</p>
+    <p class="section-sub">Free on every platform. No account needed. Pro features from £2.99/month.</p>
     <div class="platforms">
 
       <!-- Android — Google Play wordmark style SVG -->
@@ -488,7 +571,7 @@ var observer=new IntersectionObserver(function(entries){
     }
   });
 },{threshold:.1});
-document.querySelectorAll('.feature-card,.stat-card,.platform-card,.spotlight').forEach(function(el){
+document.querySelectorAll('.feature-card,.stat-card,.platform-card,.spotlight,.pricing-card').forEach(function(el){
   el.style.opacity='0';
   el.style.transform='translateY(24px)';
   el.style.transition='opacity .5s ease,transform .5s ease';

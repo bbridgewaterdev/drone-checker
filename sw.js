@@ -1,4 +1,42 @@
-const CACHE = 'dronechecker-v87';
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+
+// Keep in sync with FIREBASE_CONFIG in app.html
+firebase.initializeApp({
+  apiKey:'AIzaSyB701OaJgb68Kct39Y7rfgQkw4fHSFsUb8',
+  authDomain:'dronechecker.co.uk',
+  projectId:'dronechecker',
+  storageBucket:'dronechecker.firebasestorage.app',
+  messagingSenderId:'62546050100',
+  appId:'1:62546050100:web:2236074e078a8eb4cbde61'
+});
+const messaging = firebase.messaging();
+
+// Background push — app not in foreground
+messaging.onBackgroundMessage(function(payload) {
+  const n = payload.notification || {};
+  self.registration.showNotification(n.title || 'DroneChecker', {
+    body: n.body || 'A fly window has opened at your alert location.',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-96.png',
+    data: payload.data || {}
+  });
+});
+
+self.addEventListener('notificationclick', function(e) {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/app.html';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(wcs) {
+      for (var i = 0; i < wcs.length; i++) {
+        if (wcs[i].url.includes('dronechecker') && 'focus' in wcs[i]) return wcs[i].focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
+
+const CACHE = 'dronechecker-v88';
 
 const STATIC = [
   '/',
@@ -33,7 +71,6 @@ self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => {
-        console.log('Clearing old cache:', k);
         return caches.delete(k);
       }))
     )

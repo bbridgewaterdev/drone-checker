@@ -30,7 +30,7 @@ const PRICE_ID_YEARLY  = 'price_1ThSwBBwELWfTObfULMmiYjp';
 const APP_URL = 'https://dronechecker.co.uk/app.html';
 
 // ---- Drone wind thresholds (km/h) — single source of truth in ../drone-thresholds.json ----
-const _DRONES_RAW = require('../drone-thresholds.json');
+const _DRONES_RAW = require('./drone-thresholds.json');
 const DRONE_THRESHOLDS = Object.fromEntries(
   Object.entries(_DRONES_RAW).map(([k, {name, ...t}]) => [k, t])
 );

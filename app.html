@@ -3486,7 +3486,8 @@ function photoScore(wind,gust,vis,cloud,wmo,lat,lng){
   if(rainWmo.indexOf(wmo)!==-1){visPts=Math.min(visPts,5);cloudPts=Math.min(cloudPts,8);}
   var total=sunPts+cloudPts+visPts+windPts;
   var grade,label,col;
-  if(total>=85){grade='A+';label='Exceptional light';col='#22c55e';}
+  if(sunPts===0){grade='F';label='Night — low ambient light';col='#ef4444';}
+  else if(total>=85){grade='A+';label='Exceptional light';col='#22c55e';}
   else if(total>=72){grade='A';label='Excellent light';col='#22c55e';}
   else if(total>=60){grade='B';label='Good light';col='#84cc16';}
   else if(total>=46){grade='C';label='Fair light';col='#f59e0b';}

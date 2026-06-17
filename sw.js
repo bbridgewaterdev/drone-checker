@@ -36,7 +36,7 @@ self.addEventListener('notificationclick', function(e) {
   );
 });
 
-const CACHE = 'dronechecker-v88';
+const CACHE = 'dronechecker-v89';
 
 const STATIC = [
   '/',
@@ -88,6 +88,12 @@ self.addEventListener('fetch', e => {
 
   // Never cache non-GET requests (POST etc. — Firebase auth, Stripe, etc.)
   if (e.request.method !== 'GET') return;
+
+  // Never cache the version probe — must always reflect the live deploy
+  if (url.endsWith('/version.json')) {
+    e.respondWith(fetch(e.request).catch(() => new Response('{}', { status: 503, headers: { 'Content-Type': 'application/json' } })));
+    return;
+  }
 
   // Never cache API calls — always fetch fresh
   if (url.includes('open-meteo.com') ||

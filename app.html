@@ -1145,7 +1145,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.0';
+var APP_VERSION='1.7.1';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -5016,6 +5016,20 @@ function openNotamLink(){window.open('https://nats-uk.ead-it.com/cms-nats/opencm
   if('serviceWorker' in navigator){
     window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').then(function(r){_swReg=r;}).catch(function(){});});
   }
+  // Auto-update: a TWA/PWA keeps app.html alive in memory, so new deploys never
+  // load unless the page is reloaded. Poll a tiny version.json whenever the app is
+  // foregrounded; if the deployed version differs from the running one, reload.
+  function _checkAppVersion(){
+    fetch('/version.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      if(d&&d.v&&d.v!==APP_VERSION){
+        if(sessionStorage.getItem('_vReload')===d.v)return; // guard against reload loops
+        sessionStorage.setItem('_vReload',d.v);
+        location.reload();
+      }
+    }).catch(function(){});
+  }
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')_checkAppVersion();});
+  _checkAppVersion();
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>

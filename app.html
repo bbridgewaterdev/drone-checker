@@ -4550,7 +4550,7 @@ function onAlertToggleChange(checked){
         if(err||!token){
           var msg=err?(err.code||err.message||String(err)):'no token returned';
           var friendlyMsg=msg.indexOf('permission-blocked')!==-1
-            ?'Notifications are blocked — check Android Settings → Apps → DroneChecker → Notifications'
+            ?'Notifications blocked ('+msg+') — try: Chrome → dronechecker.co.uk → Site settings → Reset permissions, then enable here'
             :'Could not enable notifications ('+msg+')';
           showToast(friendlyMsg,6000);
           console.error('[DC] FCM token error:',err);

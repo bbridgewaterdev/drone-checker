@@ -987,18 +987,24 @@
               <option value="flip">DJI Flip</option>
             </optgroup>
             <optgroup label="DJI Mini">
+              <option value="mini1">DJI Mini 1</option>
               <option value="mini4k">DJI Mini 4K</option>
-              <option value="mini2">DJI Mini 2</option>
+              <option value="mini2">DJI Mini 2 / Mini 2 SE</option>
+              <option value="mini3">DJI Mini 3</option>
               <option value="mini3pro">DJI Mini 3 Pro</option>
               <option value="mini4pro" selected>DJI Mini 4 Pro</option>
               <option value="mini5pro">DJI Mini 5 Pro</option>
             </optgroup>
             <optgroup label="DJI Air">
+              <option value="air2s">DJI Air 2S</option>
               <option value="air3">DJI Air 3 / 3S</option>
             </optgroup>
             <optgroup label="DJI Mavic">
               <option value="mavic3">DJI Mavic 3 Pro / Classic</option>
               <option value="mavic4pro">DJI Mavic 4 Pro</option>
+            </optgroup>
+            <optgroup label="DJI Phantom">
+              <option value="phantom4pro">DJI Phantom 4 Pro</option>
             </optgroup>
             <optgroup label="DJI FPV / 360">
               <option value="avata2">DJI Avata 2</option>
@@ -1007,6 +1013,14 @@
             <optgroup label="Autel">
               <option value="autel_nano">Autel EVO Nano+</option>
               <option value="autel_lite">Autel EVO Lite+</option>
+            </optgroup>
+            <optgroup label="Potensic">
+              <option value="potensic_atom_se">Potensic Atom SE</option>
+              <option value="potensic_atom2">Potensic Atom 2</option>
+            </optgroup>
+            <optgroup label="HoverAir">
+              <option value="hoverair_x1">HoverAir X1</option>
+              <option value="hoverair_x1pro">HoverAir X1 Pro / ProMax</option>
             </optgroup>
             <optgroup label="Other">
               <option value="generic_light">Generic Light (&lt;500g)</option>
@@ -1115,18 +1129,26 @@ var DRONES={
   neo:{name:'DJI Neo',windAmber:18,windRed:29,gustAmber:21,gustRed:29},
   neo2:{name:'DJI Neo 2',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   flip:{name:'DJI Flip',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
+  mini1:{name:'DJI Mini 1',windAmber:18,windRed:29,gustAmber:21,gustRed:29},
   mini4k:{name:'DJI Mini 4K',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
-  mini2:{name:'DJI Mini 2',windAmber:22,windRed:38,gustAmber:25,gustRed:38},
+  mini2:{name:'DJI Mini 2 / Mini 2 SE',windAmber:22,windRed:38,gustAmber:25,gustRed:38},
+  mini3:{name:'DJI Mini 3',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   mini3pro:{name:'DJI Mini 3 Pro',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   mini4pro:{name:'DJI Mini 4 Pro',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   mini5pro:{name:'DJI Mini 5 Pro',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
+  air2s:{name:'DJI Air 2S',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   air3:{name:'DJI Air 3 / 3S',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
   mavic3:{name:'DJI Mavic 3 Pro / Classic',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
   mavic4pro:{name:'DJI Mavic 4 Pro',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
+  phantom4pro:{name:'DJI Phantom 4 Pro',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   avata2:{name:'DJI Avata 2',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   avata360:{name:'DJI Avata 360',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   autel_nano:{name:'Autel EVO Nano+',windAmber:29,windRed:38,gustAmber:32,gustRed:38},
   autel_lite:{name:'Autel EVO Lite+',windAmber:33,windRed:43,gustAmber:36,gustRed:43},
+  potensic_atom_se:{name:'Potensic Atom SE',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
+  potensic_atom2:{name:'Potensic Atom 2',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
+  hoverair_x1:{name:'HoverAir X1',windAmber:18,windRed:29,gustAmber:21,gustRed:29},
+  hoverair_x1pro:{name:'HoverAir X1 Pro / ProMax',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
   generic_light:{name:'Generic Light (<500g)',windAmber:22,windRed:29,gustAmber:25,gustRed:29},
   generic_heavy:{name:'Generic Heavy (>500g)',windAmber:29,windRed:39,gustAmber:32,gustRed:39},
 };
@@ -1145,7 +1167,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.2';
+var APP_VERSION='1.7.3';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;

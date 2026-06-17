@@ -1149,7 +1149,7 @@ var APP_VERSION='1.7.0';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',tempMode='c',lastUpdated=null,windMap=null,windAnimFrame=null,ghRefreshTimer=null;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',tempMode='c',lastUpdated=null,windMap=null,windAnimFrame=null,ghRefreshTimer=null,wxLocUtcOffsetMs=0;
 var UK_FRZS=[
   {n:'Heathrow',i:'EGLL',lat:51.4775,lng:-0.4614,r:5000},
   {n:'Gatwick',i:'EGKK',lat:51.1537,lng:-0.1821,r:5000},
@@ -1439,6 +1439,8 @@ function fcRating(wind,gust,vis,wmo,precip,temp,kp,wind80,wind120){
 function dirLabel(deg){return['N','NE','E','SE','S','SW','W','NW'][Math.round(deg/45)%8];}
 function pad(n){return(n<10?'0':'')+n;}
 function fmtTime(d){return pad(d.getHours())+':'+pad(d.getMinutes());}
+// Convert a location-local time string from Open-Meteo to actual UTC ms for comparisons
+function locEntryMs(ts){return new Date(ts+'Z').getTime()-wxLocUtcOffsetMs;}
 var DRONE_SVG='<svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" rx="20" fill="#0f172a"/><circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="3.5"/><line x1="50" y1="50" x2="21" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="21" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="21" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><line x1="50" y1="50" x2="79" y2="79" stroke="white" stroke-width="9" stroke-linecap="round"/><circle cx="21" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="21" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="21" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><circle cx="79" cy="79" r="13" fill="none" stroke="#38bdf8" stroke-width="4"/><rect x="14" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(-45 21 21)"/><rect x="72" y="18" width="14" height="6" rx="2" fill="white" transform="rotate(45 79 21)"/><rect x="14" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(45 21 79)"/><rect x="72" y="76" width="14" height="6" rx="2" fill="white" transform="rotate(-45 79 79)"/><circle cx="50" cy="50" r="11" fill="white"/><circle cx="50" cy="50" r="5.5" fill="#0f172a"/></svg>';
 function loadUnits(){
   try{var s=localStorage.getItem('dc_units');if(s==='imperial')unitMode='mph';else if(s==='ms')unitMode='ms';else if(s==='kts')unitMode='kts';else unitMode='kmh';}catch(e){}
@@ -2390,7 +2392,7 @@ function updateCondBanner(){
   var lbl=condEl.querySelector('.cond-lbl');
   if(lbl){lbl.className='cond-lbl '+cond.lvl;lbl.textContent=cond.label;}
   var curPrecipB=0;
-  if(wxData.hourly&&wxData.hourly.precipitation_probability){var _now=new Date(),_nowH=_now.getHours();for(var _pi=0;_pi<wxData.hourly.time.length;_pi++){var _pt=new Date(wxData.hourly.time[_pi]);if(_pt.getHours()===_nowH&&_pt.getDate()===_now.getDate()){curPrecipB=Math.round(wxData.hourly.precipitation_probability[_pi]||0);break;}}}
+  if(wxData.hourly&&wxData.hourly.precipitation_probability){var _nowSlot=Math.floor(Date.now()/3600000);for(var _pi=0;_pi<wxData.hourly.time.length;_pi++){if(Math.floor(locEntryMs(wxData.hourly.time[_pi])/3600000)===_nowSlot){curPrecipB=Math.round(wxData.hourly.precipitation_probability[_pi]||0);break;}}}
   var desc=condEl.querySelector('.cond-desc');
   if(desc)desc.textContent=qualifyPrecipDesc(cond.desc,curPrecipB);
 }
@@ -2427,6 +2429,7 @@ function fetchAll(){
   fetchOpenMeteo(uLat,uLng)
     .then(function(data){
       wxData=data;
+      wxLocUtcOffsetMs=(data.utc_offset_seconds||0)*1000;
       // Stamp lastUpdated only once live data confirmed for these coordinates
       lastUpdated=new Date();
       var updEl=document.getElementById('updated-txt');
@@ -2667,13 +2670,14 @@ function getKpForTime(t){
 function getHourlyRatings(numHours){
   if(!wxData||!wxData.hourly)return[];
   var hours=wxData.hourly,now=new Date();
-  var windowStart=new Date(now);windowStart.setMinutes(0,0,0);
-  var windowEnd=new Date(windowStart.getTime()+numHours*3600000);
+  var windowStartMs=Math.floor(Date.now()/3600000)*3600000;
+  var windowEndMs=windowStartMs+numHours*3600000;
   var results=[];
   for(var i=0;i<hours.time.length;i++){
     var t=new Date(hours.time[i]);
-    if(t<windowStart||t>=windowEnd)continue;
-    var cur=wxData.current,isNow=cur&&t.getHours()===now.getHours()&&t.getDate()===now.getDate();
+    var tMs=locEntryMs(hours.time[i]);
+    if(tMs<windowStartMs||tMs>=windowEndMs)continue;
+    var cur=wxData.current,isNow=cur&&Math.floor(tMs/3600000)===Math.floor(Date.now()/3600000);
     var w=isNow?(cur.wind_speed_10m||0):(hours.wind_speed_10m[i]||0);
     var g=isNow?(cur.wind_gusts_10m||0):(hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0);
     var v=isNow?(cur.visibility||10000):(hours.visibility?hours.visibility[i]||10000:10000);
@@ -2917,10 +2921,9 @@ function renderDash(){
   // Get current hour precipitation probability from hourly data
   var curPrecip=0;
   if(wxData.hourly&&wxData.hourly.precipitation_probability){
-    var now=new Date(),nowH=now.getHours();
+    var _nowSlot2=Math.floor(Date.now()/3600000);
     for(var pi=0;pi<wxData.hourly.time.length;pi++){
-      var pt=new Date(wxData.hourly.time[pi]);
-      if(pt.getHours()===nowH&&pt.getDate()===now.getDate()){curPrecip=Math.round(wxData.hourly.precipitation_probability[pi]||0);break;}
+      if(Math.floor(locEntryMs(wxData.hourly.time[pi])/3600000)===_nowSlot2){curPrecip=Math.round(wxData.hourly.precipitation_probability[pi]||0);break;}
     }
   }
   var rPrecip=tilePrecip(curPrecip);
@@ -3131,7 +3134,7 @@ function renderFc(){
   var hours=wxData.hourly,now=new Date(),rows='',count=0;
   var maxHours=isPro()?72:6;
   for(var i=0;i<hours.time.length&&count<maxHours;i++){
-    var t=new Date(hours.time[i]);if(t<now)continue;
+    var t=new Date(hours.time[i]);if(locEntryMs(hours.time[i])<Date.now())continue;
     var wmo=hours.weather_code[i],info=wmoInfo(wmo,t),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);
     var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
     var w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
@@ -3266,15 +3269,14 @@ function initWindMap(){
   var hours=wxData.hourly,now=new Date(),fcRows='',count=0;
   var trendSum=0,trendCount=0;
   for(var i=0;i<hours.time.length;i++){
-    var ht=new Date(hours.time[i]);
-    if(ht>now&&trendCount<3){trendSum+=hours.wind_speed_10m[i]||0;trendCount++;}
+    if(locEntryMs(hours.time[i])>Date.now()&&trendCount<3){trendSum+=hours.wind_speed_10m[i]||0;trendCount++;}
   }
   var avgAhead=trendCount>0?trendSum/trendCount:rawWind;
   var trendDiff=avgAhead-rawWind;
   var trendTxt=trendDiff>3?'📈 Increasing':trendDiff<-3?'📉 Easing':'→ Steady';
   var trendCol=trendDiff>3?'#f59e0b':trendDiff<-3?'#22c55e':'rgba(241,245,249,.55)';
   for(var i=0;i<hours.time.length&&count<8;i++){
-    var t=new Date(hours.time[i]);if(t<now)continue;
+    var t=new Date(hours.time[i]);if(locEntryMs(hours.time[i])<Date.now())continue;
     var hWind=hours.wind_speed_10m[i]||0;
     var hGust=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
     var hw=spd(hWind),hg=spd(hGust);

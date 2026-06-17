@@ -14,8 +14,8 @@ const TILE_SIZE  = 0.25;
 const COORD_DP   = 5;
 const UK_BBOX    = '49.5,-8.2,58.8,1.8';
 const OUTPUT_DIR = path.join(__dirname, '..', 'hazard-tiles', 'v1');
-const OVERPASS   = 'https://overpass-api.de/api/interpreter';
-const FALLBACK   = 'https://overpass.kumi.systems/api/interpreter';
+const OVERPASS   = 'https://overpass.kumi.systems/api/interpreter';
+const FALLBACK   = 'https://overpass-api.de/api/interpreter';
 
 const HAZARD_TYPES = [
   { key: 'school',   query: 'way["amenity"="school"];relation["amenity"="school"];' },
@@ -71,7 +71,7 @@ async function fetchOverpass(hazardKey, queryLines) {
   let rateLimits = 0;
 
   for (const url of [OVERPASS, FALLBACK]) {
-    const label = url.includes('kumi') ? 'fallback' : 'primary';
+    const label = url.includes('kumi') ? 'primary' : 'fallback';
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) {
         const wait = 15000 * attempt;
@@ -110,8 +110,10 @@ async function fetchOverpass(hazardKey, queryLines) {
 
 function addFeaturesToTiles(features, hazardKey) {
   let tileEntries = 0;
+  const touched = new Set();
   for (const f of features) {
     if (!f.geometry) continue;
+    if (f.geometry.type === 'Point' || f.geometry.type === 'MultiPoint') continue;
     const bbox = featureBbox(f);
     if (!bbox) continue;
     const p = f.properties || {};
@@ -126,9 +128,11 @@ function addFeaturesToTiles(features, hazardKey) {
       if (f.id && tiles[k].some(x => x.id === f.id && x.properties.hazard === hazardKey)) continue;
       tiles[k].push(slim);
       tileEntries++;
+      touched.add(k);
     }
   }
   console.log(`  → ${features.length} features, ${tileEntries} tile-entries, ${Object.keys(tiles).length} tiles total`);
+  return touched;
 }
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -166,8 +170,23 @@ async function main() {
     try {
       const osmJson = await fetchOverpass(key, queryLines);
       const geojson = osmtogeojson(osmJson);
-      addFeaturesToTiles(geojson.features, key);
+      const touched = addFeaturesToTiles(geojson.features, key);
       newlyCompleted.push(key);
+      // Incremental save — write touched tiles and update manifest immediately
+      const allSoFar = [...completedKeys, ...newlyCompleted];
+      let savedCount = 0;
+      for (const k of touched) {
+        fs.writeFileSync(path.join(OUTPUT_DIR, `${k}.geojson`),
+          JSON.stringify({ type: 'FeatureCollection', features: tiles[k] }));
+        savedCount++;
+      }
+      fs.writeFileSync(manifestPath, JSON.stringify({
+        generated: new Date().toISOString(),
+        tileCount: Object.keys(tiles).length,
+        tileSize: TILE_SIZE,
+        completedKeys: allSoFar,
+      }));
+      console.log(`  Saved ${savedCount} tile files — manifest: [${allSoFar.join(', ')}]`);
     } catch (err) {
       console.error(`  SKIPPED ${key}: ${err.message}`);
     }
@@ -176,30 +195,12 @@ async function main() {
 
   const allCompleted = [...completedKeys, ...newlyCompleted];
 
-  if (!Object.keys(tiles).length) {
-    console.log('\nNo tile data — nothing written.');
+  if (!allCompleted.length) {
+    console.log('\nNo progress — nothing written.');
     return;
   }
 
-  // Write tile files
-  const keys = Object.keys(tiles);
-  console.log(`\nWriting ${keys.length} tile files…`);
-  let written = 0;
-  for (const k of keys) {
-    fs.writeFileSync(path.join(OUTPUT_DIR, `${k}.geojson`),
-      JSON.stringify({ type: 'FeatureCollection', features: tiles[k] }));
-    if (++written % 100 === 0) process.stdout.write(`  ${written}/${keys.length}\r`);
-  }
-
-  fs.writeFileSync(manifestPath, JSON.stringify({
-    generated: new Date().toISOString(),
-    tileCount: keys.length,
-    tileSize: TILE_SIZE,
-    completedKeys: allCompleted,
-  }));
-
-  console.log(`\nDone — ${written} tiles written`);
-  console.log(`Completed: ${allCompleted.join(', ')}`);
+  console.log(`\nCompleted: ${allCompleted.join(', ')}`);
 
   const remaining = HAZARD_TYPES.map(h => h.key).filter(k => !allCompleted.includes(k));
   if (remaining.length) {

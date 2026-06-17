@@ -68,5 +68,4 @@ node_modules/
 # dataconnect generated files
 .dataconnect
 
-# Generated hazard tiles (reproducible via scripts/generate-hazard-tiles.js)
-hazard-tiles/
+# hazard-tiles/ committed so nightly automation can back them up to GitHub

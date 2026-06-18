@@ -69,3 +69,4 @@ node_modules/
 .dataconnect
 
 # hazard-tiles/ committed so nightly automation can back them up to GitHub
+.DS_Store

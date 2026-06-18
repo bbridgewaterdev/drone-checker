@@ -35,6 +35,26 @@
           {
             "key": "Strict-Transport-Security",
             "value": "max-age=31536000; includeSubDomains"
+          },
+          {
+            "key": "X-Frame-Options",
+            "value": "DENY"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          },
+          {
+            "key": "Permissions-Policy",
+            "value": "geolocation=(self), camera=(), microphone=(), payment=(self)"
+          },
+          {
+            "key": "Content-Security-Policy-Report-Only",
+            "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://unpkg.com https://apis.google.com https://www.googletagmanager.com https://www.google-analytics.com https://js.stripe.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://us-central1-dronechecker.cloudfunctions.net https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.postcodes.io https://nominatim.openstreetmap.org https://services.swpc.noaa.gov https://*.stadiamaps.com https://*.googleapis.com https://*.google-analytics.com https://www.googletagmanager.com https://*.stripe.com; frame-src https://js.stripe.com https://*.stripe.com https://dronechecker.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self'; manifest-src 'self'; form-action 'self' https://*.stripe.com"
           }
         ]
       },
@@ -61,6 +81,10 @@
       {
         "source": "/hazard-tiles/**",
         "headers": [{"key": "Cache-Control","value": "public, max-age=604800, stale-while-revalidate=86400"}]
+      },
+      {
+        "source": "/app.js",
+        "headers": [{"key": "Cache-Control","value": "no-cache"}]
       }
     ],
     "rewrites": [

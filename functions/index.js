@@ -36,22 +36,35 @@ const DRONE_THRESHOLDS = Object.fromEntries(
 );
 const DEFAULT_THRESHOLDS = {windAmber:29,windRed:39,gustAmber:32,gustRed:39};
 
-// ---- In-memory rate limiter for createCheckoutSession ----
-// Limits each uid to MAX_CHECKOUT_CALLS per CHECKOUT_WINDOW_MS
-const _checkoutCalls = new Map();
+// ---- Durable rate limiter for createCheckoutSession ----
+// Limits each uid to MAX_CHECKOUT_CALLS per CHECKOUT_WINDOW_MS. Backed by Firestore
+// so the limit holds across the many horizontally-scaled function instances (an
+// in-memory Map only limits per-instance and resets on cold start). The Admin SDK
+// bypasses security rules; the deny-all rule keeps clients out of this collection.
 const CHECKOUT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_CHECKOUT_CALLS = 10;
 
-function isCheckoutRateLimited(uid) {
+async function isCheckoutRateLimited(uid) {
+  const db = admin.firestore();
+  const ref = db.collection('checkoutRateLimits').doc(uid);
   const now = Date.now();
-  const entry = _checkoutCalls.get(uid);
-  if (!entry || now - entry.ts > CHECKOUT_WINDOW_MS) {
-    _checkoutCalls.set(uid, {ts: now, count: 1});
+  try {
+    return await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      const data = snap.exists ? snap.data() : null;
+      if (!data || (now - (data.windowStart || 0)) > CHECKOUT_WINDOW_MS) {
+        tx.set(ref, {windowStart: now, count: 1});
+        return false;
+      }
+      if ((data.count || 0) >= MAX_CHECKOUT_CALLS) return true;
+      tx.update(ref, {count: (data.count || 0) + 1});
+      return false;
+    });
+  } catch (e) {
+    // Fail open — a Firestore hiccup should not block a legitimate checkout.
+    console.error('Rate limit check failed (allowing):', e);
     return false;
   }
-  if (entry.count >= MAX_CHECKOUT_CALLS) return true;
-  entry.count++;
-  return false;
 }
 
 // WMO codes that indicate bad weather — matches app.html flyRating logic
@@ -85,8 +98,37 @@ function isWithinWindow(windowStart, windowEnd, utcOffsetMinutes, now) {
   if (windowStart <= windowEnd) {
     return localHour >= windowStart && localHour < windowEnd;
   }
-  // Wraps midnight
   return localHour >= windowStart || localHour < windowEnd;
+}
+
+function getLocalHour(now, utcOffsetMinutes) {
+  return (now.getUTCHours() + Math.round((utcOffsetMinutes || 0) / 60) + 24) % 24;
+}
+
+function getLocalDay(now, utcOffsetMinutes) {
+  const localMs = now.getTime() + (utcOffsetMinutes || 0) * 60000;
+  return new Date(localMs).getUTCDay(); // 0=Sun, 6=Sat
+}
+
+async function sendFcmData(fcmToken, title, body, uid) {
+  const message = {
+    data: { title, body, url: '/app.html' },
+    token: fcmToken,
+  };
+  try {
+    await admin.messaging().send(message);
+    console.log(`FCM sent to uid=${uid}: ${title}`);
+    return true;
+  } catch (err) {
+    console.error(`FCM send failed uid=${uid}:`, err.code, err.message);
+    if (
+      err.code === 'messaging/registration-token-not-registered' ||
+      err.code === 'messaging/invalid-registration-token'
+    ) {
+      return 'stale';
+    }
+    return false;
+  }
 }
 
 // ----------------------------------------------------------------
@@ -118,12 +160,17 @@ exports.createCheckoutSession = onRequest(
       return;
     }
 
+    if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      res.status(400).json({error: 'Invalid email'});
+      return;
+    }
+
     if (decodedToken.uid !== uid) {
       res.status(403).json({error: 'Forbidden'});
       return;
     }
 
-    if (isCheckoutRateLimited(uid)) {
+    if (await isCheckoutRateLimited(uid)) {
       res.status(429).json({error: 'Too many requests. Please try again later.'});
       return;
     }
@@ -298,9 +345,10 @@ exports.stripeWebhook = onRequest(
         break;
       }
 
-      // Payment failed or subscription cancelled — revoke Pro
-      case 'customer.subscription.deleted':
-      case 'invoice.payment_failed': {
+      // Subscription fully cancelled — revoke Pro.
+      // Stripe fires this only once dunning/retries are exhausted, so it is
+      // the authoritative revocation signal.
+      case 'customer.subscription.deleted': {
         const obj = event.data.object;
         const subId = obj.subscription || obj.id;
         if (subId) {
@@ -318,6 +366,13 @@ exports.stripeWebhook = onRequest(
             console.error('Could not revoke Pro:', e);
           }
         }
+        break;
+      }
+
+      // A single failed charge — do NOT revoke. Stripe's dunning will retry,
+      // and customer.subscription.deleted handles the final cancellation.
+      case 'invoice.payment_failed': {
+        console.log('invoice.payment_failed received — deferring to Stripe dunning / subscription.deleted');
         break;
       }
 
@@ -361,13 +416,28 @@ exports.sendFlightAlerts = onSchedule(
       if (!alertSettings || !alertSettings.enabled || !fcmToken) return;
       if (!alertSettings.lat || !alertSettings.lng) return;
 
-      // Check time window
+      const utcOffset = alertSettings.utcOffsetMinutes || 0;
+      const localHour = getLocalHour(now, utcOffset);
+      const localDay  = getLocalDay(now, utcOffset);
+
+      // Active days filter (default: all days)
+      const activeDays = alertSettings.activeDays;
+      const isActiveDay = !activeDays || !activeDays.length || activeDays.includes(localDay);
+
+      // Morning forecast check
+      const morningEnabled = alertSettings.morningForecastEnabled;
+      const morningHour    = alertSettings.morningForecastHour !== undefined ? alertSettings.morningForecastHour : 7;
+      const isMorningTime  = !!(morningEnabled && isActiveDay && localHour === morningHour);
+
+      // Fly-window check
       const windowStart = alertSettings.windowStart !== undefined ? alertSettings.windowStart : 6;
       const windowEnd   = alertSettings.windowEnd   !== undefined ? alertSettings.windowEnd   : 21;
-      if (!isWithinWindow(windowStart, windowEnd, alertSettings.utcOffsetMinutes || 0, now)) return;
+      const inWindow    = isActiveDay && isWithinWindow(windowStart, windowEnd, utcOffset, now);
 
-      // Resolve thresholds: user's custom > built-in for their drone > default
-      const droneKey = alertSettings.droneKey || 'mini4pro';
+      if (!isMorningTime && !inWindow) return;
+
+      // Resolve thresholds
+      const droneKey  = alertSettings.droneKey || 'mini4pro';
       const customThr = data.windThresholds && data.windThresholds[droneKey];
       const thresholds = customThr || DRONE_THRESHOLDS[droneKey] || DEFAULT_THRESHOLDS;
 
@@ -381,20 +451,16 @@ exports.sendFlightAlerts = onSchedule(
         if (!resp.ok) throw new Error('Open-Meteo HTTP ' + resp.status);
         const wx = await resp.json();
         const h = wx.hourly;
-
-        // Find the index for the current hour
         const nowTs = Math.floor(now.getTime() / 1000);
         let idx = 0;
         for (let i = 0; i < h.time.length; i++) {
           if (h.time[i] <= nowTs) idx = i; else break;
         }
-
-        const wind  = h.wind_speed_10m ? (h.wind_speed_10m[idx] || 0) : 0;
-        const gust  = h.wind_gusts_10m ? (h.wind_gusts_10m[idx] || 0) : 0;
-        const vis   = h.visibility     ? (h.visibility[idx]     || 10000) : 10000;
-        const wmo   = h.weather_code   ? (h.weather_code[idx]   || 0) : 0;
-        const precip = h.precipitation_probability ? (h.precipitation_probability[idx] || 0) : 0;
-
+        const wind   = h.wind_speed_10m            ? (h.wind_speed_10m[idx]            || 0)     : 0;
+        const gust   = h.wind_gusts_10m            ? (h.wind_gusts_10m[idx]            || 0)     : 0;
+        const vis    = h.visibility                 ? (h.visibility[idx]                || 10000) : 10000;
+        const wmo    = h.weather_code              ? (h.weather_code[idx]              || 0)     : 0;
+        const precip = h.precipitation_probability ? (h.precipitation_probability[idx] || 0)     : 0;
         rating = alertFlyRating(wind, gust, vis, wmo, precip, thresholds);
         console.log(`uid=${uid} wind=${wind} gust=${gust} vis=${vis} wmo=${wmo} precip=${precip} → ${rating}`);
       } catch (err) {
@@ -402,47 +468,89 @@ exports.sendFlightAlerts = onSchedule(
         return;
       }
 
+      const locationName = alertSettings.locationName || 'your saved location';
       const minRating = alertSettings.minRating || 'green';
-      const isGood = minRating === 'amber'
-        ? (rating === 'green' || rating === 'amber')
-        : (rating === 'green');
-
+      const isGood  = minRating === 'amber' ? (rating === 'green' || rating === 'amber') : (rating === 'green');
       const wasGood = data.alertLastRatingGood === true;
+      const ratingWord = rating === 'green' ? 'good' : rating === 'amber' ? 'marginal' : 'poor';
 
-      // Only notify on transition from not-good → good
       const update = {
-        alertLastRatingGood: isGood,
         alertLastCheckedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
 
-      if (isGood && !wasGood) {
-        const locationName = alertSettings.locationName || 'your saved location';
-        const ratingWord = rating === 'green' ? 'good' : 'marginal';
-        const message = {
-          data: {
-            title: `✈ Fly window open — ${locationName}`,
-            body: `Conditions are now ${ratingWord} for flying. Tap to check before you launch.`,
-            url: '/app.html',
-          },
-          token: fcmToken,
-        };
+      let staleToken = false;
 
-        try {
-          await admin.messaging().send(message);
-          update.alertLastSentAt = admin.firestore.FieldValue.serverTimestamp();
-          console.log(`Notification sent to uid=${uid} (${locationName})`);
-        } catch (err) {
-          console.error(`FCM send failed for uid=${uid}:`, err.code, err.message);
-          // Stale token — disable alerts so we stop trying
-          if (
-            err.code === 'messaging/registration-token-not-registered' ||
-            err.code === 'messaging/invalid-registration-token'
-          ) {
-            update.fcmToken = admin.firestore.FieldValue.delete();
-            update['alertSettings.enabled'] = false;
-            update.alertAutoDisabled = true;
+      // ---- Morning forecast ----
+      if (isMorningTime) {
+        const lastMorning = data.alertMorningLastSentAt;
+        const hrsSinceMorning = lastMorning
+          ? (now.getTime() - lastMorning.toDate().getTime()) / 3600000
+          : 999;
+        if (hrsSinceMorning >= 23) {
+          const body = isGood
+            ? `Conditions look ${ratingWord} for flying at ${locationName} today. Tap to check.`
+            : `Flying conditions at ${locationName} look ${ratingWord} today. Check back later.`;
+          const result = await sendFcmData(fcmToken, `☀️ Morning forecast — ${locationName}`, body, uid);
+          if (result === 'stale') { staleToken = true; }
+          else if (result) { update.alertMorningLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
+        }
+      }
+
+      // ---- Fly-window notifications ----
+      if (inWindow && !staleToken) {
+        update.alertLastRatingGood = isGood;
+
+        if (isGood && !wasGood) {
+          // Window just opened
+          const result = await sendFcmData(
+            fcmToken,
+            `✈ Fly window open — ${locationName}`,
+            `Conditions are now ${ratingWord} for flying. Tap to check before you launch.`,
+            uid
+          );
+          if (result === 'stale') { staleToken = true; }
+          else if (result) {
+            update.alertLastSentAt = admin.firestore.FieldValue.serverTimestamp();
+            update.alertRepeatLastSentAt = admin.firestore.FieldValue.serverTimestamp();
+          }
+
+        } else if (!isGood && wasGood && alertSettings.notifyOnClose) {
+          // Window just closed
+          const result = await sendFcmData(
+            fcmToken,
+            `⛅ Conditions changing — ${locationName}`,
+            `Flying conditions at ${locationName} have deteriorated. Check back later.`,
+            uid
+          );
+          if (result === 'stale') { staleToken = true; }
+          else if (result) {
+            update.alertRepeatLastSentAt = admin.firestore.FieldValue.delete();
+          }
+
+        } else if (isGood && wasGood && alertSettings.repeatIntervalHours > 0) {
+          // Still good — repeat reminder
+          const repeatLast = data.alertRepeatLastSentAt || data.alertLastSentAt;
+          const hrsSinceRepeat = repeatLast
+            ? (now.getTime() - repeatLast.toDate().getTime()) / 3600000
+            : 999;
+          if (hrsSinceRepeat >= alertSettings.repeatIntervalHours) {
+            const result = await sendFcmData(
+              fcmToken,
+              `🔔 Still flyable — ${locationName}`,
+              `Conditions remain ${ratingWord} at ${locationName}. Tap to check.`,
+              uid
+            );
+            if (result === 'stale') { staleToken = true; }
+            else if (result) { update.alertRepeatLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
           }
         }
+      }
+
+      // Stale token — disable alerts
+      if (staleToken) {
+        update.fcmToken = admin.firestore.FieldValue.delete();
+        update['alertSettings.enabled'] = false;
+        update.alertAutoDisabled = true;
       }
 
       await doc.ref.set(update, {merge: true});

@@ -18,7 +18,7 @@ messaging.onBackgroundMessage(function(payload) {
   self.registration.showNotification(d.title || 'DroneChecker', {
     body: d.body || 'A fly window has opened at your alert location.',
     icon: '/icons/icon-192.png',
-    badge: '/icons/icon-96.png',
+    badge: '/icons/badge-96.png',
     data: {url: d.url || '/app.html'}
   });
 });
@@ -36,12 +36,13 @@ self.addEventListener('notificationclick', function(e) {
   );
 });
 
-const CACHE = 'dronechecker-v89';
+const CACHE = 'dronechecker-v91';
 
 const STATIC = [
   '/',
   '/index.html',
   '/app.html',
+  '/app.js',
   '/faq.html',
   '/privacy.html',
   '/terms.html',

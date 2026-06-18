@@ -14,8 +14,12 @@ const TILE_SIZE  = 0.25;
 const COORD_DP   = 5;
 const UK_BBOX    = '49.5,-8.2,58.8,1.8';
 const OUTPUT_DIR = path.join(__dirname, '..', 'hazard-tiles', 'v1');
-const OVERPASS   = 'https://overpass.kumi.systems/api/interpreter';
-const FALLBACK   = 'https://overpass-api.de/api/interpreter';
+const ENDPOINTS = [
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass-api.de/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
+];
 
 const HAZARD_TYPES = [
   { key: 'school',   query: 'way["amenity"="school"];relation["amenity"="school"];' },
@@ -70,8 +74,8 @@ async function fetchOverpass(hazardKey, queryLines) {
   const body = `[out:json][timeout:180][bbox:${UK_BBOX}];\n(\n${queryLines}\n);\nout body;\n>;\nout skel qt;`;
   let rateLimits = 0;
 
-  for (const url of [OVERPASS, FALLBACK]) {
-    const label = url.includes('kumi') ? 'primary' : 'fallback';
+  for (const url of ENDPOINTS) {
+    const label = new URL(url).hostname;
     for (let attempt = 0; attempt < 3; attempt++) {
       if (attempt > 0) {
         const wait = 15000 * attempt;
@@ -81,7 +85,7 @@ async function fetchOverpass(hazardKey, queryLines) {
       try {
         const res = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': '*/*' },
           body: 'data=' + encodeURIComponent(body),
           signal: AbortSignal.timeout(210_000),
         });
@@ -90,16 +94,16 @@ async function fetchOverpass(hazardKey, queryLines) {
           const wait = Math.min(60_000 * rateLimits, 300_000);
           console.log(`  Rate limited — waiting ${wait/1000}s…`);
           await sleep(wait);
-          if (attempt === 2) break; // give up on this endpoint, try the other
+          if (attempt === 2) break;
           continue;
         }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        console.log(`  ✓ ${json.elements.length} elements`);
+        console.log(`  ✓ ${json.elements.length} elements from ${label}`);
         return json;
       } catch (err) {
-        console.error(`  ✗ ${err.message}`);
-        if (attempt === 2 && url === FALLBACK) throw err;
+        console.error(`  ✗ ${label}: ${err.message}`);
+        if (attempt === 2 && url === ENDPOINTS[ENDPOINTS.length - 1]) throw err;
       }
     }
   }

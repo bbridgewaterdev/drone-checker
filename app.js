@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.7';
+var APP_VERSION='1.7.8';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -2306,14 +2306,26 @@ function initWindMap(){
   var wind=spd(rawWind),gust=spd(rawGust);
   var deg=c.wind_direction_10m||0;
   var d=getDrone();
-  var colHex=rawWind>=d.windRed?'#ef4444':rawWind>=d.windAmber?'#f59e0b':'#22c55e';
-  var col=rawWind>=d.windRed?'var(--red)':rawWind>=d.windAmber?'var(--amber)':'var(--green)';
-  var label=rawWind>=d.windRed?'Too Strong':rawWind>=d.windAmber?'Caution':'Flyable';
+  function aHex(v,g){g=g||0;return(v>=d.windRed||g>=d.gustRed)?'#ef4444':(v>=d.windAmber||g>=d.gustAmber)?'#f59e0b':'#22c55e';}
+  function aLbl(v,g){g=g||0;return(v>=d.windRed||g>=d.gustRed)?'✕':(v>=d.windAmber||g>=d.gustAmber)?'⚠':'✓';}
+  var colHex=aHex(rawWind,rawGust);
+  var col=(rawWind>=d.windRed||rawGust>=d.gustRed)?'var(--red)':(rawWind>=d.windAmber||rawGust>=d.gustAmber)?'var(--amber)':'var(--green)';
+  var label=(rawWind>=d.windRed||rawGust>=d.gustRed)?'Too Strong':(rawWind>=d.windAmber||rawGust>=d.gustAmber)?'Caution':'Flyable';
   var dirStr=dirLabel(deg);
   var lat=uLat||51.5074,lng=uLng||(-0.1278);
-  function aHex(v){return v>=d.windRed?'#ef4444':v>=d.windAmber?'#f59e0b':'#22c55e';}
-  function aLbl(v){return v>=d.windRed?'✕':v>=d.windAmber?'⚠':'✓';}
   var col80=aHex(raw80),col120=aHex(raw120);
+  function windWhy(){
+    if(rawGust>=d.gustRed)return{lvl:'red',txt:'Gusts of '+gust+' '+spdU()+' exceed your drone\'s red limit ('+spd(d.gustRed)+' '+spdU()+').'};
+    if(rawWind>=d.windRed)return{lvl:'red',txt:'Wind at 10m ('+wind+' '+spdU()+') exceeds your drone\'s red limit ('+spd(d.windRed)+' '+spdU()+').'};
+    if(raw120>=d.windRed)return{lvl:'red',txt:'Wind at 120m ('+spd(raw120)+' '+spdU()+') exceeds your drone\'s red limit ('+spd(d.windRed)+' '+spdU()+').'};
+    if(raw80>=d.windRed)return{lvl:'red',txt:'Wind at 80m ('+spd(raw80)+' '+spdU()+') exceeds your drone\'s red limit ('+spd(d.windRed)+' '+spdU()+').'};
+    if(rawGust>=d.gustAmber)return{lvl:'amber',txt:'Gusts of '+gust+' '+spdU()+' exceed the caution threshold ('+spd(d.gustAmber)+' '+spdU()+').'};
+    if(rawWind>=d.windAmber)return{lvl:'amber',txt:'Wind at 10m ('+wind+' '+spdU()+') exceeds the caution threshold ('+spd(d.windAmber)+' '+spdU()+').'};
+    if(raw120>=d.windAmber)return{lvl:'amber',txt:'Wind at 120m ('+spd(raw120)+' '+spdU()+') exceeds the caution threshold ('+spd(d.windAmber)+' '+spdU()+').'};
+    if(raw80>=d.windAmber)return{lvl:'amber',txt:'Wind at 80m ('+spd(raw80)+' '+spdU()+') exceeds the caution threshold ('+spd(d.windAmber)+' '+spdU()+').'};
+    return null;
+  }
+  var why=windWhy();
   var maxAlt=Math.max(rawWind,raw80,raw120,d.windRed);
   function altBar(v){return Math.min(Math.round((v/maxAlt)*100),100)+'%';}
   var hours=wxData.hourly,now=new Date(),fcRows='',count=0;
@@ -2365,12 +2377,13 @@ function initWindMap(){
       '</div>'+
       '<div style="position:absolute;bottom:24px;left:12px;z-index:1000;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 11px;pointer-events:none;min-width:148px;">'+
         '<div style="font-size:9px;font-weight:700;color:rgba(241,245,249,.35);letter-spacing:.5px;margin-bottom:6px;">WIND BY ALTITUDE</div>'+
-        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">10m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(rawWind)+';height:100%;background:'+colHex+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+colHex+';text-align:right;flex-shrink:0;">'+wind+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+colHex+';flex-shrink:0;">'+aLbl(rawWind)+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">10m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(rawWind)+';height:100%;background:'+colHex+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+colHex+';text-align:right;flex-shrink:0;">'+wind+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+colHex+';flex-shrink:0;">'+aLbl(rawWind,rawGust)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">80m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw80)+';height:100%;background:'+col80+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col80+';text-align:right;flex-shrink:0;">'+spd(raw80)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col80+';flex-shrink:0;">'+aLbl(raw80)+'</div></div>'+
         '<div style="display:flex;align-items:center;gap:6px;"><div style="width:26px;font-size:10px;color:rgba(241,245,249,.4);text-align:right;flex-shrink:0;">120m</div><div style="flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;"><div style="width:'+altBar(raw120)+';height:100%;background:'+col120+';border-radius:2px;"></div></div><div style="width:52px;font-size:11px;font-weight:600;color:'+col120+';text-align:right;flex-shrink:0;">'+spd(raw120)+' '+spdU()+'</div><div style="width:12px;font-size:10px;font-weight:700;color:'+col120+';flex-shrink:0;">'+aLbl(raw120)+'</div></div>'+
       '</div>'+
       '<button onclick="locateMeOnMap()" title="Centre map on my location" aria-label="Centre map on my location" style="position:absolute;bottom:90px;right:10px;z-index:1000;background:#334155;border:1px solid rgba(255,255,255,.2);border-radius:9px;width:34px;height:34px;cursor:pointer;color:#f1f5f9;display:flex;align-items:center;justify-content:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg></button>'+
     '</div>'+
+    (why?'<div style="display:flex;align-items:center;gap:7px;margin:10px 12px 0;padding:8px 11px;border-radius:8px;background:'+(why.lvl==='red'?'rgba(239,68,68,.12)':'rgba(245,158,11,.12)')+';border:1px solid '+(why.lvl==='red'?'rgba(239,68,68,.35)':'rgba(245,158,11,.35)')+';"><span style="font-size:13px;flex-shrink:0;">'+(why.lvl==='red'?'✕':'⚠')+'</span><span style="font-size:12px;color:'+(why.lvl==='red'?'#ef4444':'#f59e0b')+';line-height:1.4;">'+why.txt+'</span></div>':'')+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 12px;">'+
       '<div class="wx-tile"><div class="wx-lbl">Wind</div><div id="wtile-spd" class="wx-val" style="font-size:16px;">'+wind+'</div><div id="wtile-unit" class="wx-sub">'+spdU()+'</div></div>'+
       '<div class="wx-tile"><div class="wx-lbl">Gusts</div><div class="wx-val" style="font-size:16px;">'+gust+'</div><div class="wx-sub">'+spdU()+' · 10m only</div></div>'+

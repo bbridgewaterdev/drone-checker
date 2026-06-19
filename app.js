@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.8';
+var APP_VERSION='1.7.9';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -2328,7 +2328,20 @@ function initWindMap(){
   var why=windWhy();
   var maxAlt=Math.max(rawWind,raw80,raw120,d.windRed);
   function altBar(v){return Math.min(Math.round((v/maxAlt)*100),100)+'%';}
-  var hours=wxData.hourly,now=new Date(),fcRows='',count=0;
+  var hours=wxData.hourly,now=new Date(),count=0;
+  var nowLvl=flyRating(rawWind,rawGust,c.visibility||10000,c.weather_code||0,currentKp,c.temperature_2m!=null?c.temperature_2m:15,raw80,raw120).lvl;
+  var nowCol=nowLvl==='red'?'var(--red)':nowLvl==='amber'?'var(--amber)':'var(--green)';
+  var nowGustCol=rawGust>=d.gustRed?'var(--red)':rawGust>=d.gustAmber?'var(--amber)':'var(--muted)';
+  var fcRows='<div class="wind-hr-row" data-w10="'+rawWind+'" data-w80="'+raw80+'" data-w120="'+raw120+'" data-g="'+rawGust+'" style="padding:10px 0;border-bottom:1px solid var(--border);border-left:2px solid #06b6d4;">'+
+    '<div style="display:flex;align-items:center;gap:10px;padding-left:6px;">'+
+      '<div class="whr-time" style="color:#06b6d4;">Now</div>'+
+      '<div style="flex:1;">'+
+        '<div class="whr-spd" style="font-size:13px;font-weight:600;color:'+nowCol+';">'+wind+' '+spdU()+'</div>'+
+        '<div class="whr-gust" style="font-size:11px;color:'+nowGustCol+';">Gusts '+gust+' '+spdU()+' &middot; 10m only</div>'+
+      '</div>'+
+      '<div class="fc-dot '+nowLvl+'" style="flex-shrink:0;"></div>'+
+    '</div>'+
+  '</div>';
   var trendSum=0,trendCount=0;
   for(var i=0;i<hours.time.length;i++){
     if(locEntryMs(hours.time[i])>Date.now()&&trendCount<3){trendSum+=hours.wind_speed_10m[i]||0;trendCount++;}

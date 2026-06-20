@@ -562,6 +562,81 @@ exports.sendFlightAlerts = onSchedule(
 );
 
 // ----------------------------------------------------------------
+// sendIdRenewalReminders
+// Runs daily. Sends a push reminder before each Pro user's CAA
+// Operator ID / Flyer ID date, based on their configured lead time
+// (default 14 days). Dedup is keyed on the expiry date itself, so
+// updating the date after renewing naturally re-arms the reminder.
+// ----------------------------------------------------------------
+exports.sendIdRenewalReminders = onSchedule(
+  {schedule: 'every 24 hours', timeZone: 'UTC', timeoutSeconds: 60},
+  async () => {
+    const db = admin.firestore();
+    const now = new Date();
+    const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+
+    function daysUntil(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return Math.round((Date.UTC(y, m - 1, d) - todayUTC) / 86400000);
+    }
+
+    let snapshot;
+    try {
+      snapshot = await db.collection('users').where('isPro', '==', true).get();
+    } catch (err) {
+      console.error('sendIdRenewalReminders: Firestore query failed:', err);
+      return;
+    }
+
+    if (snapshot.empty) return;
+
+    const tasks = snapshot.docs.map(async (doc) => {
+      const uid = doc.id;
+      const data = doc.data();
+      const ids = data.droneIds;
+      const fcmToken = data.fcmToken;
+      if (!ids || !fcmToken) return;
+
+      const checks = [
+        {key: 'operator', label: 'Operator ID', expiry: ids.operatorIdExpiry, days: ids.operatorReminderDays, verb: 'renews'},
+        {key: 'flyer', label: 'Flyer ID', expiry: ids.flyerIdExpiry, days: ids.flyerReminderDays, verb: 'expires'},
+      ];
+
+      const update = {};
+      let staleToken = false;
+
+      for (const c of checks) {
+        if (!c.expiry || staleToken) continue;
+        const lead = c.days || 14;
+        const remaining = daysUntil(c.expiry);
+        if (remaining > lead) continue;
+        if (ids[`${c.key}ReminderSentForExpiry`] === c.expiry) continue;
+
+        const body = remaining < 0
+          ? `Your ${c.label} ${c.verb === 'renews' ? 'renewal' : 'expiry'} was ${Math.abs(remaining)} day${Math.abs(remaining) === 1 ? '' : 's'} ago.`
+          : remaining === 0
+            ? `Your ${c.label} ${c.verb} today.`
+            : `Your ${c.label} ${c.verb} in ${remaining} day${remaining === 1 ? '' : 's'}.`;
+
+        const result = await sendFcmData(fcmToken, `🪪 ${c.label} reminder`, body, uid);
+        if (result === 'stale') { staleToken = true; }
+        else if (result) { update[`droneIds.${c.key}ReminderSentForExpiry`] = c.expiry; }
+      }
+
+      if (staleToken) {
+        update.fcmToken = admin.firestore.FieldValue.delete();
+      }
+      if (Object.keys(update).length) {
+        await doc.ref.set(update, {merge: true});
+      }
+    });
+
+    await Promise.allSettled(tasks);
+    console.log(`sendIdRenewalReminders done — ${snapshot.docs.length} Pro users scanned`);
+  }
+);
+
+// ----------------------------------------------------------------
 // cleanupExpiredAccounts
 // Runs weekly. Deletes Firestore documents for non-Pro users whose
 // subscription was revoked 90+ days ago, or who signed up but never

@@ -490,9 +490,9 @@
     .pro-upsell-t{font-size:12px;font-weight:700;color:#f59e0b;}
     .pro-upsell-s{font-size:11px;color:var(--muted);}
     .pro-account-card{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:var(--radius);padding:14px;margin:12px 12px 0;display:flex;align-items:center;gap:12px;}
-    .pro-account-name{font-size:13px;font-weight:600;color:var(--text);}
+    .pro-account-name{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .pro-account-badge{font-size:10px;color:#f59e0b;font-weight:600;}
-    .pro-signout-btn{margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;flex-shrink:0;}
+    .pro-signout-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;}
     @media(max-height:700px){.pro-sheet{max-height:95vh;}}
     @media(max-width:520px){
       .drone-bar{flex-wrap:nowrap;gap:4px;padding:7px 10px;}
@@ -862,8 +862,13 @@
 
         <!-- Email / Password form -->
         <div class="pro-email-form" id="pro-email-form">
+          <div id="pro-signup-fields" style="display:none;gap:8px;">
+            <input class="pro-input" id="pro-first-name-input" type="text" placeholder="First name" autocomplete="given-name" style="flex:1;">
+            <input class="pro-input" id="pro-last-name-input" type="text" placeholder="Last name" autocomplete="family-name" style="flex:1;">
+          </div>
           <input class="pro-input" id="pro-email-input" type="email" placeholder="Email address" autocomplete="email" inputmode="email">
           <input class="pro-input" id="pro-password-input" type="password" placeholder="Password (min 6 characters)" autocomplete="current-password">
+          <input class="pro-input" id="pro-confirm-password-input" type="password" placeholder="Confirm password" autocomplete="new-password" style="display:none;">
           <div class="pro-forgot" onclick="handleForgotPassword()">Forgot password?</div>
           <div class="pro-auth-error" id="pro-auth-error"></div>
           <button class="pro-email-btn" id="pro-email-btn" onclick="handleEmailSignIn()">Sign in</button>
@@ -1238,6 +1243,15 @@
         <button id="settings-cd-btn" class="settings-btn" onclick="closeSettings();openCustomDroneOverlay();">Manage</button>
       </div>
 
+      <div class="settings-section">Pilot &amp; Registration</div>
+      <div class="settings-row" id="settings-droneid-row">
+        <div id="settings-droneid-label">
+          <div class="settings-row-label">Operator &amp; Flyer ID</div>
+          <div class="settings-row-sub" id="settings-droneid-sub">Add your IDs for renewal reminders</div>
+        </div>
+        <button id="settings-droneid-btn" class="settings-btn" onclick="closeSettings();openDroneIdSheet();">Configure</button>
+      </div>
+
       <div class="settings-section">Notifications</div>
       <div class="settings-row" id="settings-alert-row">
         <div id="settings-alert-label">
@@ -1367,6 +1381,55 @@
         <div style="padding:16px 20px 4px;">
           <button onclick="saveAlertSettingsFromSheet()" style="width:100%;background:#f59e0b;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Save alert settings</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Operator & Flyer ID Sheet -->
+<div class="settings-overlay" id="droneid-sheet-overlay" onclick="if(event.target===this)closeDroneIdSheet()">
+  <div class="settings-sheet">
+    <div class="settings-header">
+      <div class="settings-title">Operator &amp; Flyer ID <span style="font-size:9px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.12);border-radius:3px;padding:1px 5px;vertical-align:middle;">PRO</span></div>
+      <button class="settings-close" onclick="closeDroneIdSheet()">×</button>
+    </div>
+    <div class="settings-body">
+      <div style="padding:10px 20px 4px;font-size:12px;color:var(--muted);line-height:1.6;">Store your CAA IDs and we'll send a push reminder before each renewal.</div>
+
+      <div class="settings-section">Operator ID</div>
+      <div style="padding:0 20px;">
+        <input class="log-input" id="droneid-operator-id" type="text" placeholder="e.g. GBR-OP-A1B2C3D4"/>
+        <div class="log-field-lbl">Renews on</div>
+        <input class="log-input" id="droneid-operator-expiry" type="date"/>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Remind me</div>
+        <select class="settings-select" id="droneid-operator-reminder">
+          <option value="3">3 days before</option>
+          <option value="7">7 days before</option>
+          <option value="14" selected>14 days before</option>
+          <option value="30">30 days before</option>
+        </select>
+      </div>
+
+      <div class="settings-section">Flyer ID</div>
+      <div style="padding:0 20px;">
+        <input class="log-input" id="droneid-flyer-id" type="text" placeholder="e.g. GBR-FL-X9Y8Z7"/>
+        <div class="log-field-lbl">Expires on</div>
+        <input class="log-input" id="droneid-flyer-expiry" type="date"/>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Remind me</div>
+        <select class="settings-select" id="droneid-flyer-reminder">
+          <option value="3">3 days before</option>
+          <option value="7">7 days before</option>
+          <option value="14" selected>14 days before</option>
+          <option value="30">30 days before</option>
+        </select>
+      </div>
+
+      <div style="padding:16px 20px 4px;">
+        <button onclick="saveDroneIdsFromSheet()" style="width:100%;background:#06b6d4;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;">Save</button>
       </div>
     </div>
   </div>

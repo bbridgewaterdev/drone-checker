@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.9';
+var APP_VERSION='1.7.10';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -429,11 +429,11 @@ function showProWelcomeScreen(){
     setTimeout(function(){if(el.parentNode)el.remove();},500);
   },10000);
 }
-function showToast(msg){
+function showToast(msg,duration){
   var old=document.querySelector('.toast');if(old)old.remove();
   var t=document.createElement('div');t.className='toast';t.textContent=msg;
   document.body.appendChild(t);
-  setTimeout(function(){t.style.opacity='0';setTimeout(function(){if(t.parentNode)t.remove();},300);},2200);
+  setTimeout(function(){t.style.opacity='0';setTimeout(function(){if(t.parentNode)t.remove();},300);},duration||2200);
 }
 var _refreshing=false;
 function manualRefresh(){
@@ -2037,6 +2037,7 @@ function renderDash(){
   var updEl=document.getElementById('updated-txt');if(updEl)updEl.textContent=updTxt;
   _writeDash(
     '<div class="cond '+cond.lvl+'"><div class="cond-ring '+cond.lvl+'">'+DRONE_SVG+'</div><div style="flex:1;"><div class="cond-lbl '+cond.lvl+'">'+cond.label+'</div><div class="cond-desc">'+condDesc+'</div></div><button onclick="shareConditions()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Share</button></div>'+
+    renderIdReminderBanner()+
     renderBestTimeCard()+renderFlightWindowCard()+
     proUpsellStrip()+
     renderWeatherCard()+
@@ -2974,6 +2975,7 @@ var GOOGLE_CLIENT_ID='62546050100-qkdhvc5g77a1kn423u44jrisgmakgigg.apps.googleus
 // ---- DEV MODE: bypasses real Google/Firebase sign-in for local testing ----
 
 var proUser=null;
+var _droneIds=null;
 var _lastCloudSync=null; // timestamp of last successful cloud sync
 
 function loadProUser(){
@@ -3029,14 +3031,20 @@ function toggleEmailMode(mode){
   var btn=document.getElementById('pro-email-btn');
   var toggle=document.getElementById('pro-auth-toggle');
   var pwInput=document.getElementById('pro-password-input');
+  var signupFields=document.getElementById('pro-signup-fields');
+  var confirmInput=document.getElementById('pro-confirm-password-input');
   if(mode==='signup'){
     if(btn)btn.textContent='Create account';
     if(toggle)toggle.innerHTML='Already have one? <a onclick="toggleEmailMode(&apos;signin&apos;)">Sign in</a>';
-    if(pwInput)pwInput.placeholder='Password (min 6 characters)';
+    if(pwInput){pwInput.placeholder='Password (min 6 characters)';pwInput.autocomplete='new-password';}
+    if(signupFields)signupFields.style.display='flex';
+    if(confirmInput)confirmInput.style.display='';
   } else {
     if(btn)btn.textContent='Sign in';
     if(toggle)toggle.innerHTML='No account? <a onclick="toggleEmailMode(&apos;signup&apos;)">Create one</a>';
-    if(pwInput)pwInput.placeholder='Password';
+    if(pwInput){pwInput.placeholder='Password';pwInput.autocomplete='current-password';}
+    if(signupFields)signupFields.style.display='none';
+    if(confirmInput)confirmInput.style.display='none';
   }
   setEmailError('');
 }
@@ -3049,11 +3057,18 @@ function setEmailError(msg,isSuccess){
 function handleEmailSignIn(){
   var email=(document.getElementById('pro-email-input')||{}).value||'';
   var password=(document.getElementById('pro-password-input')||{}).value||'';
+  var firstName=(document.getElementById('pro-first-name-input')||{}).value||'';
+  var lastName=(document.getElementById('pro-last-name-input')||{}).value||'';
+  var confirmPassword=(document.getElementById('pro-confirm-password-input')||{}).value||'';
   var btn=document.getElementById('pro-email-btn');
 
-  email=email.trim();
+  email=email.trim();firstName=firstName.trim();lastName=lastName.trim();
   if(!email||!password){setEmailError('Please enter your email and password.');return;}
   if(password.length<6){setEmailError('Password must be at least 6 characters.');return;}
+  if(_emailMode==='signup'){
+    if(!firstName||!lastName){setEmailError('Please enter your first and last name.');return;}
+    if(password!==confirmPassword){setEmailError('Passwords do not match.');return;}
+  }
 
   setEmailError('');
   if(btn){btn.disabled=true;btn.textContent='Please wait…';}
@@ -3066,6 +3081,7 @@ function handleEmailSignIn(){
     authFn.then(function(result){
       var fbUser=result.user;
       if(_emailMode==='signup'){
+        fbUser.updateProfile({displayName:(firstName+' '+lastName).trim()}).catch(function(){});
         fbUser.sendEmailVerification().catch(function(){});
         firebase.auth().signOut();
         if(btn){btn.disabled=false;btn.textContent='Create account';}
@@ -3263,6 +3279,7 @@ function onGoogleSignInSuccess(user){
     syncFlightsFromCloud(user.uid,null);
     syncThresholdsFromCloud(user.uid,null);
     syncAlertSettingsFromCloud(user.uid,null);
+    syncDroneIdsFromCloud(user.uid,function(){_lastDashSig=null;if(wxData)renderDash();});
     syncFavsFromCloud(user.uid,null);
   } else {
     showProUpgrade();
@@ -3386,7 +3403,7 @@ function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return'<di
 '</div>'+
 '<div style="background:linear-gradient(90deg,#f59e0b 0%,#f97316 100%);border-radius:var(--radius-sm);padding:10px;text-align:center;font-size:13px;font-weight:700;color:#000;letter-spacing:.01em;">Get Pro &middot; &pound;2.99/mo &rarr;</div>'+
 '</div>';}
-function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;"><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button><button class="pro-signout-btn" onclick="openBillingPortal()" style="font-size:10px;opacity:.7;">Manage subscription</button></div></div>';}
+function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;min-width:0;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;"><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button><button class="pro-signout-btn" onclick="openBillingPortal()" style="font-size:10px;opacity:.7;">Manage subscription</button></div></div>';}
 
 // ---- SETTINGS ----
 function openSettings(){
@@ -3418,6 +3435,15 @@ function openSettings(){
     if(pro){cdBtn.textContent='Manage';cdBtn.style.cssText='';cdBtn.onclick=function(){closeSettings();openCustomDroneOverlay();};}
     else{cdBtn.textContent='PRO';cdBtn.style.cssText=proStyle;cdBtn.onclick=openProOverlay;}
   }
+  // Operator & Flyer ID row
+  var didLabel=document.getElementById('settings-droneid-label');
+  var didBtn=document.getElementById('settings-droneid-btn');
+  if(didLabel)didLabel.style.opacity=pro?'':'0.6';
+  if(didBtn){
+    if(pro){didBtn.textContent='Configure';didBtn.style.cssText='';didBtn.onclick=function(){closeSettings();openDroneIdSheet();};}
+    else{didBtn.textContent='PRO';didBtn.style.cssText=proStyle;didBtn.onclick=openProOverlay;}
+  }
+  if(pro)updateSettingsDroneIdRow();
   // Flight alerts row
   var alertLabel=document.getElementById('settings-alert-label');
   var alertBtn=document.getElementById('settings-alert-btn');
@@ -3544,7 +3570,7 @@ function populateAlertSheet(){
   var configSection=document.getElementById('alert-config-section');
   if(toggle)toggle.checked=isEnabled;
   if(statusSub){
-    if(!('PushManager' in window)||!('Notification' in window))statusSub.textContent='Not supported on this browser';
+    if(!('PushManager' in window)||!('Notification' in window))statusSub.textContent=(isIOS&&!isStandalone)?'Add to Home Screen first (iOS)':'Not supported on this browser';
     else if(Notification.permission==='denied')statusSub.textContent='Blocked — enable in browser/OS settings';
     else if(isEnabled)statusSub.textContent='Active';
     else statusSub.textContent='Off — toggle to enable';
@@ -3635,7 +3661,11 @@ function populateAlertMorning(s){
 function onAlertToggleChange(checked){
   if(checked){
     if(!('PushManager' in window)||!('Notification' in window)){
-      showToast('Push notifications not supported on this browser');
+      if(isIOS&&!isStandalone){
+        showToast('Add DroneChecker to your Home Screen first (Share → Add to Home Screen) — notifications only work in the installed app on iPhone',6000);
+      } else {
+        showToast('Push notifications not supported on this browser');
+      }
       var t=document.getElementById('alert-enabled-toggle');if(t)t.checked=false;return;
     }
     if(Notification.permission==='denied'){
@@ -3729,6 +3759,105 @@ function saveAlertSettingsFromSheet(){
   showToast('Alert saved — you\'ll be notified when conditions open up');
   closeAlertSheet();
   updateSettingsAlertRow();
+}
+
+// ---- Operator & Flyer ID ----
+function loadDroneIdsLocal(){try{return JSON.parse(localStorage.getItem('dc_drone_ids'))||null;}catch(e){return null;}}
+function saveDroneIdsLocal(d){try{localStorage.setItem('dc_drone_ids',JSON.stringify(d));}catch(e){}}
+function syncDroneIdsFromCloud(uid,cb){
+  if(!_fbLoaded||!uid){cb&&cb(null);return;}
+  var db=firebase.firestore();
+  db.collection('users').doc(uid).get().then(function(snap){
+    if(snap.exists){
+      var d=snap.data();
+      if(d.droneIds){_droneIds=d.droneIds;saveDroneIdsLocal(_droneIds);}
+    }
+    cb&&cb(_droneIds);
+  }).catch(function(){cb&&cb(null);});
+}
+function saveDroneIdsToCloud(ids){
+  if(!proUser||!proUser.uid||!_fbLoaded)return;
+  var db=firebase.firestore();
+  db.collection('users').doc(proUser.uid).set({droneIds:ids},{merge:true}).catch(function(){});
+}
+
+function openDroneIdSheet(){
+  if(!isPro()){openProOverlay();return;}
+  if(proUser&&proUser.uid)syncDroneIdsFromCloud(proUser.uid,null);
+  var overlay=document.getElementById('droneid-sheet-overlay');
+  if(!overlay)return;
+  overlay.classList.add('open');
+  populateDroneIdSheet();
+}
+function closeDroneIdSheet(){
+  var overlay=document.getElementById('droneid-sheet-overlay');
+  if(overlay)overlay.classList.remove('open');
+}
+function populateDroneIdSheet(){
+  var d=_droneIds||loadDroneIdsLocal()||{};
+  var opId=document.getElementById('droneid-operator-id');if(opId)opId.value=d.operatorId||'';
+  var opExp=document.getElementById('droneid-operator-expiry');if(opExp)opExp.value=d.operatorIdExpiry||'';
+  var opRem=document.getElementById('droneid-operator-reminder');if(opRem)opRem.value=String(d.operatorReminderDays||14);
+  var flId=document.getElementById('droneid-flyer-id');if(flId)flId.value=d.flyerId||'';
+  var flExp=document.getElementById('droneid-flyer-expiry');if(flExp)flExp.value=d.flyerIdExpiry||'';
+  var flRem=document.getElementById('droneid-flyer-reminder');if(flRem)flRem.value=String(d.flyerReminderDays||14);
+}
+function saveDroneIdsFromSheet(){
+  var ids={
+    operatorId:(document.getElementById('droneid-operator-id')||{}).value.trim(),
+    operatorIdExpiry:(document.getElementById('droneid-operator-expiry')||{}).value,
+    operatorReminderDays:parseInt((document.getElementById('droneid-operator-reminder')||{}).value||14,10),
+    flyerId:(document.getElementById('droneid-flyer-id')||{}).value.trim(),
+    flyerIdExpiry:(document.getElementById('droneid-flyer-expiry')||{}).value,
+    flyerReminderDays:parseInt((document.getElementById('droneid-flyer-reminder')||{}).value||14,10)
+  };
+  _droneIds=ids;
+  saveDroneIdsLocal(ids);
+  saveDroneIdsToCloud(ids);
+  showToast('Saved — we\'ll remind you before each renewal');
+  closeDroneIdSheet();
+  updateSettingsDroneIdRow();
+  _lastDashSig=null;
+  if(wxData)renderDash();
+}
+function updateSettingsDroneIdRow(){
+  var subEl=document.getElementById('settings-droneid-sub');
+  if(!subEl)return;
+  var d=_droneIds||loadDroneIdsLocal();
+  var n=d?((d.operatorId?1:0)+(d.flyerId?1:0)):0;
+  subEl.textContent=n===2?'Both IDs saved':n===1?'1 of 2 IDs saved':'Add your IDs for renewal reminders';
+}
+function renderIdReminderBanner(){
+  if(!isPro())return'';
+  var d=_droneIds||loadDroneIdsLocal();
+  if(!d)return'';
+  var todayUTC=Date.UTC(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+  function daysUntil(dateStr){
+    var p=dateStr.split('-');
+    return Math.round((Date.UTC(+p[0],+p[1]-1,+p[2])-todayUTC)/86400000);
+  }
+  var checks=[
+    {label:'Operator ID',expiry:d.operatorIdExpiry,days:d.operatorReminderDays||14,verb:'renews'},
+    {label:'Flyer ID',expiry:d.flyerIdExpiry,days:d.flyerReminderDays||14,verb:'expires'}
+  ];
+  var due=[];
+  checks.forEach(function(c){
+    if(!c.expiry)return;
+    var remaining=daysUntil(c.expiry);
+    if(remaining<=c.days)due.push({label:c.label,remaining:remaining,verb:c.verb});
+  });
+  if(!due.length)return'';
+  due.sort(function(a,b){return a.remaining-b.remaining;});
+  var first=due[0];
+  var txt;
+  if(first.remaining<0)txt=first.label+' '+(first.verb==='renews'?'renewal':'expiry')+' was '+Math.abs(first.remaining)+' day'+(Math.abs(first.remaining)===1?'':'s')+' ago';
+  else if(first.remaining===0)txt=first.label+' '+first.verb+' today';
+  else txt=first.label+' '+first.verb+' in '+first.remaining+' day'+(first.remaining===1?'':'s');
+  if(due.length>1)txt+=' (+'+(due.length-1)+' more)';
+  return '<div class="card" style="cursor:pointer;display:flex;align-items:flex-start;gap:9px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);" onclick="openDroneIdSheet()">'+
+    '<span style="font-size:14px;flex-shrink:0;">⚠</span>'+
+    '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#f59e0b;">'+esc(txt)+'</div><div style="font-size:11px;color:#f59e0b;opacity:.85;margin-top:1px;">Tap to update your IDs</div></div>'+
+    '</div>';
 }
 
 function updateSettingsAlertRow(){

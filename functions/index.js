@@ -35,6 +35,7 @@ const DRONE_THRESHOLDS = Object.fromEntries(
   Object.entries(_DRONES_RAW).map(([k, {name, ...t}]) => [k, t])
 );
 const DEFAULT_THRESHOLDS = {windAmber:29,windRed:39,gustAmber:32,gustRed:39};
+const MAX_ALERTS = 3; // cap on simultaneous alert profiles per user — keep in sync with app.js
 
 // ---- Durable rate limiter for createCheckoutSession ----
 // Limits each uid to MAX_CHECKOUT_CALLS per CHECKOUT_WINDOW_MS. Backed by Firestore
@@ -390,6 +391,149 @@ exports.stripeWebhook = onRequest(
 // weather at their saved location and sends an FCM push if a
 // flyable window has just opened (transition from not-good to good).
 // ----------------------------------------------------------------
+// ----------------------------------------------------------------
+// evaluateAndNotifyAlert
+// Core per-alert decision logic shared by both the multi-alert path
+// and the legacy single-alert path below — given one alert's config
+// and its last-known notification state, fetches current conditions,
+// decides whether to send, and returns whichever state fields changed
+// (the caller persists them at whichever field path matches its shape:
+// `alertState.<id>.*` for the new array, flat `alertXxx` for legacy).
+// ----------------------------------------------------------------
+async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, uid, now) {
+  if (!alert.lat || !alert.lng) return {newState: null, staleToken: false};
+
+  const utcOffset = alert.utcOffsetMinutes || 0;
+  const localHour = getLocalHour(now, utcOffset);
+  const localDay  = getLocalDay(now, utcOffset);
+
+  // Active days filter (default: all days)
+  const activeDays = alert.activeDays;
+  const isActiveDay = !activeDays || !activeDays.length || activeDays.includes(localDay);
+
+  // Morning forecast check
+  const morningEnabled = alert.morningForecastEnabled;
+  const morningHour    = alert.morningForecastHour !== undefined ? alert.morningForecastHour : 7;
+  const isMorningTime  = !!(morningEnabled && isActiveDay && localHour === morningHour);
+
+  // Fly-window check
+  const windowStart = alert.windowStart !== undefined ? alert.windowStart : 6;
+  const windowEnd   = alert.windowEnd   !== undefined ? alert.windowEnd   : 21;
+  const inWindow    = isActiveDay && isWithinWindow(windowStart, windowEnd, utcOffset, now);
+
+  if (!isMorningTime && !inWindow) return {newState: null, staleToken: false};
+
+  // Resolve thresholds
+  const droneKey  = alert.droneKey || 'mini4pro';
+  const customThr = windThresholds && windThresholds[droneKey];
+  const thresholds = customThr || DRONE_THRESHOLDS[droneKey] || DEFAULT_THRESHOLDS;
+
+  // Fetch current conditions from Open-Meteo
+  let rating = 'red';
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${alert.lat}&longitude=${alert.lng}` +
+      `&hourly=wind_speed_10m,wind_gusts_10m,visibility,weather_code,precipitation_probability` +
+      `&wind_speed_unit=kmh&timezone=UTC&forecast_days=1&timeformat=unixtime`;
+    const resp = await fetch(url, {signal: AbortSignal.timeout(8000)});
+    if (!resp.ok) throw new Error('Open-Meteo HTTP ' + resp.status);
+    const wx = await resp.json();
+    const h = wx.hourly;
+    const nowTs = Math.floor(now.getTime() / 1000);
+    let idx = 0;
+    for (let i = 0; i < h.time.length; i++) {
+      if (h.time[i] <= nowTs) idx = i; else break;
+    }
+    const wind   = h.wind_speed_10m            ? (h.wind_speed_10m[idx]            || 0)     : 0;
+    const gust   = h.wind_gusts_10m            ? (h.wind_gusts_10m[idx]            || 0)     : 0;
+    const vis    = h.visibility                 ? (h.visibility[idx]                || 10000) : 10000;
+    const wmo    = h.weather_code              ? (h.weather_code[idx]              || 0)     : 0;
+    const precip = h.precipitation_probability ? (h.precipitation_probability[idx] || 0)     : 0;
+    rating = alertFlyRating(wind, gust, vis, wmo, precip, thresholds);
+    console.log(`uid=${uid} wind=${wind} gust=${gust} vis=${vis} wmo=${wmo} precip=${precip} → ${rating}`);
+  } catch (err) {
+    console.error(`Weather fetch failed for uid ${uid}:`, err.message);
+    return {newState: null, staleToken: false};
+  }
+
+  const locationName = alert.locationName || 'your saved location';
+  const droneName = alert.droneName || 'Your drone';
+  const minRating = alert.minRating || 'green';
+  const isGood  = minRating === 'amber' ? (rating === 'green' || rating === 'amber') : (rating === 'green');
+  const wasGood = state.lastRatingGood === true;
+  const ratingWord = rating === 'green' ? 'good' : rating === 'amber' ? 'marginal' : 'poor';
+
+  const newState = {lastCheckedAt: admin.firestore.FieldValue.serverTimestamp()};
+  let staleToken = false;
+
+  // ---- Morning forecast ----
+  if (isMorningTime) {
+    const lastMorning = state.morningLastSentAt;
+    const hrsSinceMorning = lastMorning
+      ? (now.getTime() - lastMorning.toDate().getTime()) / 3600000
+      : 999;
+    if (hrsSinceMorning >= 23) {
+      const body = isGood
+        ? `${droneName}: conditions look ${ratingWord} for flying at ${locationName} today. Tap to check.`
+        : `${droneName}: flying conditions at ${locationName} look ${ratingWord} today. Check back later.`;
+      const result = await sendFcmData(fcmToken, `☀️ Morning forecast — ${locationName}`, body, uid);
+      if (result === 'stale') { staleToken = true; }
+      else if (result) { newState.morningLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
+    }
+  }
+
+  // ---- Fly-window notifications ----
+  if (inWindow && !staleToken) {
+    newState.lastRatingGood = isGood;
+
+    if (isGood && !wasGood) {
+      // Window just opened
+      const result = await sendFcmData(
+        fcmToken,
+        `✈ Fly window open — ${locationName}`,
+        `${droneName}: conditions are now ${ratingWord} for flying. Tap to check before you launch.`,
+        uid
+      );
+      if (result === 'stale') { staleToken = true; }
+      else if (result) {
+        newState.lastSentAt = admin.firestore.FieldValue.serverTimestamp();
+        newState.repeatLastSentAt = admin.firestore.FieldValue.serverTimestamp();
+      }
+
+    } else if (!isGood && wasGood && alert.notifyOnClose) {
+      // Window just closed
+      const result = await sendFcmData(
+        fcmToken,
+        `⛅ Conditions changing — ${locationName}`,
+        `${droneName}: flying conditions at ${locationName} have deteriorated. Check back later.`,
+        uid
+      );
+      if (result === 'stale') { staleToken = true; }
+      else if (result) {
+        newState.repeatLastSentAt = admin.firestore.FieldValue.delete();
+      }
+
+    } else if (isGood && wasGood && alert.repeatIntervalHours > 0) {
+      // Still good — repeat reminder
+      const repeatLast = state.repeatLastSentAt || state.lastSentAt;
+      const hrsSinceRepeat = repeatLast
+        ? (now.getTime() - repeatLast.toDate().getTime()) / 3600000
+        : 999;
+      if (hrsSinceRepeat >= alert.repeatIntervalHours) {
+        const result = await sendFcmData(
+          fcmToken,
+          `🔔 Still flyable — ${locationName}`,
+          `${droneName}: conditions remain ${ratingWord} at ${locationName}. Tap to check.`,
+          uid
+        );
+        if (result === 'stale') { staleToken = true; }
+        else if (result) { newState.repeatLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
+      }
+    }
+  }
+
+  return {newState, staleToken};
+}
+
 exports.sendFlightAlerts = onSchedule(
   {schedule: 'every 60 minutes', timeZone: 'UTC', timeoutSeconds: 120},
   async () => {
@@ -410,150 +554,69 @@ exports.sendFlightAlerts = onSchedule(
     const tasks = snapshot.docs.map(async (doc) => {
       const uid = doc.id;
       const data = doc.data();
-      const alertSettings = data.alertSettings;
       const fcmToken = data.fcmToken;
+      if (!fcmToken) return;
 
-      if (!alertSettings || !alertSettings.enabled || !fcmToken) return;
-      if (!alertSettings.lat || !alertSettings.lng) return;
+      // ---- Multi-alert path (post-migration: `alerts` array + `alertState` map) ----
+      if (data.alerts) {
+        if (data.alertsEnabled === false) return; // master pause switch — independent of each alert's own `enabled`
+        const alertsArr = data.alerts.slice(0, MAX_ALERTS);
+        const update = {};
+        let staleToken = false;
 
-      const utcOffset = alertSettings.utcOffsetMinutes || 0;
-      const localHour = getLocalHour(now, utcOffset);
-      const localDay  = getLocalDay(now, utcOffset);
-
-      // Active days filter (default: all days)
-      const activeDays = alertSettings.activeDays;
-      const isActiveDay = !activeDays || !activeDays.length || activeDays.includes(localDay);
-
-      // Morning forecast check
-      const morningEnabled = alertSettings.morningForecastEnabled;
-      const morningHour    = alertSettings.morningForecastHour !== undefined ? alertSettings.morningForecastHour : 7;
-      const isMorningTime  = !!(morningEnabled && isActiveDay && localHour === morningHour);
-
-      // Fly-window check
-      const windowStart = alertSettings.windowStart !== undefined ? alertSettings.windowStart : 6;
-      const windowEnd   = alertSettings.windowEnd   !== undefined ? alertSettings.windowEnd   : 21;
-      const inWindow    = isActiveDay && isWithinWindow(windowStart, windowEnd, utcOffset, now);
-
-      if (!isMorningTime && !inWindow) return;
-
-      // Resolve thresholds
-      const droneKey  = alertSettings.droneKey || 'mini4pro';
-      const customThr = data.windThresholds && data.windThresholds[droneKey];
-      const thresholds = customThr || DRONE_THRESHOLDS[droneKey] || DEFAULT_THRESHOLDS;
-
-      // Fetch current conditions from Open-Meteo
-      let rating = 'red';
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${alertSettings.lat}&longitude=${alertSettings.lng}` +
-          `&hourly=wind_speed_10m,wind_gusts_10m,visibility,weather_code,precipitation_probability` +
-          `&wind_speed_unit=kmh&timezone=UTC&forecast_days=1&timeformat=unixtime`;
-        const resp = await fetch(url, {signal: AbortSignal.timeout(8000)});
-        if (!resp.ok) throw new Error('Open-Meteo HTTP ' + resp.status);
-        const wx = await resp.json();
-        const h = wx.hourly;
-        const nowTs = Math.floor(now.getTime() / 1000);
-        let idx = 0;
-        for (let i = 0; i < h.time.length; i++) {
-          if (h.time[i] <= nowTs) idx = i; else break;
+        for (const alert of alertsArr) {
+          if (staleToken) break;
+          if (!alert.enabled) continue;
+          const state = (data.alertState && data.alertState[alert.id]) || {};
+          const result = await evaluateAndNotifyAlert(alert, state, data.windThresholds, fcmToken, uid, now);
+          if (result.newState) {
+            for (const key of Object.keys(result.newState)) {
+              update[`alertState.${alert.id}.${key}`] = result.newState[key];
+            }
+          }
+          if (result.staleToken) staleToken = true;
         }
-        const wind   = h.wind_speed_10m            ? (h.wind_speed_10m[idx]            || 0)     : 0;
-        const gust   = h.wind_gusts_10m            ? (h.wind_gusts_10m[idx]            || 0)     : 0;
-        const vis    = h.visibility                 ? (h.visibility[idx]                || 10000) : 10000;
-        const wmo    = h.weather_code              ? (h.weather_code[idx]              || 0)     : 0;
-        const precip = h.precipitation_probability ? (h.precipitation_probability[idx] || 0)     : 0;
-        rating = alertFlyRating(wind, gust, vis, wmo, precip, thresholds);
-        console.log(`uid=${uid} wind=${wind} gust=${gust} vis=${vis} wmo=${wmo} precip=${precip} → ${rating}`);
-      } catch (err) {
-        console.error(`Weather fetch failed for uid ${uid}:`, err.message);
+
+        if (staleToken) {
+          update.fcmToken = admin.firestore.FieldValue.delete();
+          update.alertAutoDisabled = true;
+        }
+
+        if (Object.keys(update).length) {
+          await doc.ref.set(update, {merge: true});
+        }
         return;
       }
 
-      const locationName = alertSettings.locationName || 'your saved location';
-      const minRating = alertSettings.minRating || 'green';
-      const isGood  = minRating === 'amber' ? (rating === 'green' || rating === 'amber') : (rating === 'green');
-      const wasGood = data.alertLastRatingGood === true;
-      const ratingWord = rating === 'green' ? 'good' : rating === 'amber' ? 'marginal' : 'poor';
+      // ---- Legacy single-alert path (user not yet migrated client-side) ----
+      const alertSettings = data.alertSettings;
+      if (!alertSettings || !alertSettings.enabled) return;
 
-      const update = {
-        alertLastCheckedAt: admin.firestore.FieldValue.serverTimestamp(),
+      const legacyState = {
+        lastRatingGood: data.alertLastRatingGood,
+        morningLastSentAt: data.alertMorningLastSentAt,
+        lastSentAt: data.alertLastSentAt,
+        repeatLastSentAt: data.alertRepeatLastSentAt,
       };
+      const result = await evaluateAndNotifyAlert(alertSettings, legacyState, data.windThresholds, fcmToken, uid, now);
 
-      let staleToken = false;
-
-      // ---- Morning forecast ----
-      if (isMorningTime) {
-        const lastMorning = data.alertMorningLastSentAt;
-        const hrsSinceMorning = lastMorning
-          ? (now.getTime() - lastMorning.toDate().getTime()) / 3600000
-          : 999;
-        if (hrsSinceMorning >= 23) {
-          const body = isGood
-            ? `Conditions look ${ratingWord} for flying at ${locationName} today. Tap to check.`
-            : `Flying conditions at ${locationName} look ${ratingWord} today. Check back later.`;
-          const result = await sendFcmData(fcmToken, `☀️ Morning forecast — ${locationName}`, body, uid);
-          if (result === 'stale') { staleToken = true; }
-          else if (result) { update.alertMorningLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
-        }
+      const update = {};
+      if (result.newState) {
+        if ('lastCheckedAt' in result.newState) update.alertLastCheckedAt = result.newState.lastCheckedAt;
+        if ('morningLastSentAt' in result.newState) update.alertMorningLastSentAt = result.newState.morningLastSentAt;
+        if ('lastRatingGood' in result.newState) update.alertLastRatingGood = result.newState.lastRatingGood;
+        if ('lastSentAt' in result.newState) update.alertLastSentAt = result.newState.lastSentAt;
+        if ('repeatLastSentAt' in result.newState) update.alertRepeatLastSentAt = result.newState.repeatLastSentAt;
       }
-
-      // ---- Fly-window notifications ----
-      if (inWindow && !staleToken) {
-        update.alertLastRatingGood = isGood;
-
-        if (isGood && !wasGood) {
-          // Window just opened
-          const result = await sendFcmData(
-            fcmToken,
-            `✈ Fly window open — ${locationName}`,
-            `Conditions are now ${ratingWord} for flying. Tap to check before you launch.`,
-            uid
-          );
-          if (result === 'stale') { staleToken = true; }
-          else if (result) {
-            update.alertLastSentAt = admin.firestore.FieldValue.serverTimestamp();
-            update.alertRepeatLastSentAt = admin.firestore.FieldValue.serverTimestamp();
-          }
-
-        } else if (!isGood && wasGood && alertSettings.notifyOnClose) {
-          // Window just closed
-          const result = await sendFcmData(
-            fcmToken,
-            `⛅ Conditions changing — ${locationName}`,
-            `Flying conditions at ${locationName} have deteriorated. Check back later.`,
-            uid
-          );
-          if (result === 'stale') { staleToken = true; }
-          else if (result) {
-            update.alertRepeatLastSentAt = admin.firestore.FieldValue.delete();
-          }
-
-        } else if (isGood && wasGood && alertSettings.repeatIntervalHours > 0) {
-          // Still good — repeat reminder
-          const repeatLast = data.alertRepeatLastSentAt || data.alertLastSentAt;
-          const hrsSinceRepeat = repeatLast
-            ? (now.getTime() - repeatLast.toDate().getTime()) / 3600000
-            : 999;
-          if (hrsSinceRepeat >= alertSettings.repeatIntervalHours) {
-            const result = await sendFcmData(
-              fcmToken,
-              `🔔 Still flyable — ${locationName}`,
-              `Conditions remain ${ratingWord} at ${locationName}. Tap to check.`,
-              uid
-            );
-            if (result === 'stale') { staleToken = true; }
-            else if (result) { update.alertRepeatLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
-          }
-        }
-      }
-
-      // Stale token — disable alerts
-      if (staleToken) {
+      if (result.staleToken) {
         update.fcmToken = admin.firestore.FieldValue.delete();
         update['alertSettings.enabled'] = false;
         update.alertAutoDisabled = true;
       }
 
-      await doc.ref.set(update, {merge: true});
+      if (Object.keys(update).length) {
+        await doc.ref.set(update, {merge: true});
+      }
     });
 
     await Promise.allSettled(tasks);

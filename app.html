@@ -540,7 +540,7 @@
     // paste it below, then turn ON enforcement for Cloud Functions and Cloud Firestore.
     // While this is empty, App Check is completely inert — no SDK is loaded and nothing changes.
     var APPCHECK_SITE_KEY='';
-    var _swReg=null,_fcmToken=null,_fcmLoaded=false,_fcmMessaging=null,_alertSettings=null;
+    var _swReg=null,_fcmToken=null,_fcmLoaded=false,_fcmMessaging=null,_alerts=[],_editingAlertId=null,_alertsEnabled=null;
 
     // ---- Lazy loader: Firebase App + Auth + Firestore ----
     var _fbLoaded=false;
@@ -1306,81 +1306,94 @@
       </div>
 
       <div id="alert-config-section" style="display:none;">
-        <div class="settings-section">Location</div>
-        <div class="settings-row">
-          <div class="settings-row-label">Watch location</div>
-          <select class="settings-select" id="alert-loc-select" style="max-width:175px;overflow:hidden;text-overflow:ellipsis;"></select>
-        </div>
 
-        <div class="settings-section">Time window</div>
-        <div class="settings-row">
-          <div class="settings-row-label">From</div>
-          <select class="settings-select" id="alert-from-select"></select>
-        </div>
-        <div class="settings-row">
-          <div class="settings-row-label">Until</div>
-          <select class="settings-select" id="alert-to-select"></select>
-        </div>
-
-        <div class="settings-section">Active days</div>
-        <div class="alert-days-row" id="alert-days-row"></div>
-
-        <div class="settings-section">Alert when</div>
-        <div class="settings-row">
-          <div class="settings-row-label">Minimum rating</div>
-          <select class="settings-select" id="alert-rating-select">
-            <option value="green">Good only</option>
-            <option value="amber">Good or Marginal</option>
-          </select>
-        </div>
-        <div class="settings-row">
-          <div>
-            <div class="settings-row-label">Conditions worsen</div>
-            <div class="settings-row-sub">Alert when fly window closes</div>
+        <div id="alert-list-view">
+          <div style="padding:14px 20px 10px;font-size:12px;color:var(--muted);line-height:1.6;">Up to 3 alerts — different locations, drones or schedules.</div>
+          <div id="alert-list-body"></div>
+          <div style="padding:16px 20px 4px;">
+            <button id="alert-add-btn" onclick="openAlertEditor()" style="width:100%;background:#f59e0b;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">+ Add alert</button>
           </div>
-          <label class="settings-toggle">
-            <input type="checkbox" id="alert-worsen-toggle">
-            <span class="settings-toggle-slider"></span>
-          </label>
-        </div>
-        <div class="settings-row">
-          <div class="settings-row-label">Repeat reminder</div>
-          <select class="settings-select" id="alert-repeat-select">
-            <option value="0">Off</option>
-            <option value="2">Every 2 hrs</option>
-            <option value="4">Every 4 hrs</option>
-            <option value="6">Every 6 hrs</option>
-          </select>
         </div>
 
-        <div class="settings-section">Morning forecast</div>
-        <div class="settings-row">
-          <div>
-            <div class="settings-row-label">Daily forecast push</div>
-            <div class="settings-row-sub">Today's conditions summary each morning</div>
+        <div id="alert-editor-view" style="display:none;">
+          <div class="settings-row" style="padding-top:14px;padding-bottom:14px;">
+            <button onclick="closeAlertEditor()" style="background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;padding:0;">← Back to alerts</button>
           </div>
-          <label class="settings-toggle">
-            <input type="checkbox" id="alert-morning-toggle" onchange="document.getElementById('alert-morning-time-row').style.display=this.checked?'flex':'none'">
-            <span class="settings-toggle-slider"></span>
-          </label>
-        </div>
-        <div class="settings-row" id="alert-morning-time-row" style="display:none;">
-          <div class="settings-row-label">Send at</div>
-          <select class="settings-select" id="alert-morning-hour-select"></select>
-        </div>
 
-        <div class="settings-section">Drone</div>
-        <div class="settings-row">
-          <div>
+          <div class="settings-section">Location</div>
+          <div class="settings-row">
+            <div class="settings-row-label">Watch location</div>
+            <select class="settings-select" id="alert-loc-select" style="max-width:175px;overflow:hidden;text-overflow:ellipsis;"></select>
+          </div>
+
+          <div class="settings-section">Time window</div>
+          <div class="settings-row">
+            <div class="settings-row-label">From</div>
+            <select class="settings-select" id="alert-from-select"></select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Until</div>
+            <select class="settings-select" id="alert-to-select"></select>
+          </div>
+
+          <div class="settings-section">Active days</div>
+          <div class="alert-days-row" id="alert-days-row"></div>
+
+          <div class="settings-section">Alert when</div>
+          <div class="settings-row">
+            <div class="settings-row-label">Minimum rating</div>
+            <select class="settings-select" id="alert-rating-select">
+              <option value="green">Good only</option>
+              <option value="amber">Good or Marginal</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Conditions worsen</div>
+              <div class="settings-row-sub">Alert when fly window closes</div>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" id="alert-worsen-toggle">
+              <span class="settings-toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Repeat reminder</div>
+            <select class="settings-select" id="alert-repeat-select">
+              <option value="0">Off</option>
+              <option value="2">Every 2 hrs</option>
+              <option value="4">Every 4 hrs</option>
+              <option value="6">Every 6 hrs</option>
+            </select>
+          </div>
+
+          <div class="settings-section">Morning forecast</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Daily forecast push</div>
+              <div class="settings-row-sub">Today's conditions summary each morning</div>
+            </div>
+            <label class="settings-toggle">
+              <input type="checkbox" id="alert-morning-toggle" onchange="document.getElementById('alert-morning-time-row').style.display=this.checked?'flex':'none'">
+              <span class="settings-toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row" id="alert-morning-time-row" style="display:none;">
+            <div class="settings-row-label">Send at</div>
+            <select class="settings-select" id="alert-morning-hour-select"></select>
+          </div>
+
+          <div class="settings-section">Drone</div>
+          <div class="settings-row">
             <div class="settings-row-label">Using drone</div>
-            <div class="settings-row-sub">Same limits as your current selection</div>
+            <select class="settings-select" id="alert-drone-select" style="max-width:175px;overflow:hidden;text-overflow:ellipsis;"></select>
           </div>
-          <div style="font-size:13px;font-weight:600;color:var(--text);" id="alert-drone-label"></div>
+
+          <div style="padding:16px 20px 4px;">
+            <button onclick="saveAlertFromEditor()" style="width:100%;background:#f59e0b;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Save alert</button>
+          </div>
         </div>
 
-        <div style="padding:16px 20px 4px;">
-          <button onclick="saveAlertSettingsFromSheet()" style="width:100%;background:#f59e0b;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Save alert settings</button>
-        </div>
       </div>
     </div>
   </div>

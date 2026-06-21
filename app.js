@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.10';
+var APP_VERSION='1.7.15';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -340,11 +340,13 @@ function qualifyPrecipDesc(desc,precip){
   return desc.replace(/\b(Thunderstorm|Heavy precipitation|Freezing precipitation|Heavy drizzle|Drizzle|Light rain|Rain|Light snow|Snow)\b/g,function(m){return'Potential '+m.charAt(0).toLowerCase()+m.slice(1);});
 }
 function precipAdjustWmo(wmo,precip){
-  var p=precip||0;
+  if(precip==null)return wmo;
   if(wmo<=3){
-    if(p>=80) return 63;
-    if(p>=50) return 61;
-    if(p>=30) return 61;
+    if(precip>=70) return 63;
+    if(precip>=50) return 61;
+  }
+  else if((wmo===51||wmo===53||wmo===61||wmo===71||wmo===77||wmo===80||wmo===85)&&precip<50){
+    return 3;
   }
   return wmo;
 }
@@ -566,7 +568,7 @@ function renderFavBar(){
             var vis=cur.visibility!=null?cur.visibility:10000;
             var wmo=cur.weather_code||0;
             var tmpC=cur.temperature_2m!=null?cur.temperature_2m:15;
-            var r=fcRating(wind,gust,vis,wmo,0,tmpC,currentKp,0,0);
+            var r=fcRating(wind,gust,vis,wmo,null,tmpC,currentKp,0,0);
             var dotCol=r==='green'?'var(--green)':r==='amber'?'var(--amber)':'var(--red)';
             dot='<span style="width:8px;height:8px;border-radius:50%;background:'+dotCol+';display:inline-block;margin-right:4px;flex-shrink:0;"></span>';
             tempStr='<span style="font-size:10px;color:var(--muted);margin-left:4px;">'+Math.round(tmpC)+'\u00b0</span>';
@@ -587,12 +589,33 @@ function loadFav(name,lat,lng){
   document.getElementById('loc-name').textContent=decodeURIComponent(name);
   renderFavBar();fetchAll();
 }
+function dayHourlyRating(date){
+  if(!wxData||!wxData.hourly)return null;
+  var hours=wxData.hourly,target=date.toDateString(),green=0,amber=0,red=0;
+  for(var i=0;i<hours.time.length;i++){
+    var t=new Date(hours.time[i]);
+    if(t.toDateString()!==target)continue;
+    var wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m?hours.wind_gusts_10m[i]||0:0;
+    var vis=hours.visibility?hours.visibility[i]||10000:10000;
+    var wmo=hours.weather_code?hours.weather_code[i]||0:0;
+    var tp=hours.temperature_2m?hours.temperature_2m[i]||15:15;
+    var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
+    var w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
+    var precip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
+    var lvl=flyRating(wind,gust,vis,precipAdjustWmo(wmo,precip),getKpForTime(t),tp,w80,w120).lvl;
+    if(lvl==='green')green++;else if(lvl==='amber')amber++;else red++;
+  }
+  var total=green+amber+red;
+  if(!total)return null;
+  if(red>0)return'red';
+  return green>=Math.floor(total*.6)?'green':'amber';
+}
 function renderWeekPlanner(daily){
   if(!daily||!daily.time)return'';
   var bestIdx=1,bestScore=-1;
   for(var i=1;i<daily.time.length&&i<=7;i++){
     var dMidT=((daily.temperature_2m_max[i]||15)+(daily.temperature_2m_min[i]||15))/2;
-    var dayNoon1=new Date(daily.time[i]);dayNoon1.setHours(12,0,0,0);var r=fcRating(daily.wind_speed_10m_max[i]||0,daily.wind_gusts_10m_max[i]||0,10000,daily.weather_code[i],0,dMidT,getKpForTime(dayNoon1),0,0);
+    var dayNoon1=new Date(daily.time[i]);dayNoon1.setHours(12,0,0,0);var r=dayHourlyRating(dayNoon1)||fcRating(daily.wind_speed_10m_max[i]||0,daily.wind_gusts_10m_max[i]||0,10000,daily.weather_code[i],null,dMidT,getKpForTime(dayNoon1),0,0);
     var score=r==='green'?2:r==='amber'?1:0;
     var gust=daily.wind_gusts_10m_max[i]||0;
     if(score>bestScore||(score===bestScore&&gust<(daily.wind_gusts_10m_max[bestIdx]||999))){bestScore=score;bestIdx=i;}
@@ -606,7 +629,7 @@ function renderWeekPlanner(daily){
     var dMax=Math.round(daily.temperature_2m_max[j]),dMin=Math.round(daily.temperature_2m_min[j]);
     var dWind=spd(daily.wind_speed_10m_max[j]||0),dGust=spd(daily.wind_gusts_10m_max[j]||0);
     var dMidT2=((daily.temperature_2m_max[j]||15)+(daily.temperature_2m_min[j]||15))/2;
-    var dayNoon2=new Date(daily.time[j]);dayNoon2.setHours(12,0,0,0);var dr=fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo,0,dMidT2,getKpForTime(dayNoon2),0,0);
+    var dayNoon2=new Date(daily.time[j]);dayNoon2.setHours(12,0,0,0);var dr=dayHourlyRating(dayNoon2)||fcRating(daily.wind_speed_10m_max[j]||0,daily.wind_gusts_10m_max[j]||0,10000,dWmo,null,dMidT2,getKpForTime(dayNoon2),0,0);
     var dotCls=dr==='green'?'g':dr==='amber'?'a':'r';
     var isBest=j===bestIdx;
     rows+='<div class="week-row'+(isBest?' best-day':'')+'">'+
@@ -2190,11 +2213,12 @@ function renderFc(){
     var w80=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
     var w120=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
     var precip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
+    var ratingWmo=precipAdjustWmo(wmo,precip);
     var rawTempHr=hours.temperature_2m[i]||0;
     var fcTempPrimary=tmp(rawTempHr)+tmpU();
     var fcTempSecondary=unitMode==='mph'?Math.round(rawTempHr)+'°C':Math.round(rawTempHr*9/5+32)+'°F';
     var precipBadge=precip>0?'<span style="font-size:11px;color:'+(precip>=60?'var(--red)':precip>=30?'var(--amber)':'var(--muted)')+';">💧'+precip+'% rain</span>':'';
-    var rating=flyRating(wind,gust,vis,wmo,getKpForTime(t),temp,w80,w120);
+    var rating=flyRating(wind,gust,vis,ratingWmo,getKpForTime(t),temp,w80,w120);
     var kpVal=getKpForTime(t);
     var ariaLabel=pad(t.getHours())+':00. '+info.desc+'.'+(precip>0?' '+precip+' percent chance of rain.':'')+' '+spd(wind)+' '+spdU()+' wind. '+(rating.lvl==='green'?'Good to fly.':'Caution: '+rating.desc)+'. Tap for full conditions.';
     var dayLabel=t.toDateString()!==now.toDateString()?'<span style="font-size:10px;color:var(--accent);font-weight:600;margin-left:4px;">'+t.toLocaleDateString('en-GB',{weekday:'short'})+'</span>':'';
@@ -2226,7 +2250,7 @@ function renderFc(){
         '<div class="fc-chevron">▾</div>'+
       '</div>'+
       '<div class="fc-detail" id="fc-det-'+count+'">'+
-        buildFcHourDetail(wind,gust,vis,wmo,rawTempHr,w80,w120,precip,kpVal)+
+        buildFcHourDetail(wind,gust,vis,ratingWmo,rawTempHr,w80,w120,precip,kpVal)+
       '</div>';
     count++;
   }
@@ -2358,7 +2382,8 @@ function initWindMap(){
     var hw=spd(hWind),hg=spd(hGust);
     var h80v=hours.wind_speed_80m?hours.wind_speed_80m[i]||0:0;
     var h120v=hours.wind_speed_120m?hours.wind_speed_120m[i]||0:0;
-    var hr=fcRating(hWind,hGust,hours.visibility?(hours.visibility[i]||10000):10000,hours.weather_code?(hours.weather_code[i]||0):0,0,hours.temperature_2m?Math.round(hours.temperature_2m[i]):15,0,0,0);
+    var hPrecip=hours.precipitation_probability?Math.round(hours.precipitation_probability[i]||0):0;
+    var hr=fcRating(hWind,hGust,hours.visibility?(hours.visibility[i]||10000):10000,hours.weather_code?(hours.weather_code[i]||0):0,hPrecip,hours.temperature_2m?Math.round(hours.temperature_2m[i]):15,0,0,0);
     var hcol=hr==='red'?'var(--red)':hr==='amber'?'var(--amber)':'var(--green)';
     var gustCol=hGust>=d.gustRed?'var(--red)':hGust>=d.gustAmber?'var(--amber)':'var(--muted)';
     fcRows+='<div class="wind-hr-row" data-w10="'+hWind+'" data-w80="'+h80v+'" data-w120="'+h120v+'" data-g="'+hGust+'" style="padding:10px 0;border-bottom:1px solid var(--border);">'+
@@ -3480,22 +3505,65 @@ function saveTempUnit(val){
 function resetDataFromSettings(){
   if(confirm('Reset all app data? This will clear your settings, checklist progress and consent. Your flight log will not be deleted.')){
     closeSettings();
-    var keys=['dc_drone','dc_units','dc_checklist','dc_disclaimer','dc_analytics_consent','dc_onboarded','dc_favs','dc_wx','dc_lastloc','dc_theme','dc_alert_settings'];
+    var keys=['dc_drone','dc_units','dc_checklist','dc_disclaimer','dc_analytics_consent','dc_onboarded','dc_favs','dc_wx','dc_lastloc','dc_theme','dc_alerts'];
     keys.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
     location.reload();
   }
 }
 
-// ---- Flight alert settings ----
-function loadAlertSettingsLocal(){try{return JSON.parse(localStorage.getItem('dc_alert_settings'))||null;}catch(e){return null;}}
-function saveAlertSettingsLocal(s){try{localStorage.setItem('dc_alert_settings',JSON.stringify(s));}catch(e){}}
+// ---- Flight alerts (up to MAX_ALERTS profiles per user) ----
+var MAX_ALERTS=3;
+function genAlertId(){return 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function loadAlertsLocal(){try{return JSON.parse(localStorage.getItem('dc_alerts'))||[];}catch(e){return [];}}
+function saveAlertsLocal(arr){try{localStorage.setItem('dc_alerts',JSON.stringify(arr));}catch(e){}}
+function saveAlertsMasterEnabled(val){
+  if(!proUser||!proUser.uid||!_fbLoaded)return;
+  var db=firebase.firestore();
+  db.collection('users').doc(proUser.uid).set({alertsEnabled:val},{merge:true}).catch(function(){});
+}
 function syncAlertSettingsFromCloud(uid,cb){
   if(!_fbLoaded||!uid){cb&&cb(null);return;}
   var db=firebase.firestore();
   db.collection('users').doc(uid).get().then(function(snap){
     if(snap.exists){
       var d=snap.data();
-      if(d.alertSettings){_alertSettings=d.alertSettings;saveAlertSettingsLocal(_alertSettings);}
+      if(d.alerts){
+        _alerts=d.alerts;
+        var needsBackfill=false;
+        _alerts.forEach(function(a){
+          if(!a.droneName){a.droneName=(DRONES[a.droneKey]||{}).name||'Your drone';needsBackfill=true;}
+        });
+        saveAlertsLocal(_alerts);
+        if(needsBackfill)saveAlertsToCloud(_alerts);
+      } else if(d.alertSettings){
+        // One-time migration: legacy single `alertSettings` object -> `alerts` array + `alertState` map.
+        var id=genAlertId();
+        var migrated=Object.assign({},d.alertSettings,{id:id});
+        delete migrated.fcmToken; // was duplicated onto the legacy object; lives only at doc root now
+        if(!migrated.droneName)migrated.droneName=(DRONES[migrated.droneKey]||{}).name||'Your drone';
+        var state={};
+        if(d.alertLastRatingGood!==undefined)state.lastRatingGood=d.alertLastRatingGood;
+        if(d.alertMorningLastSentAt!==undefined)state.morningLastSentAt=d.alertMorningLastSentAt;
+        if(d.alertLastSentAt!==undefined)state.lastSentAt=d.alertLastSentAt;
+        if(d.alertRepeatLastSentAt!==undefined)state.repeatLastSentAt=d.alertRepeatLastSentAt;
+        _alerts=[migrated];saveAlertsLocal(_alerts);
+        _alertsEnabled=!!d.alertSettings.enabled;
+        var migrateWrite={
+          alerts:_alerts,
+          alertsEnabled:_alertsEnabled,
+          alertSettings:firebase.firestore.FieldValue.delete(),
+          alertLastRatingGood:firebase.firestore.FieldValue.delete(),
+          alertMorningLastSentAt:firebase.firestore.FieldValue.delete(),
+          alertLastSentAt:firebase.firestore.FieldValue.delete(),
+          alertRepeatLastSentAt:firebase.firestore.FieldValue.delete(),
+          alertLastCheckedAt:firebase.firestore.FieldValue.delete()
+        };
+        migrateWrite['alertState.'+id]=state;
+        db.collection('users').doc(uid).set(migrateWrite,{merge:true}).catch(function(){});
+      } else {
+        _alerts=[];
+      }
+      if(d.alertsEnabled!==undefined)_alertsEnabled=d.alertsEnabled;
       if(d.fcmToken)_fcmToken=d.fcmToken;
       // If the cloud function silently disabled alerts (stale FCM token), notify the user
       if(d.alertAutoDisabled){
@@ -3506,13 +3574,13 @@ function syncAlertSettingsFromCloud(uid,cb){
         db.collection('users').doc(uid).set({alertAutoDisabled:false},{merge:true}).catch(function(){});
       }
     }
-    cb&&cb(_alertSettings);
+    cb&&cb(_alerts);
   }).catch(function(){cb&&cb(null);});
 }
-function saveAlertSettingsToCloud(settings){
+function saveAlertsToCloud(arr){
   if(!proUser||!proUser.uid||!_fbLoaded)return;
   var db=firebase.firestore();
-  db.collection('users').doc(proUser.uid).set({alertSettings:settings},{merge:true}).catch(function(){});
+  db.collection('users').doc(proUser.uid).set({alerts:arr},{merge:true}).catch(function(){});
 }
 function saveFCMTokenToFirestore(token){
   if(!proUser||!proUser.uid||!_fbLoaded)return;
@@ -3561,10 +3629,9 @@ function closeAlertSheet(){
 }
 
 function populateAlertSheet(){
-  var s=_alertSettings||loadAlertSettingsLocal()||{};
   var notifGranted=('Notification' in window)&&Notification.permission==='granted';
-  var hasToken=!!(_fcmToken||s.fcmToken);
-  var isEnabled=!!(s.enabled&&hasToken&&notifGranted);
+  var hasToken=!!_fcmToken;
+  var isEnabled=!!(hasToken&&notifGranted&&_alertsEnabled!==false);
   var toggle=document.getElementById('alert-enabled-toggle');
   var statusSub=document.getElementById('alert-status-sub');
   var configSection=document.getElementById('alert-config-section');
@@ -3576,18 +3643,114 @@ function populateAlertSheet(){
     else statusSub.textContent='Off — toggle to enable';
   }
   if(configSection)configSection.style.display=isEnabled?'block':'none';
-  populateAlertLocSelect(s);
-  populateAlertTimeSelects(s);
-  populateAlertDays(s);
-  populateAlertMorning(s);
+  closeAlertEditor();
+  renderAlertList();
+}
+
+// ---- Alert list/editor views ----
+function renderAlertList(){
+  var body=document.getElementById('alert-list-body');
+  var addBtn=document.getElementById('alert-add-btn');
+  if(body){
+    if(!_alerts.length){
+      body.innerHTML='<div style="padding:8px 20px 4px;font-size:13px;color:var(--muted);">No alerts yet — add one below.</div>';
+    } else {
+      body.innerHTML=_alerts.map(function(a){
+        var dayCount=(a.activeDays&&a.activeDays.length)?a.activeDays.length:7;
+        var daysTxt=dayCount<7?(dayCount+' day'+(dayCount===1?'':'s')):'Every day';
+        var droneName=a.droneName||(DRONES[a.droneKey]||{}).name||'Drone';
+        var ws=a.windowStart!==undefined?a.windowStart:6;
+        var we=a.windowEnd!==undefined?a.windowEnd:21;
+        var summary=esc(daysTxt+' · '+pad(ws)+':00–'+pad(we)+':00 · '+droneName);
+        return '<div class="settings-row">'+
+            '<div style="min-width:0;flex:1;margin-right:8px;">'+
+              '<div class="settings-row-label">'+esc(a.locationName||'Location')+'</div>'+
+              '<div class="settings-row-sub">'+summary+'</div>'+
+            '</div>'+
+            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'+
+              '<label class="settings-toggle">'+
+                '<input type="checkbox" '+(a.enabled?'checked':'')+' onchange="toggleAlertEnabled(\''+a.id+'\')">'+
+                '<span class="settings-toggle-slider"></span>'+
+              '</label>'+
+              '<button class="settings-btn" onclick="openAlertEditor(\''+a.id+'\')">Edit</button>'+
+              '<button onclick="deleteAlert(\''+a.id+'\')" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;padding:0 2px;line-height:1;">×</button>'+
+            '</div>'+
+          '</div>';
+      }).join('');
+    }
+  }
+  if(addBtn){
+    if(_alerts.length>=MAX_ALERTS){
+      addBtn.textContent='Maximum reached ('+MAX_ALERTS+')';
+      addBtn.disabled=true;
+      addBtn.style.opacity='.5';
+    } else {
+      addBtn.textContent='+ Add alert';
+      addBtn.disabled=false;
+      addBtn.style.opacity='1';
+    }
+  }
+  var listView=document.getElementById('alert-list-view');
+  var editorView=document.getElementById('alert-editor-view');
+  if(listView)listView.style.display='block';
+  if(editorView)editorView.style.display='none';
+}
+
+function openAlertEditor(id){
+  if(id===undefined)id=null;
+  if(!id&&_alerts.length>=MAX_ALERTS){showToast('Maximum '+MAX_ALERTS+' alerts — delete one first');return;}
+  _editingAlertId=id;
+  var a=id?_alerts.find(function(x){return x.id===id;}):null;
+  if(!a)a={windowStart:6,windowEnd:21,minRating:'green',activeDays:[0,1,2,3,4,5,6],droneKey:selectedDrone};
+  populateAlertLocSelect(a);
+  populateAlertTimeSelects(a);
+  populateAlertDays(a);
+  populateAlertMorning(a);
   var rSel=document.getElementById('alert-rating-select');
-  if(rSel)rSel.value=s.minRating||'green';
+  if(rSel)rSel.value=a.minRating||'green';
   var worsenToggle=document.getElementById('alert-worsen-toggle');
-  if(worsenToggle)worsenToggle.checked=!!s.notifyOnClose;
+  if(worsenToggle)worsenToggle.checked=!!a.notifyOnClose;
   var repeatSel=document.getElementById('alert-repeat-select');
-  if(repeatSel)repeatSel.value=String(s.repeatIntervalHours||0);
-  var droneLabel=document.getElementById('alert-drone-label');
-  if(droneLabel)droneLabel.textContent=getDrone().name;
+  if(repeatSel)repeatSel.value=String(a.repeatIntervalHours||0);
+  var droneSel=document.getElementById('alert-drone-select');
+  if(droneSel){
+    var mainSel=document.getElementById('drone-sel');
+    if(mainSel)droneSel.innerHTML=mainSel.innerHTML;
+    droneSel.value=a.droneKey||selectedDrone;
+  }
+  var listView=document.getElementById('alert-list-view');
+  var editorView=document.getElementById('alert-editor-view');
+  if(listView)listView.style.display='none';
+  if(editorView)editorView.style.display='block';
+}
+
+function closeAlertEditor(){
+  _editingAlertId=null;
+  var listView=document.getElementById('alert-list-view');
+  var editorView=document.getElementById('alert-editor-view');
+  if(listView)listView.style.display='block';
+  if(editorView)editorView.style.display='none';
+}
+
+function toggleAlertEnabled(id){
+  var a=_alerts.find(function(x){return x.id===id;});
+  if(!a)return;
+  a.enabled=!a.enabled;
+  saveAlertsLocal(_alerts);saveAlertsToCloud(_alerts);
+  renderAlertList();updateSettingsAlertRow();
+}
+
+function deleteAlert(id){
+  if(!confirm('Delete this alert?'))return;
+  _alerts=_alerts.filter(function(x){return x.id!==id;});
+  saveAlertsLocal(_alerts);saveAlertsToCloud(_alerts);
+  if(proUser&&proUser.uid&&_fbLoaded){
+    var db=firebase.firestore();
+    var clear={};
+    clear['alertState.'+id]=firebase.firestore.FieldValue.delete();
+    db.collection('users').doc(proUser.uid).set(clear,{merge:true}).catch(function(){});
+  }
+  renderAlertList();updateSettingsAlertRow();
 }
 
 function populateAlertLocSelect(s){
@@ -3692,32 +3855,29 @@ function onAlertToggleChange(checked){
           var t=document.getElementById('alert-enabled-toggle');if(t)t.checked=false;return;
         }
         _fcmToken=token;
+        _alertsEnabled=true;
         saveFCMTokenToFirestore(token);
+        saveAlertsMasterEnabled(true);
         var cfg=document.getElementById('alert-config-section');if(cfg)cfg.style.display='block';
         var sub=document.getElementById('alert-status-sub');if(sub)sub.textContent='Active';
-        var _s=_alertSettings||loadAlertSettingsLocal()||{};
-        populateAlertLocSelect(_s);
-        populateAlertTimeSelects(_s);
-        populateAlertDays(_s);
-        populateAlertMorning(_s);
+        renderAlertList();
       });
     });
   } else {
     var cfg=document.getElementById('alert-config-section');if(cfg)cfg.style.display='none';
     var sub=document.getElementById('alert-status-sub');if(sub)sub.textContent='Off — toggle to enable';
-    var s=_alertSettings||loadAlertSettingsLocal()||{};
-    s.enabled=false;_alertSettings=s;
-    saveAlertSettingsLocal(s);saveAlertSettingsToCloud(s);
+    _alertsEnabled=false;
+    saveAlertsMasterEnabled(false);
   }
 }
 
-function saveAlertSettingsFromSheet(){
-  var token=_fcmToken||(_alertSettings&&_alertSettings.fcmToken);
-  if(!token){showToast('Please enable alerts first');return;}
+function saveAlertFromEditor(){
+  if(!_fcmToken){showToast('Please enable alerts first');return;}
   var locSel=document.getElementById('alert-loc-select');
   var fromSel=document.getElementById('alert-from-select');
   var toSel=document.getElementById('alert-to-select');
   var ratSel=document.getElementById('alert-rating-select');
+  var droneSel=document.getElementById('alert-drone-select');
   var locVal=locSel?locSel.value:'current';
   var lat,lng,locationName;
   if(locVal==='current'){
@@ -3736,10 +3896,15 @@ function saveAlertSettingsFromSheet(){
   var repeatSel=document.getElementById('alert-repeat-select');
   var morningToggle=document.getElementById('alert-morning-toggle');
   var morningHourSel=document.getElementById('alert-morning-hour-select');
-  var settings={
+  var isNew=!_editingAlertId;
+  if(isNew&&_alerts.length>=MAX_ALERTS){showToast('Maximum '+MAX_ALERTS+' alerts — delete one first');return;}
+  var a={
+    id:_editingAlertId||genAlertId(),
     enabled:true,
     locationName:locationName,
     lat:lat,lng:lng,
+    droneKey:droneSel?droneSel.value:selectedDrone,
+    droneName:droneSel&&droneSel.selectedIndex>-1?droneSel.options[droneSel.selectedIndex].text:getDrone().name,
     windowStart:parseInt(fromSel?fromSel.value:6),
     windowEnd:parseInt(toSel?toSel.value:21),
     minRating:ratSel?ratSel.value:'green',
@@ -3748,16 +3913,18 @@ function saveAlertSettingsFromSheet(){
     repeatIntervalHours:parseInt(repeatSel?repeatSel.value:0),
     morningForecastEnabled:!!(morningToggle&&morningToggle.checked),
     morningForecastHour:parseInt(morningHourSel?morningHourSel.value:7),
-    droneKey:selectedDrone,
-    utcOffsetMinutes:-new Date().getTimezoneOffset(),
-    fcmToken:token
+    utcOffsetMinutes:-new Date().getTimezoneOffset()
   };
-  _alertSettings=settings;
-  saveAlertSettingsLocal(settings);
-  saveAlertSettingsToCloud(settings);
-  saveFCMTokenToFirestore(token);
+  if(isNew){
+    _alerts.push(a);
+  } else {
+    _alerts=_alerts.map(function(x){return x.id===_editingAlertId?a:x;});
+  }
+  saveAlertsLocal(_alerts);
+  saveAlertsToCloud(_alerts);
   showToast('Alert saved — you\'ll be notified when conditions open up');
-  closeAlertSheet();
+  closeAlertEditor();
+  renderAlertList();
   updateSettingsAlertRow();
 }
 
@@ -3863,12 +4030,9 @@ function renderIdReminderBanner(){
 function updateSettingsAlertRow(){
   var subEl=document.getElementById('settings-alert-sub');
   if(!subEl)return;
-  var s=_alertSettings||loadAlertSettingsLocal();
-  if(s&&s.enabled){
-    subEl.textContent=(s.locationName||'Current')+' · '+pad(s.windowStart||6)+':00–'+pad(s.windowEnd||21)+':00';
-  } else {
-    subEl.textContent='Off';
-  }
+  var alerts=_alerts&&_alerts.length?_alerts:loadAlertsLocal();
+  var n=alerts?alerts.filter(function(a){return a.enabled;}).length:0;
+  subEl.textContent=n?(n+' alert'+(n!==1?'s':'')+' active'):'Off';
 }
 
 // Apply saved theme on load (default: dark)

@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.15';
+var APP_VERSION='1.7.17';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -3495,6 +3495,7 @@ function saveWindUnit(val){
   unitMode=val==='mph'?'mph':val==='ms'?'ms':val==='kts'?'kts':'kmh';
   saveUnits();
   updateUnitToggle();
+  updateDroneLimits();
   if(wxData){renderDash();renderFc();if(document.getElementById('tab-radar').classList.contains('on'))renderWindTab();}
 }
 function saveTempUnit(val){
@@ -3516,6 +3517,16 @@ var MAX_ALERTS=3;
 function genAlertId(){return 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function loadAlertsLocal(){try{return JSON.parse(localStorage.getItem('dc_alerts'))||[];}catch(e){return [];}}
 function saveAlertsLocal(arr){try{localStorage.setItem('dc_alerts',JSON.stringify(arr));}catch(e){}}
+// _alerts only gets populated by syncAlertSettingsFromCloud, which runs on a fresh sign-in —
+// NOT on a normal returning-session page load. Every function that reads/writes _alerts must
+// call this first so it falls back to the local cache instead of silently acting on [].
+function getAlerts(){
+  if(!_alerts||!_alerts.length){
+    var cached=loadAlertsLocal();
+    if(cached&&cached.length)_alerts=cached;
+  }
+  return _alerts;
+}
 function saveAlertsMasterEnabled(val){
   if(!proUser||!proUser.uid||!_fbLoaded)return;
   var db=firebase.firestore();
@@ -3649,6 +3660,7 @@ function populateAlertSheet(){
 
 // ---- Alert list/editor views ----
 function renderAlertList(){
+  getAlerts();
   var body=document.getElementById('alert-list-body');
   var addBtn=document.getElementById('alert-add-btn');
   if(body){
@@ -3697,6 +3709,7 @@ function renderAlertList(){
 }
 
 function openAlertEditor(id){
+  getAlerts();
   if(id===undefined)id=null;
   if(!id&&_alerts.length>=MAX_ALERTS){showToast('Maximum '+MAX_ALERTS+' alerts — delete one first');return;}
   _editingAlertId=id;
@@ -3733,6 +3746,7 @@ function closeAlertEditor(){
 }
 
 function toggleAlertEnabled(id){
+  getAlerts();
   var a=_alerts.find(function(x){return x.id===id;});
   if(!a)return;
   a.enabled=!a.enabled;
@@ -3741,6 +3755,7 @@ function toggleAlertEnabled(id){
 }
 
 function deleteAlert(id){
+  getAlerts();
   if(!confirm('Delete this alert?'))return;
   _alerts=_alerts.filter(function(x){return x.id!==id;});
   saveAlertsLocal(_alerts);saveAlertsToCloud(_alerts);
@@ -3872,6 +3887,7 @@ function onAlertToggleChange(checked){
 }
 
 function saveAlertFromEditor(){
+  getAlerts();
   if(!_fcmToken){showToast('Please enable alerts first');return;}
   var locSel=document.getElementById('alert-loc-select');
   var fromSel=document.getElementById('alert-from-select');

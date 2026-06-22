@@ -456,7 +456,7 @@ async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, ui
   }
 
   const locationName = alert.locationName || 'your saved location';
-  const droneName = alert.droneName || 'Your drone';
+  const droneName = alert.droneName || (_DRONES_RAW[alert.droneKey] && _DRONES_RAW[alert.droneKey].name) || 'Your drone';
   const minRating = alert.minRating || 'green';
   const isGood  = minRating === 'amber' ? (rating === 'green' || rating === 'amber') : (rating === 'green');
   const wasGood = state.lastRatingGood === true;

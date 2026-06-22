@@ -2,9 +2,22 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users can only read and write their own document and subcollections
+    // Users can read and write their own document and subcollections, but
+    // entitlement/billing fields are server-only (set by Cloud Functions via
+    // the Admin SDK, which bypasses these rules). Without this restriction a
+    // signed-in user could grant themselves Pro with a direct Firestore write
+    // (e.g. `update({isPro: true})` from devtools) — these fields must never
+    // be touched by a client-supplied create/update.
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+
+      allow create: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.keys().hasAny(
+          ['isPro','stripeCustomerId','stripeSubscriptionId','proActivatedAt','proRevokedAt','lastRenewalAt']);
+
+      allow update: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(
+          ['isPro','stripeCustomerId','stripeSubscriptionId','proActivatedAt','proRevokedAt','lastRenewalAt']);
 
       // Cover any subcollections under users/{userId}
       match /{subcollection=**} {

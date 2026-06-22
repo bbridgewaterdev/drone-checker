@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.18';
+var APP_VERSION='1.7.19';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -570,8 +570,8 @@ function renderFavBar(){
             var tmpC=cur.temperature_2m!=null?cur.temperature_2m:15;
             var r=fcRating(wind,gust,vis,wmo,null,tmpC,currentKp,0,0);
             var dotCol=r==='green'?'var(--green)':r==='amber'?'var(--amber)':'var(--red)';
-            dot='<span style="width:8px;height:8px;border-radius:50%;background:'+dotCol+';display:inline-block;margin-right:4px;flex-shrink:0;"></span>';
-            tempStr='<span style="font-size:10px;color:var(--muted);margin-left:4px;">'+Math.round(tmpC)+'\u00b0</span>';
+            dot='<span style="width:8px;height:8px;border-radius:50%;background:'+dotCol+';border:1.5px solid #fff;display:inline-block;margin-right:4px;flex-shrink:0;"></span>';
+            tempStr='<span style="font-size:10px;color:'+(active?'rgba(2,6,23,.65)':'var(--muted)')+';margin-left:4px;">'+Math.round(tmpC)+'\u00b0</span>';
           }
         }
       }catch(e){}

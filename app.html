@@ -867,12 +867,12 @@
         <!-- Email / Password form -->
         <div class="pro-email-form" id="pro-email-form">
           <div id="pro-signup-fields" style="display:none;gap:8px;">
-            <input class="pro-input" id="pro-first-name-input" type="text" placeholder="First name" autocomplete="given-name" style="flex:1;">
-            <input class="pro-input" id="pro-last-name-input" type="text" placeholder="Last name" autocomplete="family-name" style="flex:1;">
+            <input class="pro-input" id="pro-first-name-input" type="text" placeholder="First name" aria-label="First name" autocomplete="given-name" style="flex:1;">
+            <input class="pro-input" id="pro-last-name-input" type="text" placeholder="Last name" aria-label="Last name" autocomplete="family-name" style="flex:1;">
           </div>
-          <input class="pro-input" id="pro-email-input" type="email" placeholder="Email address" autocomplete="email" inputmode="email">
-          <input class="pro-input" id="pro-password-input" type="password" placeholder="Password (min 6 characters)" autocomplete="current-password">
-          <input class="pro-input" id="pro-confirm-password-input" type="password" placeholder="Confirm password" autocomplete="new-password" style="display:none;">
+          <input class="pro-input" id="pro-email-input" type="email" placeholder="Email address" aria-label="Email address" autocomplete="email" inputmode="email">
+          <input class="pro-input" id="pro-password-input" type="password" placeholder="Password (min 6 characters)" aria-label="Password (min 6 characters)" autocomplete="current-password">
+          <input class="pro-input" id="pro-confirm-password-input" type="password" placeholder="Confirm password" aria-label="Confirm password" autocomplete="new-password" style="display:none;">
           <div class="pro-forgot" onclick="handleForgotPassword()">Forgot password?</div>
           <div class="pro-auth-error" id="pro-auth-error"></div>
           <button class="pro-email-btn" id="pro-email-btn" onclick="handleEmailSignIn()">Sign in</button>
@@ -978,7 +978,7 @@
         <circle cx="50" cy="50" r="11" fill="white"/>
         <circle cx="50" cy="50" r="5.5" fill="#0f172a"/>
       </svg>
-      <span class="h-title">DroneChecker<span id="pro-title-badge" style="display:none;font-size:13px;font-weight:700;color:#f59e0b;margin-left:4px;letter-spacing:.5px;">Pro</span></span>
+      <h1 class="h-title">DroneChecker<span id="pro-title-badge" style="display:none;font-size:13px;font-weight:700;color:#f59e0b;margin-left:4px;letter-spacing:.5px;">Pro</span></h1>
       <!-- Location — margin-left:auto pushes it right; sits before pill in free mode, fills space in Pro mode -->
       <div id="header-loc" style="display:flex;align-items:center;gap:3px;margin-left:auto;min-width:0;overflow:hidden;flex-shrink:1;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;flex-shrink:0;color:var(--muted);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1000,7 +1000,7 @@
   </div>
 
   <div class="body-area">
-    <div class="tabs">
+    <main class="tabs" id="main-content">
 
       <div class="tab on" id="tab-dash">
         <div class="drone-bar">
@@ -1106,7 +1106,7 @@
         <div id="log-body"></div>
       </div>
 
-    </div>
+    </main>
 
     <nav class="nav" role="tablist" aria-label="Main navigation">
       <button class="nb on" id="nb-dash" onclick="goTab('dash',this)" role="tab" aria-selected="true" aria-label="Dashboard">
@@ -1413,11 +1413,11 @@
     <div class="settings-body">
       <div style="padding:10px 20px 4px;font-size:12px;color:var(--muted);line-height:1.6;">Store your CAA IDs and we'll send a push reminder before each renewal.</div>
 
-      <div class="settings-section">Operator ID</div>
+      <div class="settings-section" id="droneid-operator-id-lbl">Operator ID</div>
       <div style="padding:0 20px;">
-        <input class="log-input" id="droneid-operator-id" type="text" placeholder="e.g. GBR-OP-A1B2C3D4"/>
-        <div class="log-field-lbl">Renews on</div>
-        <input class="log-input" id="droneid-operator-expiry" type="date"/>
+        <input class="log-input" id="droneid-operator-id" type="text" placeholder="e.g. GBR-OP-A1B2C3D4" aria-labelledby="droneid-operator-id-lbl"/>
+        <div class="log-field-lbl" id="droneid-operator-expiry-lbl">Renews on</div>
+        <input class="log-input" id="droneid-operator-expiry" type="date" aria-labelledby="droneid-operator-expiry-lbl"/>
       </div>
       <div class="settings-row">
         <div class="settings-row-label">Remind me</div>
@@ -1429,11 +1429,11 @@
         </select>
       </div>
 
-      <div class="settings-section">Flyer ID</div>
+      <div class="settings-section" id="droneid-flyer-id-lbl">Flyer ID</div>
       <div style="padding:0 20px;">
-        <input class="log-input" id="droneid-flyer-id" type="text" placeholder="e.g. GBR-FL-X9Y8Z7"/>
-        <div class="log-field-lbl">Expires on</div>
-        <input class="log-input" id="droneid-flyer-expiry" type="date"/>
+        <input class="log-input" id="droneid-flyer-id" type="text" placeholder="e.g. GBR-FL-X9Y8Z7" aria-labelledby="droneid-flyer-id-lbl"/>
+        <div class="log-field-lbl" id="droneid-flyer-expiry-lbl">Expires on</div>
+        <input class="log-input" id="droneid-flyer-expiry" type="date" aria-labelledby="droneid-flyer-expiry-lbl"/>
       </div>
       <div class="settings-row">
         <div class="settings-row-label">Remind me</div>

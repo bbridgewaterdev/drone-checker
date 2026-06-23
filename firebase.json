@@ -88,8 +88,7 @@
       }
     ],
     "rewrites": [
-      {"source": "/app","destination": "/app.html"},
-      {"source": "/MBnB1234","destination": "/MBnB1234.html"}
+      {"source": "/app","destination": "/app.html"}
     ]
   }
 }

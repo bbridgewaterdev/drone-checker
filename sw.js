@@ -25,7 +25,14 @@ messaging.onBackgroundMessage(function(payload) {
 
 self.addEventListener('notificationclick', function(e) {
   e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) || '/app.html';
+  // Defence-in-depth: only ever open a same-origin/relative path, never an
+  // absolute cross-origin (or javascript:) URL, regardless of payload.
+  const raw = (e.notification.data && e.notification.data.url) || '/app.html';
+  let url = '/app.html';
+  try {
+    const u = new URL(raw, self.location.origin);
+    if (u.origin === self.location.origin) url = u.pathname + u.search + u.hash;
+  } catch (err) {}
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(wcs) {
       for (var i = 0; i < wcs.length; i++) {
@@ -36,7 +43,7 @@ self.addEventListener('notificationclick', function(e) {
   );
 });
 
-const CACHE = 'dronechecker-v98';
+const CACHE = 'dronechecker-v99';
 
 const STATIC = [
   '/',

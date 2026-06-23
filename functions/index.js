@@ -37,35 +37,46 @@ const DRONE_THRESHOLDS = Object.fromEntries(
 const DEFAULT_THRESHOLDS = {windAmber:29,windRed:39,gustAmber:32,gustRed:39};
 const MAX_ALERTS = 3; // cap on simultaneous alert profiles per user — keep in sync with app.js
 
-// ---- Durable rate limiter for createCheckoutSession ----
-// Limits each uid to MAX_CHECKOUT_CALLS per CHECKOUT_WINDOW_MS. Backed by Firestore
-// so the limit holds across the many horizontally-scaled function instances (an
-// in-memory Map only limits per-instance and resets on cold start). The Admin SDK
-// bypasses security rules; the deny-all rule keeps clients out of this collection.
+// ---- Durable rate limiter for the Stripe endpoints ----
+// Limits each uid to maxCalls per windowMs, in the given collection. Backed by
+// Firestore so the limit holds across the many horizontally-scaled function
+// instances (an in-memory Map only limits per-instance and resets on cold start).
+// The Admin SDK bypasses security rules; the deny-all rule keeps clients out of
+// these collections.
 const CHECKOUT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_CHECKOUT_CALLS = 10;
+const PORTAL_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_PORTAL_CALLS = 20;
 
-async function isCheckoutRateLimited(uid) {
+async function isRateLimited(collectionName, uid, maxCalls, windowMs) {
   const db = admin.firestore();
-  const ref = db.collection('checkoutRateLimits').doc(uid);
+  const ref = db.collection(collectionName).doc(uid);
   const now = Date.now();
   try {
     return await db.runTransaction(async (tx) => {
       const snap = await tx.get(ref);
       const data = snap.exists ? snap.data() : null;
-      if (!data || (now - (data.windowStart || 0)) > CHECKOUT_WINDOW_MS) {
+      if (!data || (now - (data.windowStart || 0)) > windowMs) {
         tx.set(ref, {windowStart: now, count: 1});
         return false;
       }
-      if ((data.count || 0) >= MAX_CHECKOUT_CALLS) return true;
+      if ((data.count || 0) >= maxCalls) return true;
       tx.update(ref, {count: (data.count || 0) + 1});
       return false;
     });
   } catch (e) {
-    // Fail open — a Firestore hiccup should not block a legitimate checkout.
+    // Fail open — a Firestore hiccup should not block a legitimate request.
     console.error('Rate limit check failed (allowing):', e);
     return false;
   }
+}
+
+function isCheckoutRateLimited(uid) {
+  return isRateLimited('checkoutRateLimits', uid, MAX_CHECKOUT_CALLS, CHECKOUT_WINDOW_MS);
+}
+
+function isPortalRateLimited(uid) {
+  return isRateLimited('portalRateLimits', uid, MAX_PORTAL_CALLS, PORTAL_WINDOW_MS);
 }
 
 // WMO codes that indicate bad weather — matches app.html flyRating logic
@@ -154,20 +165,25 @@ exports.createCheckoutSession = onRequest(
       return;
     }
 
-    const {uid, email, plan} = req.body;
+    const {uid, plan} = req.body;
 
-    if (!uid || !email) {
-      res.status(400).json({error: 'Missing uid or email'});
-      return;
-    }
-
-    if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      res.status(400).json({error: 'Invalid email'});
+    if (!uid) {
+      res.status(400).json({error: 'Missing uid'});
       return;
     }
 
     if (decodedToken.uid !== uid) {
       res.status(403).json({error: 'Forbidden'});
+      return;
+    }
+
+    // Source the Stripe customer email from the verified ID token, never the
+    // request body — a caller must not be able to put an arbitrary address on
+    // the customer/receipt.
+    const email = decodedToken.email;
+
+    if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      res.status(400).json({error: 'Invalid email'});
       return;
     }
 
@@ -233,6 +249,11 @@ exports.createPortalSession = onRequest(
 
     if (decodedToken.uid !== uid) {
       res.status(403).json({error: 'Forbidden'});
+      return;
+    }
+
+    if (await isPortalRateLimited(uid)) {
+      res.status(429).json({error: 'Too many requests. Please try again later.'});
       return;
     }
 

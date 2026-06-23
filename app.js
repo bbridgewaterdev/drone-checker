@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.21';
+var APP_VERSION='1.7.22';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -2431,7 +2431,7 @@ function initWindMap(){
   
   L.maplibreGL({
     style: 'https://tiles.openfreemap.org/styles/liberty',
-    attribution: '© <a href="https://openfreemap.org" target="_blank" style="color:#94a3b8;">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" style="color:#94a3b8;">OSM</a>',
+    attribution: '© <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;">OSM</a>',
   }).addTo(windMap);
 
   L.control.zoom({position:'bottomright'}).addTo(windMap);
@@ -2991,8 +2991,6 @@ function showProUpgrade(){
 function showProSignin(){var u=document.getElementById('pro-screen-upgrade'),s=document.getElementById('pro-screen-signin');if(u)u.style.display='none';if(s)s.style.display='';}
 function showProSignedIn(){var sheet=document.getElementById('pro-sheet');if(!sheet||!proUser)return;var initials=(proUser.name||proUser.email||'U').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();sheet.innerHTML='<div class="pro-sheet-header"><div style="width:24px;"></div><div style="font-size:13px;font-weight:600;color:var(--muted);">Your Pro Account</div><button class="pro-close" onclick="closeProOverlay()">&times;</button></div><div class="pro-body" style="padding-top:12px;"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--text);">'+esc(proUser.name||'')+'</div><div style="font-size:11px;color:var(--muted);">'+esc(proUser.email||'')+'</div><div style="font-size:11px;color:#f59e0b;font-weight:600;margin-top:2px;">DroneChecker Pro</div></div></div><div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:16px;">Subscription: <strong style="color:var(--green);">Active</strong></div><button onclick="signOutPro()" style="width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:12px;color:var(--red);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:8px;">Sign out</button>'+buildThresholdUI()+'<button onclick="closeProOverlay()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button></div>';}
 var GOOGLE_CLIENT_ID='62546050100-qkdhvc5g77a1kn423u44jrisgmakgigg.apps.googleusercontent.com';
-
-// ---- DEV MODE: bypasses real Google/Firebase sign-in for local testing ----
 
 var proUser=null;
 var _droneIds=null;

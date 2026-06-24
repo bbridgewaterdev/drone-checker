@@ -289,6 +289,70 @@ exports.createPortalSession = onRequest(
 );
 
 
+// ----------------------------------------------------------------
+// deleteAccount
+// Called from the app when the user taps "Delete account" in Settings.
+// Cancels any active Stripe subscription, then deletes the Firestore
+// user doc and the Firebase Auth user record — the two pieces that
+// must be removed TOGETHER for re-sign-in to be treated as a new user.
+// Expects JSON body: { uid }
+// ----------------------------------------------------------------
+exports.deleteAccount = onRequest(
+  {secrets: [STRIPE_SECRET_KEY], cors: ['https://dronechecker.co.uk']},
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).send('Method Not Allowed');
+      return;
+    }
+
+    let decodedToken;
+    try {
+      decodedToken = await verifyAuthToken(req);
+    } catch (err) {
+      res.status(401).json({error: 'Unauthorised'});
+      return;
+    }
+
+    const {uid} = req.body;
+
+    if (!uid) {
+      res.status(400).json({error: 'Missing uid'});
+      return;
+    }
+
+    if (decodedToken.uid !== uid) {
+      res.status(403).json({error: 'Forbidden'});
+      return;
+    }
+
+    const db = admin.firestore();
+
+    try {
+      const userDoc = await db.collection('users').doc(uid).get();
+      const subId = userDoc.exists && userDoc.data().stripeSubscriptionId;
+
+      if (subId) {
+        try {
+          const stripe = stripeLib(STRIPE_SECRET_KEY.value());
+          await stripe.subscriptions.cancel(subId);
+        } catch (e) {
+          // Already cancelled/missing — proceed with deletion regardless.
+          console.error('Could not cancel subscription during account deletion:', e.message);
+        }
+      }
+
+      if (userDoc.exists) await userDoc.ref.delete();
+      await admin.auth().deleteUser(uid);
+
+      console.log('Account fully deleted for uid:', uid);
+      res.json({deleted: true});
+    } catch (err) {
+      console.error('Account deletion error:', err);
+      res.status(500).json({error: 'Could not delete account'});
+    }
+  }
+);
+
 // Stripe calls this after successful payment events
 // Sets isPro: true in Firestore for the relevant user
 // ----------------------------------------------------------------

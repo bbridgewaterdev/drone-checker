@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.26';
+var APP_VERSION='1.7.27';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -2832,6 +2832,7 @@ var PAID_FEATURES_ENABLED=true;
 // proUser, loadProUser, saveProUser, isPro — defined below with Firebase integration
 // ---- Stripe checkout ----
 var CHECKOUT_URL='https://us-central1-dronechecker.cloudfunctions.net/createCheckoutSession';
+var DELETE_ACCOUNT_URL='https://us-central1-dronechecker.cloudfunctions.net/deleteAccount';
 var _selectedPlan='monthly'; // 'monthly' or 'yearly'
 
 function selectPlan(plan){
@@ -3467,6 +3468,16 @@ function openSettings(){
     else{alertBtn.textContent='PRO';alertBtn.style.cssText=proStyle;alertBtn.onclick=openProOverlay;}
   }
   if(pro)updateSettingsAlertRow();
+  // Account section — only shown when signed in (Pro or not)
+  var signedIn=!!(proUser&&proUser.uid);
+  var acctSection=document.getElementById('settings-account-section');
+  var acctRow=document.getElementById('settings-account-row');
+  var delRow=document.getElementById('settings-delete-row');
+  if(acctSection)acctSection.style.display=signedIn?'':'none';
+  if(acctRow)acctRow.style.display=signedIn?'':'none';
+  if(delRow)delRow.style.display=signedIn?'':'none';
+  var emailEl=document.getElementById('settings-account-email');
+  if(emailEl)emailEl.textContent=signedIn?(proUser.email||''):'';
 }
 function closeSettings(){
   var overlay=document.getElementById('settings-overlay');
@@ -3499,6 +3510,41 @@ function resetDataFromSettings(){
     keys.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});
     location.reload();
   }
+}
+function deleteAccountFromSettings(){
+  if(!proUser||!proUser.uid){showToast('Please sign in first');return;}
+  if(!confirm('Permanently delete your DroneChecker account?\n\nThis cancels any active subscription and erases your cloud data — flight log, alerts, saved locations and drone IDs. This cannot be undone.'))return;
+  var btn=document.getElementById('settings-delete-btn');
+  if(btn){btn.textContent='Deleting…';btn.disabled=true;}
+  var reset=function(){if(btn){btn.textContent='Delete';btn.disabled=false;}};
+  if(!_fbLoaded||!firebase.auth().currentUser){
+    showToast('Authentication error. Please sign in again.');
+    reset();return;
+  }
+  firebase.auth().currentUser.getIdToken().then(function(idToken){
+    return fetch(DELETE_ACCOUNT_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+idToken},
+      body:JSON.stringify({uid:proUser.uid})
+    }).then(function(r){return r.json();}).then(function(data){
+      if(data.deleted){
+        saveProUser(null);
+        try{localStorage.removeItem('dc_pro_user');}catch(e){}
+        firebase.auth().signOut().catch(function(){});
+        closeSettings();
+        updateProUI();
+        renderFavBar();
+        showToast('Account deleted');
+        if(wxData){renderDash();renderFc();}
+      } else {
+        showToast('Could not delete account. Please try again.');
+        reset();
+      }
+    });
+  }).catch(function(){
+    showToast('Could not delete account. Check your connection.');
+    reset();
+  });
 }
 
 // ---- Flight alerts (up to MAX_ALERTS profiles per user) ----

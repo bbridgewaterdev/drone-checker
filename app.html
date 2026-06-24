@@ -1280,6 +1280,22 @@
         <a href="#" onclick="this.href=buildFeedbackMailto();return true;" id="feedback-link" class="settings-btn">Send</a>
       </div>
 
+      <div class="settings-section" id="settings-account-section" style="display:none;">Account</div>
+      <div class="settings-row" id="settings-account-row" style="display:none;">
+        <div>
+          <div class="settings-row-label">Signed in as</div>
+          <div class="settings-row-sub" id="settings-account-email"></div>
+        </div>
+        <button class="settings-btn" onclick="closeSettings();signOutPro();">Sign out</button>
+      </div>
+      <div class="settings-row" id="settings-delete-row" style="display:none;">
+        <div>
+          <div class="settings-row-label">Delete account</div>
+          <div class="settings-row-sub">Permanently erases your account &amp; cloud data</div>
+        </div>
+        <button class="settings-btn danger" id="settings-delete-btn" onclick="deleteAccountFromSettings()">Delete</button>
+      </div>
+
       <div class="settings-section">Data</div>
       <div class="settings-row">
         <div>

@@ -23,7 +23,7 @@ async function verifyAuthToken(req) {
 }
 
 // ---- Your Stripe price IDs for DroneChecker Pro ----
-const PRICE_ID_MONTHLY = 'price_1TgjvDBwELWfTObfoMWjvt6N';
+const PRICE_ID_MONTHLY = 'price_1Tlv3eBwELWfTObfGqc0cacL';
 const PRICE_ID_YEARLY  = 'price_1ThSwBBwELWfTObfULMmiYjp';
 
 // ---- App URL — where Stripe redirects after checkout ----

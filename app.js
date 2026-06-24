@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.25';
+var APP_VERSION='1.7.26';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -2847,15 +2847,15 @@ function selectPlan(plan){
     if(yBtn){yBtn.style.background='#1e40af';yBtn.style.color='#fff';}
     if(amt){amt.innerHTML='&pound;29.99';}
     if(per){per.textContent='/ year';}
-    if(note){note.innerHTML='That\'s &pound;2.50/month &middot; Save &pound;5.89 vs monthly';}
+    if(note){note.innerHTML='That\'s &pound;2.50/month &middot; Save &pound;17.89 vs monthly';}
     if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;29.99/year';}
   } else {
     if(mBtn){mBtn.style.background='#1e40af';mBtn.style.color='#fff';}
     if(yBtn){yBtn.style.background='transparent';yBtn.style.color='var(--muted)';}
-    if(amt){amt.innerHTML='&pound;2.99';}
+    if(amt){amt.innerHTML='&pound;3.99';}
     if(per){per.textContent='/ month';}
     if(note){note.textContent='Cancel anytime \u00b7 Secure payment via Stripe';}
-    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;2.99/month';}
+    if(subBtn){subBtn.innerHTML='Get Pro &middot; &pound;3.99/month';}
   }
 }
 
@@ -2878,7 +2878,7 @@ function isStripeUrl(u){
 function startStripeCheckout(){
   var btn=document.getElementById('pro-subscribe-btn');
   if(btn){btn.textContent='Loading…';btn.disabled=true;}
-  var reset=function(){if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £2.99/month';btn.disabled=false;}};
+  var reset=function(){if(btn){btn.textContent=_selectedPlan==='yearly'?'Get Pro · £29.99/year':'Get Pro · £3.99/month';btn.disabled=false;}};
   if(!_fbLoaded||!firebase.auth().currentUser){
     showToast('Authentication error. Please sign in again.');
     reset();return;
@@ -2987,9 +2987,9 @@ function showProUpgrade(){
   var subBtn=document.getElementById('pro-subscribe-btn');
   if(subBtn){
     if(proUser&&!proUser.isPro){
-      subBtn.textContent='Subscribe as '+((proUser.name||'').split(' ')[0]||proUser.email||'you')+' · £2.99/month';
+      subBtn.textContent='Subscribe as '+((proUser.name||'').split(' ')[0]||proUser.email||'you')+' · £3.99/month';
     } else {
-      subBtn.textContent='Get Pro · £2.99/month';
+      subBtn.textContent='Get Pro · £3.99/month';
     }
     subBtn.disabled=false;
   }
@@ -3414,7 +3414,7 @@ function updateProUI(){
 // Shared upsell card — gradient banner, left icon, feature pills, gradient CTA.
 // Pure HTML builder; callers handle their own isPro()/PAID_FEATURES_ENABLED gating.
 // opts: {id, icon (inner <svg> string), title, sub, pills (label strings), cta, overlay}
-function proCard(opts){opts=opts||{};var cls='pro-card'+(opts.overlay?' in-overlay':'');var pills=(opts.pills||[]).map(function(p){return'<span class="pro-card-pill">'+p+'</span>';}).join('');var cta=opts.cta||'Unlock with Pro &middot; &pound;2.99/mo &rarr;';return'<div class="'+cls+'"'+(opts.id?' id="'+opts.id+'"':'')+' role="button" tabindex="0" onclick="openProOverlay()" onkeydown="if(event.key===&apos;Enter&apos;||event.key===&apos; &apos;){event.preventDefault();openProOverlay();}"><div class="pro-card-hd"><div class="pro-card-ico">'+(opts.icon||'')+'</div><div class="pro-card-tx"><div class="pro-card-ttl">'+(opts.title||'')+'</div><div class="pro-card-sub">'+(opts.sub||'')+'</div></div></div><div class="pro-card-pills">'+pills+'</div><div class="pro-card-cta">'+cta+'</div></div>';}
+function proCard(opts){opts=opts||{};var cls='pro-card'+(opts.overlay?' in-overlay':'');var pills=(opts.pills||[]).map(function(p){return'<span class="pro-card-pill">'+p+'</span>';}).join('');var cta=opts.cta||'Unlock with Pro &middot; &pound;3.99/mo &rarr;';return'<div class="'+cls+'"'+(opts.id?' id="'+opts.id+'"':'')+' role="button" tabindex="0" onclick="openProOverlay()" onkeydown="if(event.key===&apos;Enter&apos;||event.key===&apos; &apos;){event.preventDefault();openProOverlay();}"><div class="pro-card-hd"><div class="pro-card-ico">'+(opts.icon||'')+'</div><div class="pro-card-tx"><div class="pro-card-ttl">'+(opts.title||'')+'</div><div class="pro-card-sub">'+(opts.sub||'')+'</div></div></div><div class="pro-card-pills">'+pills+'</div><div class="pro-card-cta">'+cta+'</div></div>';}
 var PRO_LOCK_SVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
 function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return proCard({icon:PRO_LOCK_SVG,title:'See the next 7 days at a glance',sub:'Plan golden hour shoots and ideal flight windows days before you head out.',pills:['&#128197; 7-day Forecast','&#127749; Golden Hour','&#128247; Photo Conditions','&#128168; Wind Detail','&#127788; Hazard Map','&#9992;&#65039; Flight Log']});}
 function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;min-width:0;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;"><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button><button class="pro-signout-btn" onclick="openBillingPortal()" style="font-size:10px;opacity:.7;">Manage subscription</button></div></div>';}

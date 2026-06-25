@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.32';
+var APP_VERSION='1.7.33';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -114,7 +114,7 @@ function saveDrone(){
 function updateDroneLimits(){
   var el=document.getElementById('drone-limits');
   if(!el)return;
-  var limitText='Max '+spd(getDrone().windRed)+' '+spdU();
+  var limitText='Max sustained '+spd(getDrone().windRed)+' '+spdU();
   if(isPro()){
     var isCustom=hasCustomThresholds();
     el.innerHTML=limitText+'<span style="font-size:10px;margin-left:3px;opacity:.7;">'+(isCustom?'✎️':'✎️')+'</span>';
@@ -2169,7 +2169,7 @@ function buildFcHourDetail(wind,gust,vis,wmo,rawTemp,w80,w120,precip,kpVal){
       '<div class="fcd-tile">'+
         '<div class="fcd-lbl">KP Index</div>'+
         '<div class="fcd-val">'+kpVal.toFixed(1)+'</div>'+
-        '<div class="fcd-sub">'+(kpC==='red'?'GPS unreliable — do not fly':kpC==='amber'?'GPS drift possible — fly with care':'No geomagnetic activity')+'</div>'+
+        '<div class="fcd-sub">'+(kpC==='red'?'GPS unreliable — do not fly':kpC==='amber'?'GPS drift possible — fly with care':kpVal>=2?'Minor geomagnetic activity':'No geomagnetic activity')+'</div>'+
         '<div class="fcd-bar-bg"><div class="fcd-bar '+kpC+'" style="width:'+barW(kpVal,9)+';"></div></div>'+
       '</div>'+
       // Wind at altitude — full width

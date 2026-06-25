@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.33';
+var APP_VERSION='1.7.35';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -88,7 +88,40 @@ var UK_FRZS=[
   {n:'Newquay',i:'EGDG',lat:50.4406,lng:-4.9954,r:3000},
   {n:'Prestwick',i:'EGPK',lat:55.5094,lng:-4.5867,r:3000},
 ];
+// Camera specs per drone, used for the photography settings recommendation (Photo Conditions card).
+// Sourced from published manufacturer specs where available; entries flagged isEstimate use a
+// same-sensor-class approximation (unverifiable or unreleased model) — treated as a guide, not a spec sheet.
+var DRONE_CAMERA={
+  lito1:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400,isEstimate:true},
+  litox1:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400,isEstimate:true},
+  neo:{sensor:'1/2"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:3200},
+  neo2:{sensor:'1/2"',apertureMin:2.2,apertureMax:2.2,apertureFixed:true,isoBase:100,isoVideoMax:3200},
+  flip:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  mini1:{sensor:'1/2.3"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:1600},
+  mini4k:{sensor:'1/2.3"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  mini2:{sensor:'1/2.3"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  mini3:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  mini3pro:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  mini4pro:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  mini5pro:{sensor:'1"',apertureMin:1.8,apertureMax:1.8,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  air2s:{sensor:'1"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  air3:{sensor:'1" / 1/1.3" (dual-cam)',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  mavic3:{sensor:'4/3"',apertureMin:2.8,apertureMax:11,apertureFixed:false,isoBase:100,isoVideoMax:12800},
+  mavic4pro:{sensor:'4/3"',apertureMin:1.7,apertureMax:11,apertureFixed:false,isoBase:100,isoVideoMax:12800},
+  phantom4pro:{sensor:'1"',apertureMin:2.8,apertureMax:11,apertureFixed:false,isoBase:100,isoVideoMax:12800},
+  avata2:{sensor:'1/1.3"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  avata360:{sensor:'1/1.3"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:6400,isEstimate:true},
+  autel_nano:{sensor:'1/1.28"',apertureMin:1.9,apertureMax:1.9,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  autel_lite:{sensor:'1"',apertureMin:2.8,apertureMax:11,apertureFixed:false,isoBase:100,isoVideoMax:6400},
+  potensic_atom_se:{sensor:'1/2"',apertureMin:2.2,apertureMax:2.2,apertureFixed:true,isoBase:100,isoVideoMax:3200,isEstimate:true},
+  potensic_atom2:{sensor:'1/2"',apertureMin:1.8,apertureMax:1.8,apertureFixed:true,isoBase:100,isoVideoMax:3200},
+  hoverair_x1:{sensor:'1/2"',apertureMin:2.2,apertureMax:2.2,apertureFixed:true,isoBase:100,isoVideoMax:3200,isEstimate:true},
+  hoverair_x1pro:{sensor:'1/2"',apertureMin:1.8,apertureMax:1.8,apertureFixed:true,isoBase:100,isoVideoMax:3200,isEstimate:true},
+  generic_light:{sensor:'1/2.3"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:3200,isEstimate:true},
+  generic_heavy:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400,isEstimate:true},
+};
 function getDrone(){return DRONES[selectedDrone]||DRONES.mini4pro;}
+function getDroneCamera(){return DRONE_CAMERA[selectedDrone]||DRONE_CAMERA.generic_heavy;}
 function loadDrone(){try{var s=localStorage.getItem('dc_drone');if(s&&DRONES[s])selectedDrone=s;}catch(e){}var sel=document.getElementById('drone-sel');if(sel)sel.value=selectedDrone;updateDroneLimits();}
 function saveDrone(){
   var sel=document.getElementById('drone-sel');
@@ -1462,6 +1495,48 @@ function tilePres(v){return v<980?'red':v<1000?'amber':'green';}
 function tileTemp(v){return v<-10||v>40?'red':v<0||v>35?'amber':'green';}
 function tileCloudBase(m){return m<120?'red':m<150?'amber':'green';}
 function tileDensityAlt(m){return m>2000?'red':m>1000?'amber':'green';}
+function ndFilterRec(cloud,sunElDeg){
+  // Effective brightness: sun elevation damped by cloud cover (clouds diffuse direct light)
+  if(sunElDeg<=0)return{col:'green',lvl:'Not needed',sub:'Low light — no ND filter required'};
+  var eff=sunElDeg*(1-(cloud/100)*0.85);
+  if(eff<8)return{col:'green',lvl:'Not needed',sub:'Soft, diffused light'};
+  if(eff<22)return{col:'amber',lvl:'ND4–ND8',sub:'Bright daylight — filter smooths footage'};
+  return{col:'red',lvl:'ND16–ND32',sub:'Strong sun — filter needed for cinematic shutter speed'};
+}
+function cameraRec(cloud,sunElDeg){
+  var cam=getDroneCamera();
+  var eff=sunElDeg<=0?0:sunElDeg*(1-(cloud/100)*0.85);
+  var iso,isoNote;
+  if(eff<=0){iso=Math.min(cam.isoVideoMax,3200);isoNote='Night — push ISO, expect some noise';}
+  else if(eff<8){iso=Math.max(cam.isoBase*4,400);isoNote='Low light — slight ISO boost keeps shutter usable';}
+  else{iso=cam.isoBase;isoNote='Bright — keep ISO at base for the cleanest image';}
+  var apertureText,apertureNote;
+  if(cam.apertureFixed){
+    apertureText='f/'+cam.apertureMin+' (fixed)';
+    apertureNote='No control on this drone — use ND + shutter/ISO to manage exposure';
+  }else if(eff<8){
+    apertureText='f/'+cam.apertureMin+' (wide open)';
+    apertureNote='Low light — widest aperture gathers the most light';
+  }else if(eff<22){
+    apertureText='f/4–f/5.6';
+    apertureNote='Stop down a little for extra sharpness and depth';
+  }else{
+    apertureText='f/8–f/'+cam.apertureMax;
+    apertureNote='Bright sun — stop down to control exposure, pair with ND for video';
+  }
+  var shutterVideo='1/50s (25fps, 180° rule)';
+  var shutterPhoto=eff<=0?'1/30–1/60s — brace for a steady hover':eff<8?'1/100–1/200s':'1/500–1/1000s';
+  var wb;
+  if(sunElDeg<=0)wb='Auto / ~4500K — artificial light dominant';
+  else if(sunElDeg<6)wb='~5000–5500K — lock WB to hold the golden/blue tones';
+  else if(cloud>=50)wb='~6500–7000K — counters the blue cast from overcast sky';
+  else wb='~5600K daylight — Auto WB is fine';
+  var nd=ndFilterRec(cloud,sunElDeg);
+  if(!cam.apertureFixed&&nd.col!=='green'){
+    nd={col:nd.col,lvl:nd.lvl,sub:nd.sub+' — variable aperture eases this, but ND still gives the smoothest 180° shutter.'};
+  }
+  return{cam:cam,iso:iso,isoNote:isoNote,aperture:apertureText,apertureNote:apertureNote,shutterVideo:shutterVideo,shutterPhoto:shutterPhoto,wb:wb,nd:nd};
+}
 function gpsQuality(kp,hourOfDay){
   // Ionospheric scintillation model for mid-latitude (UK ~53N)
   // Base score 10; KP degrades it; time-of-day adds minor modifier
@@ -2609,6 +2684,9 @@ function renderPhotoScoreCard(){
   var c=wxData.current,wind=c.wind_speed_10m||0,gust=c.wind_gusts_10m||0;
   var vis=c.visibility||10000,cloud=c.cloud_cover||0,wmo=c.weather_code||0;
   var ps=photoScore(wind,gust,vis,cloud,wmo,uLat,uLng);
+  var ndEl=(uLat&&uLng)?sunElevation(uLat,uLng,new Date()):0;
+  var rec=cameraRec(cloud,ndEl);
+  var nd=rec.nd;
   function factorRow(icon,label,sub,pts){
     var pct=Math.round(pts/25*100);
     var fc=pts>=20?'#22c55e':pts>=14?'#84cc16':pts>=8?'#f59e0b':'#ef4444';
@@ -2640,7 +2718,9 @@ function renderPhotoScoreCard(){
       '<strong style="color:var(--text);">☀️ Light quality</strong> — Based on sun elevation angle. Golden hour (sun 0–6° above horizon) scores highest for warm, directional light. Blue hour (−6° to 0°) is also excellent for moody shots. Harsh midday sun scores lowest.<br><br>'+
       '<strong style="color:var(--text);">☁️ Cloud diffusion</strong> — Overcast skies (50–80% cloud) produce beautiful, even light with no harsh shadows. Partly cloudy adds natural fill. Clear skies can mean harsh contrast; heavy overcast goes flat and dark.<br><br>'+
       '<strong style="color:var(--text);">👁 Clarity</strong> — Visibility and atmospheric haze. Crystal-clear air gives sharp horizon shots and vibrant colours. Haze and mist soften distant detail and reduce contrast.<br><br>'+
-      '<strong style="color:var(--text);">💨 Air stability</strong> — Low wind and a small gust-to-wind ratio means smooth, steady footage and sharper stills. Turbulent, gusty air causes micro-jitter even within safe flying limits.'+
+      '<strong style="color:var(--text);">💨 Air stability</strong> — Low wind and a small gust-to-wind ratio means smooth, steady footage and sharper stills. Turbulent, gusty air causes micro-jitter even within safe flying limits.<br><br>'+
+      '<strong style="color:var(--text);">🎞️ ND Filter</strong> — Estimated filter strength to keep your shutter speed close to double your frame rate (the "180° rule") for natural-looking motion blur, based on how bright the light currently is. A creative guide, not a flight-safety reading.<br><br>'+
+      '<strong style="color:var(--text);">📷 Recommended settings</strong> — Aperture, ISO, shutter and white balance starting points for your selected drone\'s camera, tuned to the current light. '+(rec.cam.isEstimate?'Your model\'s exact camera spec isn\'t published, so this uses a same-sensor-class estimate.':'Based on your drone\'s published camera spec ('+rec.cam.sensor+' sensor, f/'+rec.cam.apertureMin+(rec.cam.apertureFixed?' fixed':'–f/'+rec.cam.apertureMax+' variable')+').')+' Always a starting point — adjust to taste.'+
     '</div>'+
     '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">'+
       '<div style="width:56px;height:56px;border-radius:14px;background:rgba(168,85,247,.12);border:2px solid '+ps.col+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+
@@ -2658,6 +2738,29 @@ function renderPhotoScoreCard(){
     factorRow('☁️','Cloud diffusion',ps.cloudLabel,ps.cloudPts)+
     factorRow('👁','Clarity',ps.visLabel,ps.visPts)+
     factorRow('💨','Air stability',ps.windLabel,ps.windPts)+
+    (function(){var ndCol=nd.col==='green'?'#22c55e':nd.col==='amber'?'#f59e0b':'#a855f7';return'<div style="margin-top:10px;padding:10px 12px;background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25);border-radius:var(--radius-sm);display:flex;align-items:center;gap:10px;">'+
+      '<span style="font-size:18px;flex-shrink:0;">🎞️</span>'+
+      '<div style="flex:1;min-width:0;">'+
+        '<div style="font-size:12px;font-weight:700;color:'+ndCol+';">ND Filter: '+nd.lvl+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);">'+nd.sub+'</div>'+
+      '</div>'+
+    '</div>';})()+
+    (function(){
+      function row(label,val,note){
+        return'<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:10px;">'+
+          '<span style="font-size:11px;color:var(--muted);flex-shrink:0;">'+label+'</span>'+
+          '<span style="font-size:12px;font-weight:700;color:var(--text);text-align:right;">'+val+(note?'<div style="font-size:10px;font-weight:400;color:var(--muted);margin-top:1px;">'+note+'</div>':'')+'</span>'+
+        '</div>';
+      }
+      return'<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">'+
+        '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Recommended settings — '+esc(getDrone().name)+'</div>'+
+        row('Aperture',rec.aperture,rec.apertureNote)+
+        row('ISO',rec.iso,rec.isoNote)+
+        row('Shutter (video)',rec.shutterVideo,'')+
+        row('Shutter (photo)',rec.shutterPhoto,'')+
+        row('White balance',rec.wb,'')+
+      '</div>';
+    })()+
   '</div>';
 }
 function countdown(d){if(!d)return'';var diff=d-new Date();if(diff<0)return'Passed';var h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000);return'in '+(h>0?h+'h ':'')+m+'m';}

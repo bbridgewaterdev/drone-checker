@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.35';
+var APP_VERSION='1.7.36';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -91,6 +91,9 @@ var UK_FRZS=[
 // Camera specs per drone, used for the photography settings recommendation (Photo Conditions card).
 // Sourced from published manufacturer specs where available; entries flagged isEstimate use a
 // same-sensor-class approximation (unverifiable or unreleased model) — treated as a guide, not a spec sheet.
+// isoCeiling is the approximate ISO a sensor of that size still renders cleanly (noise floor, not the
+// hardware max) — bigger sensors gather more light per pixel and tolerate a higher ISO before noise shows.
+var SENSOR_ISO_CEILING={'1/2.3"':800,'1/2"':1000,'1/1.3"':1600,'1/1.28"':1600,'1"':3200,'4/3"':6400};
 var DRONE_CAMERA={
   lito1:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400,isEstimate:true},
   litox1:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400,isEstimate:true},
@@ -105,7 +108,7 @@ var DRONE_CAMERA={
   mini4pro:{sensor:'1/1.3"',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
   mini5pro:{sensor:'1"',apertureMin:1.8,apertureMax:1.8,apertureFixed:true,isoBase:100,isoVideoMax:6400},
   air2s:{sensor:'1"',apertureMin:2.8,apertureMax:2.8,apertureFixed:true,isoBase:100,isoVideoMax:6400},
-  air3:{sensor:'1" / 1/1.3" (dual-cam)',apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
+  air3:{sensor:'1" / 1/1.3" (dual-cam)',isoCeiling:3200,apertureMin:1.7,apertureMax:1.7,apertureFixed:true,isoBase:100,isoVideoMax:6400},
   mavic3:{sensor:'4/3"',apertureMin:2.8,apertureMax:11,apertureFixed:false,isoBase:100,isoVideoMax:12800},
   mavic4pro:{sensor:'4/3"',apertureMin:1.7,apertureMax:11,apertureFixed:false,isoBase:100,isoVideoMax:12800},
   phantom4pro:{sensor:'1"',apertureMin:2.8,apertureMax:11,apertureFixed:false,isoBase:100,isoVideoMax:12800},
@@ -1506,9 +1509,13 @@ function ndFilterRec(cloud,sunElDeg){
 function cameraRec(cloud,sunElDeg){
   var cam=getDroneCamera();
   var eff=sunElDeg<=0?0:sunElDeg*(1-(cloud/100)*0.85);
+  var ceiling=cam.isoCeiling||SENSOR_ISO_CEILING[cam.sensor]||1600;
   var iso,isoNote;
-  if(eff<=0){iso=Math.min(cam.isoVideoMax,3200);isoNote='Night — push ISO, expect some noise';}
-  else if(eff<8){iso=Math.max(cam.isoBase*4,400);isoNote='Low light — slight ISO boost keeps shutter usable';}
+  if(eff<=0){
+    iso=Math.min(ceiling,cam.isoVideoMax);
+    isoNote=ceiling>=3200?'Night — '+cam.sensor+' sensor handles ISO '+iso+' cleanly':'Night — push ISO to '+iso+', smaller sensor will show noise past this';
+  }
+  else if(eff<8){iso=Math.min(Math.max(cam.isoBase*4,400),ceiling);isoNote='Low light — slight ISO boost keeps shutter usable';}
   else{iso=cam.isoBase;isoNote='Bright — keep ISO at base for the cleanest image';}
   var apertureText,apertureNote;
   if(cam.apertureFixed){
@@ -1525,7 +1532,14 @@ function cameraRec(cloud,sunElDeg){
     apertureNote='Bright sun — stop down to control exposure, pair with ND for video';
   }
   var shutterVideo='1/50s (25fps, 180° rule)';
-  var shutterPhoto=eff<=0?'1/30–1/60s — brace for a steady hover':eff<8?'1/100–1/200s':'1/500–1/1000s';
+  var shutterPhoto;
+  if(eff<=0){
+    shutterPhoto=ceiling>=1600?'1/30–1/60s — brace for a steady hover':'1/8–1/15s — lower ISO ceiling needs a slower shutter, hover as still as possible';
+  }else if(eff<8){
+    shutterPhoto='1/100–1/200s';
+  }else{
+    shutterPhoto='1/500–1/1000s';
+  }
   var wb;
   if(sunElDeg<=0)wb='Auto / ~4500K — artificial light dominant';
   else if(sunElDeg<6)wb='~5000–5500K — lock WB to hold the golden/blue tones';
@@ -2705,7 +2719,7 @@ function renderPhotoScoreCard(){
   }
   var barPct=Math.round(ps.total/100*100);
   var infoSvg='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><rect x="7.25" y="6.5" width="1.5" height="5" rx=".75" fill="currentColor"/><rect x="7.25" y="4" width="1.5" height="1.5" rx=".75" fill="currentColor"/></svg>';
-  return'<div class="card" style="border-color:rgba(168,85,247,.25);background:rgba(168,85,247,.04);">'+
+  return'<div class="card" style="border-color:rgba(168,85,247,.25);">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'+
       '<div style="display:flex;align-items:center;gap:6px;">'+
         '<h2 class="card-ttl" style="margin-bottom:0;">Photo Conditions</h2>'+

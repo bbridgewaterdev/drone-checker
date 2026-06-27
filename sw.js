@@ -43,7 +43,7 @@ self.addEventListener('notificationclick', function(e) {
   );
 });
 
-const CACHE = 'dronechecker-v106';
+const CACHE = 'dronechecker-v107';
 
 const STATIC = [
   '/',

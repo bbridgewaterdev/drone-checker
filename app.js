@@ -52,11 +52,11 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.7.43';
+var APP_VERSION='1.7.51';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
-var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',tempMode='c',lastUpdated=null,windMap=null,windAnimFrame=null,ghRefreshTimer=null,wxLocUtcOffsetMs=0;
+var selectedDrone='mini4pro',uLat=null,uLng=null,wxData=null,currentKp=0,kpForecast=[],unitMode='kmh',tempMode='c',lastUpdated=null,windMap=null,windAnimFrame=null,ghRefreshTimer=null,wxLocUtcOffsetMs=0,ghMap=null;
 var UK_FRZS=[
   {n:'Heathrow',i:'EGLL',lat:51.4775,lng:-0.4614,r:5000},
   {n:'Gatwick',i:'EGKK',lat:51.1537,lng:-0.1821,r:5000},
@@ -1433,7 +1433,7 @@ function renderKpCard(){
 function fetchOpenMeteo(lat,lng){
   var url='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+
     '&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,surface_pressure,visibility,cloud_cover,wind_speed_80m,wind_speed_120m'+
-    '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility,precipitation_probability,wind_speed_80m,wind_speed_120m'+
+    '&hourly=temperature_2m,weather_code,wind_speed_10m,wind_gusts_10m,visibility,precipitation_probability,wind_speed_80m,wind_speed_120m,cloud_cover_low,cloud_cover_mid,cloud_cover_high'+
     '&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max'+
     '&wind_speed_unit=kmh&timezone=auto&forecast_days=8';
   return fetchWithTimeout(url,12000)
@@ -2632,7 +2632,7 @@ function calcSunTimes(lat,lng,date){
   function mins(angle,rising){if(angle===null)return null;return 720-4*(lng+(rising?angle:-angle))+EoT+tz*60;}
   function toDate(m){if(m===null)return null;var d=new Date(date);d.setHours(0,0,0,0);d.setMinutes(Math.round(m));return d;}
   var hSun=ha(-0.833),hCivil=ha(-6),hNaut=ha(-12),hGoldS=ha(-4),hGoldE=ha(6);
-  return{nautDawn:toDate(mins(hNaut,true)),blueDawnE:toDate(mins(hCivil,true)),goldMornS:toDate(mins(hGoldS,true)),goldMornE:toDate(mins(hGoldE,true)),sunrise:toDate(mins(hSun,true)),sunset:toDate(mins(hSun,false)),goldEveS:toDate(mins(hGoldE,false)),goldEveE:toDate(mins(hGoldS,false)),blueEveS:toDate(mins(hCivil,false)),nautDusk:toDate(mins(hNaut,false))};
+  return{nautDawn:toDate(mins(hNaut,true)),blueDawnE:toDate(mins(hCivil,true)),goldMornS:toDate(mins(hGoldS,true)),goldMornE:toDate(mins(hGoldE,true)),sunrise:toDate(mins(hSun,true)),sunset:toDate(mins(hSun,false)),goldEveS:toDate(mins(hGoldE,false)),goldEveE:toDate(mins(hGoldS,false)),blueEveS:toDate(mins(hCivil,false)),nautDusk:toDate(mins(hNaut,false)),solarNoon:toDate(720-4*lng+EoT+tz*60)};
 }
 function sunElevation(lat,lng,date){
   var rad=Math.PI/180,deg=180/Math.PI;
@@ -2644,6 +2644,101 @@ function sunElevation(lat,lng,date){
   var hourAngle=(mins-solarNoon)*0.25;
   var sinEl=Math.sin(lat*rad)*Math.sin(decl)+Math.cos(lat*rad)*Math.cos(decl)*Math.cos(hourAngle*rad);
   return Math.asin(sinEl)*deg;
+}
+function sunAzimuth(lat,lng,date){
+  var rad=Math.PI/180,deg=180/Math.PI;
+  var start=new Date(date.getFullYear(),0,0),doy=Math.floor((date-start)/86400000);
+  var B=(360/365)*(doy-81)*rad,EoT=9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);
+  var decl=23.45*Math.sin(B)*rad,tz=-date.getTimezoneOffset()/60,latR=lat*rad;
+  var mins=date.getHours()*60+date.getMinutes()+date.getSeconds()/60;
+  var solarNoon=720-4*lng+EoT+tz*60,hourAngle=(mins-solarNoon)*0.25*rad;
+  var elR=Math.asin(Math.sin(latR)*Math.sin(decl)+Math.cos(latR)*Math.cos(decl)*Math.cos(hourAngle));
+  var cosAz=(Math.sin(decl)-Math.sin(elR)*Math.sin(latR))/(Math.cos(elR)*Math.cos(latR));
+  cosAz=Math.max(-1,Math.min(1,cosAz));
+  var az=Math.acos(cosAz)*deg;
+  return hourAngle>0?360-az:az;
+}
+function nearestHourlyCloud(hours,target){
+  if(!hours||!hours.time||!target)return null;
+  var bestIdx=-1,bestDiff=Infinity;
+  for(var i=0;i<hours.time.length;i++){
+    var diff=Math.abs(new Date(hours.time[i])-target);
+    if(diff<bestDiff){bestDiff=diff;bestIdx=i;}
+  }
+  if(bestIdx<0||bestDiff>5400000)return null;
+  return{low:hours.cloud_cover_low?hours.cloud_cover_low[bestIdx]||0:0,mid:hours.cloud_cover_mid?hours.cloud_cover_mid[bestIdx]||0:0,high:hours.cloud_cover_high?hours.cloud_cover_high[bestIdx]||0:0};
+}
+function sunEventQuality(low,mid,high){
+  var colorCloud=Math.max(mid,high);
+  var colorScore=colorCloud<=40?65+(colorCloud/40)*35:100-((colorCloud-40)/60)*80;
+  colorScore=Math.max(0,Math.min(100,colorScore));
+  var horizonFactor=1-Math.pow(Math.min(Math.max(low,0),100)/100,1.3);
+  return Math.round(Math.max(0,Math.min(100,colorScore*horizonFactor)));
+}
+function initGoldenMap(lat,lng,today){
+  var mapEl=document.getElementById('gh-map-el');
+  if(!mapEl||typeof L==='undefined')return;
+  if(ghMap){ghMap.remove();ghMap=null;}
+  var t=calcSunTimes(lat,lng,today);
+  var sunriseAz=t.sunrise?sunAzimuth(lat,lng,t.sunrise):null;
+  var sunsetAz=t.sunset?sunAzimuth(lat,lng,t.sunset):null;
+  var legendEl=document.getElementById('gh-map-legend');
+  if(legendEl){
+    legendEl.innerHTML=
+      (sunriseAz!=null?'<span><span style="display:inline-block;width:10px;height:3px;background:#fbbf24;margin-right:4px;vertical-align:middle;"></span>Sunrise '+Math.round(sunriseAz)+'°</span>':'')+
+      (sunsetAz!=null?'<span><span style="display:inline-block;width:10px;height:3px;background:#f97316;margin-right:4px;vertical-align:middle;"></span>Sunset '+Math.round(sunsetAz)+'°</span>':'')+
+      '<span><span style="display:inline-block;width:10px;height:3px;background:#ef4444;margin-right:4px;vertical-align:middle;"></span>Selected time</span>';
+  }
+  var dayBase=new Date(today);dayBase.setHours(0,0,0,0);
+  var nowMinutes=today.getHours()*60+today.getMinutes();
+  function timeAt(m){var d=new Date(dayBase);d.setMinutes(m);return d;}
+  ghMap=L.map('gh-map-el',{center:[lat,lng],zoom:13,zoomControl:false,attributionControl:true});
+  L.maplibreGL({
+    style:'https://tiles.openfreemap.org/styles/liberty',
+    attribution:'© <a href="https://openfreemap.org" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;">OpenFreeMap</a> © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;">OSM</a>',
+  }).addTo(ghMap);
+  L.control.zoom({position:'bottomright'}).addTo(ghMap);
+  L.circleMarker([lat,lng],{radius:6,color:'#38bdf8',fillColor:'#38bdf8',fillOpacity:1,weight:2,opacity:0.9,interactive:false}).addTo(ghMap);
+  setTimeout(function(){
+    if(!ghMap)return;
+    ghMap.invalidateSize();
+    var W=mapEl.offsetWidth,H=mapEl.offsetHeight;
+    if(!W||!H)return;
+    var canvas=document.createElement('canvas');
+    canvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:400;';
+    mapEl.appendChild(canvas);
+    canvas.width=W;canvas.height=H;
+    var ctx=canvas.getContext('2d'),rayLen=Math.sqrt(W*W+H*H),selectedMinutes=nowMinutes;
+    function ray(cx,cy,az,color){
+      if(az==null)return;
+      var a=az*Math.PI/180;
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+rayLen*Math.sin(a),cy-rayLen*Math.cos(a));
+      ctx.strokeStyle=color;ctx.lineWidth=3;ctx.stroke();
+    }
+    function draw(){
+      var pt=ghMap.latLngToContainerPoint([lat,lng]),cx=pt.x,cy=pt.y;
+      ctx.clearRect(0,0,W,H);
+      ray(cx,cy,sunriseAz,'rgba(251,191,36,.85)');
+      ray(cx,cy,sunsetAz,'rgba(249,115,22,.85)');
+      var selD=timeAt(selectedMinutes),selEl=sunElevation(lat,lng,selD),selAz=sunAzimuth(lat,lng,selD);
+      if(selEl>-6)ray(cx,cy,selAz,'rgba(239,68,68,.85)');
+      var roEl=document.getElementById('gh-map-readout');
+      if(roEl){
+        roEl.innerHTML=
+          '<div style="background:rgba(15,23,42,.94);border-radius:8px;padding:6px 9px;margin-bottom:6px;"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;">Altitude</div><div style="font-size:14px;font-weight:700;color:#f1f5f9;">'+selEl.toFixed(1)+'°</div></div>'+
+          '<div style="background:rgba(15,23,42,.94);border-radius:8px;padding:6px 9px;"><div style="font-size:9px;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;">Azimuth</div><div style="font-size:14px;font-weight:700;color:#f1f5f9;">'+selAz.toFixed(1)+'°</div></div>';
+      }
+    }
+    draw();
+    ghMap.on('move zoom',draw);
+    var sliderEl=document.getElementById('gh-time-slider'),timeLabelEl=document.getElementById('gh-time-label');
+    if(sliderEl){
+      sliderEl.value=selectedMinutes;
+      function updateLabel(){if(timeLabelEl)timeLabelEl.textContent=fmtTime(timeAt(selectedMinutes))+(Math.abs(selectedMinutes-nowMinutes)<5?' (now)':'');}
+      updateLabel();
+      sliderEl.oninput=function(){selectedMinutes=parseInt(sliderEl.value,10);updateLabel();draw();};
+    }
+  },150);
 }
 function photoScore(wind,gust,vis,cloud,wmo,lat,lng){
   var now=new Date(),el=(lat&&lng)?sunElevation(lat,lng,now):-90;
@@ -2809,8 +2904,23 @@ function renderGolden(){
     return'<div class="gh-slot" style="border-left-color:'+col+';"><div class="gh-slot-header"><div class="gh-slot-name">'+emoji+' '+label+badge+cds+'</div><div class="gh-slot-time" style="color:'+col+';">'+(start&&end&&Math.abs(end-start)<120000?sStr:sStr+' – '+eStr)+'</div></div><div class="gh-slot-desc">'+desc+'</div></div>';
   }
   function tmTile(label,col,d){return'<div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">'+label+'</div><div class="gh-tmrw-val" style="color:'+col+';">'+(d?fmtTime(d):'--:--')+'</div></div>';}
+  function qualityMeta(pct){
+    if(pct==null)return{label:'No data',col:'#64748b'};
+    if(pct>=75)return{label:'Great',col:'#22c55e'};
+    if(pct>=55)return{label:'Good',col:'#84cc16'};
+    if(pct>=35)return{label:'Fair',col:'#f59e0b'};
+    return{label:'Poor',col:'#ef4444'};
+  }
+  function qualityRow(emoji,label,pct,isPast){
+    var m=qualityMeta(pct);
+    var doneTag=isPast?'<span style="font-size:10px;color:var(--muted);font-weight:600;margin-left:6px;">✓ Done for today</span>':'';
+    return'<div style="margin-bottom:10px;'+(isPast?'opacity:.45;':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div style="font-size:13px;font-weight:600;color:var(--text);">'+emoji+' '+label+doneTag+'</div><div style="font-size:13px;font-weight:700;color:'+m.col+';">'+(pct!=null?pct+'% · '+m.label:'No data')+'</div></div><div style="height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;"><div style="height:100%;width:'+(pct||0)+'%;background:'+m.col+';border-radius:3px;"></div></div></div>';
+  }
+  var hourlyData=wxData&&wxData.hourly?wxData.hourly:null;
+  function qualityFor(d){var c=nearestHourlyCloud(hourlyData,d);return c?sunEventQuality(c.low,c.mid,c.high):null;}
+  var sunriseQ=qualityFor(t.sunrise),sunsetQ=qualityFor(t.sunset),sunriseQTm=qualityFor(tm.sunrise),sunsetQTm=qualityFor(tm.sunset);
+  var sunrisePast=!!(t.sunrise&&t.sunrise<today),sunsetPast=!!(t.sunset&&t.sunset<today);
   document.getElementById('gh-body').innerHTML=
-    renderPhotoScoreCard()+
     '<div class="card"><h2 class="card-ttl">Today — '+today.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+'</h2><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">📍 '+esc(loc)+'</div>'+
     slot('🌑','Blue Hour — Dawn','#818cf8',t.nautDawn,t.blueDawnE,'Deep blue pre-dawn sky. Great for moody shots before sunrise.')+
     slot('🌅','Golden Hour — Morning','#f59e0b',t.goldMornS,t.goldMornE,'Warm, soft light just after sunrise. Long shadows and golden tones.')+
@@ -2818,11 +2928,22 @@ function renderGolden(){
     slot('🌇','Sunset','#f97316',t.sunset,t.sunset,'Sun crosses the horizon. Most popular time to fly.')+
     slot('🌆','Golden Hour — Evening','#f59e0b',t.goldEveS,t.goldEveE,'The classic golden hour. Warm directional light before sunset.')+
     slot('🌃','Blue Hour — Dusk','#818cf8',t.blueEveS,t.nautDusk,'Deep blue sky after sunset. City lights begin to appear.')+
-    '</div><div class="card"><h2 class="card-ttl">Tomorrow at a Glance</h2><div class="gh-tmrw">'+
+    '</div>'+
+    '<div class="card"><h2 class="card-ttl">Sunrise &amp; Sunset Quality</h2><div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Likelihood of vivid colour, based on cloud cover near the horizon.</div>'+
+    qualityRow('🌅','Sunrise',sunriseQ,sunrisePast)+qualityRow('🌇','Sunset',sunsetQ,sunsetPast)+
+    '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;">Tomorrow</div>'+
+    qualityRow('🌅','Sunrise',sunriseQTm)+qualityRow('🌇','Sunset',sunsetQTm)+
+    '</div>'+
+    '<div class="card"><h2 class="card-ttl">Sun Path</h2><div style="position:relative;"><div id="gh-map-el" role="application" aria-label="Map showing the sun\'s direction throughout the day" style="height:240px;width:100%;border-radius:var(--radius-sm);overflow:hidden;"></div><div style="position:absolute;bottom:10px;left:10px;z-index:1000;pointer-events:none;" id="gh-map-readout"></div><div style="position:absolute;top:10px;right:10px;z-index:1000;background:rgba(15,23,42,.7);border-radius:6px;padding:3px 7px;font-size:10px;font-weight:600;color:#e2e8f0;pointer-events:none;">N&#8593;</div></div>'+
+    '<div style="margin-top:12px;"><input type="range" id="gh-time-slider" min="0" max="1439" step="5" value="720" style="width:100%;accent-color:#ef4444;display:block;" aria-label="Time of day"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px;"><span>00:00</span><span id="gh-time-label" style="font-size:12px;font-weight:700;color:var(--text);">--:--</span><span>23:55</span></div></div>'+
+    '<div id="gh-map-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted);"></div></div>'+
+    renderPhotoScoreCard()+
+    '<div class="card"><h2 class="card-ttl">Tomorrow at a Glance</h2><div class="gh-tmrw">'+
     tmTile('🌑 Blue Dawn','#818cf8',tm.nautDawn)+tmTile('🌅 Golden Morning','#f59e0b',tm.goldMornS)+
     tmTile('☀️ Sunrise','#f97316',tm.sunrise)+tmTile('🌇 Sunset','#f97316',tm.sunset)+
     tmTile('🌆 Golden Evening','#f59e0b',tm.goldEveS)+tmTile('🌃 Blue Dusk','#818cf8',tm.blueEveS)+
     '</div></div><div style="height:14px;"></div>'+proAccountCard();
+  initGoldenMap(uLat,uLng,today);
   }catch(e){
     document.getElementById('gh-body').innerHTML='<div class="err">Could not calculate golden hour for this location.<br><br><button onclick="renderGolden()" style="background:var(--accent);border:none;border-radius:var(--radius-sm);padding:10px 20px;color:#020617;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">↻ Try Again</button></div>';
   }
@@ -2844,7 +2965,7 @@ function goTab(id,btn){
   if(id==='gh'){
     if(!isPro()){
       var ghEl=document.getElementById('gh-body');
-      if(ghEl)ghEl.innerHTML='<div class="paywall-card fill"><div class="paywall-blurred" style="padding:14px;"><div style="font-size:11px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;">Today &mdash; Monday 16 June</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">&#128205; Your location</div><div class="gh-slot" style="border-left-color:#818cf8;"><div class="gh-slot-header"><div class="gh-slot-name">🌑 Blue Hour &mdash; Dawn</div><div class="gh-slot-time" style="color:#818cf8;">04:12 &ndash; 04:44</div></div><div class="gh-slot-desc">Deep blue pre-dawn sky. Great for moody shots before sunrise.</div></div><div class="gh-slot" style="border-left-color:#f59e0b;"><div class="gh-slot-header"><div class="gh-slot-name">🌅 Golden Hour &mdash; Morning</div><div class="gh-slot-time" style="color:#f59e0b;">04:44 &ndash; 05:23</div></div><div class="gh-slot-desc">Warm, soft light just after sunrise. Long shadows and golden tones.</div></div><div class="gh-slot" style="border-left-color:#f97316;"><div class="gh-slot-header"><div class="gh-slot-name">☀️ Sunrise</div><div class="gh-slot-time" style="color:#f97316;">04:48</div></div><div class="gh-slot-desc">Sun crosses the horizon. Be airborne 10 minutes before.</div></div><div class="gh-slot" style="border-left-color:#f97316;"><div class="gh-slot-header"><div class="gh-slot-name">🌇 Sunset</div><div class="gh-slot-time" style="color:#f97316;">21:21</div></div><div class="gh-slot-desc">Sun crosses the horizon. Most popular time to fly.</div></div><div class="gh-slot" style="border-left-color:#f59e0b;"><div class="gh-slot-header"><div class="gh-slot-name">🌆 Golden Hour &mdash; Evening <span class="gh-badge" style="background:#f59e0b;color:#fff;">LIVE NOW</span></div><div class="gh-slot-time" style="color:#f59e0b;">20:42 &ndash; 21:21</div></div><div class="gh-slot-desc">The classic golden hour. Warm directional light before sunset.</div></div><div class="gh-slot" style="border-left-color:#818cf8;margin-bottom:2px;"><div class="gh-slot-header"><div class="gh-slot-name">🌃 Blue Hour &mdash; Dusk</div><div class="gh-slot-time" style="color:#818cf8;">21:21 &ndash; 21:53</div></div><div class="gh-slot-desc">Deep blue sky after sunset. City lights begin to appear.</div></div><div style="font-size:11px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin:14px 0 8px;">Tomorrow at a Glance</div><div class="gh-tmrw"><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌑 Blue Dawn</div><div class="gh-tmrw-val" style="color:#818cf8;">04:11</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌅 Golden Morning</div><div class="gh-tmrw-val" style="color:#f59e0b;">04:43</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">☀️ Sunrise</div><div class="gh-tmrw-val" style="color:#f97316;">04:47</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌇 Sunset</div><div class="gh-tmrw-val" style="color:#f97316;">21:22</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌆 Golden Eve</div><div class="gh-tmrw-val" style="color:#f59e0b;">20:43</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌃 Blue Dusk</div><div class="gh-tmrw-val" style="color:#818cf8;">21:54</div></div></div></div><div class="paywall-over">'+proCard({overlay:true,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',title:'Golden Hour',sub:'Precise golden hour, blue hour, sunrise &amp; sunset times with live countdowns for your exact location.',pills:['🌅 Golden hour','🌑 Blue hour','☀️ Sunrise &amp; sunset','📷 Photo conditions','⏱ Live countdown','📅 Tomorrow']})+'</div></div>';
+      if(ghEl)ghEl.innerHTML='<div class="paywall-card fill"><div class="paywall-blurred" style="padding:14px;"><div style="font-size:11px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;">Today &mdash; Monday 16 June</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px;">&#128205; Your location</div><div class="gh-slot" style="border-left-color:#818cf8;"><div class="gh-slot-header"><div class="gh-slot-name">🌑 Blue Hour &mdash; Dawn</div><div class="gh-slot-time" style="color:#818cf8;">04:12 &ndash; 04:44</div></div><div class="gh-slot-desc">Deep blue pre-dawn sky. Great for moody shots before sunrise.</div></div><div class="gh-slot" style="border-left-color:#f59e0b;"><div class="gh-slot-header"><div class="gh-slot-name">🌅 Golden Hour &mdash; Morning</div><div class="gh-slot-time" style="color:#f59e0b;">04:44 &ndash; 05:23</div></div><div class="gh-slot-desc">Warm, soft light just after sunrise. Long shadows and golden tones.</div></div><div class="gh-slot" style="border-left-color:#f97316;"><div class="gh-slot-header"><div class="gh-slot-name">☀️ Sunrise</div><div class="gh-slot-time" style="color:#f97316;">04:48</div></div><div class="gh-slot-desc">Sun crosses the horizon. Be airborne 10 minutes before.</div></div><div class="gh-slot" style="border-left-color:#f97316;"><div class="gh-slot-header"><div class="gh-slot-name">🌇 Sunset</div><div class="gh-slot-time" style="color:#f97316;">21:21</div></div><div class="gh-slot-desc">Sun crosses the horizon. Most popular time to fly.</div></div><div class="gh-slot" style="border-left-color:#f59e0b;"><div class="gh-slot-header"><div class="gh-slot-name">🌆 Golden Hour &mdash; Evening <span class="gh-badge" style="background:#f59e0b;color:#fff;">LIVE NOW</span></div><div class="gh-slot-time" style="color:#f59e0b;">20:42 &ndash; 21:21</div></div><div class="gh-slot-desc">The classic golden hour. Warm directional light before sunset.</div></div><div class="gh-slot" style="border-left-color:#818cf8;margin-bottom:2px;"><div class="gh-slot-header"><div class="gh-slot-name">🌃 Blue Hour &mdash; Dusk</div><div class="gh-slot-time" style="color:#818cf8;">21:21 &ndash; 21:53</div></div><div class="gh-slot-desc">Deep blue sky after sunset. City lights begin to appear.</div></div><div style="font-size:11px;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin:14px 0 8px;">Tomorrow at a Glance</div><div class="gh-tmrw"><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌑 Blue Dawn</div><div class="gh-tmrw-val" style="color:#818cf8;">04:11</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌅 Golden Morning</div><div class="gh-tmrw-val" style="color:#f59e0b;">04:43</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">☀️ Sunrise</div><div class="gh-tmrw-val" style="color:#f97316;">04:47</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌇 Sunset</div><div class="gh-tmrw-val" style="color:#f97316;">21:22</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌆 Golden Eve</div><div class="gh-tmrw-val" style="color:#f59e0b;">20:43</div></div><div class="gh-tmrw-tile"><div class="gh-tmrw-lbl">🌃 Blue Dusk</div><div class="gh-tmrw-val" style="color:#818cf8;">21:54</div></div></div></div><div class="paywall-over">'+proCard({overlay:true,icon:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',title:'Golden Hour',sub:'Precise golden hour, blue hour and sunrise &amp; sunset times, plus a live sun-path map and sunrise/sunset quality score for your exact location.',pills:['🌅 Golden hour','🌑 Blue hour','🗺️ Sun path map','☀️ Sunrise/Sunset %','📷 Photo conditions','⏱ Live countdown']})+'</div></div>';
     } else { renderGolden(); ghRefreshTimer=setInterval(renderGolden,600000); }
   }
   if(id==='cl')renderChecklist();
@@ -3534,7 +3655,7 @@ function updateProUI(){
 // opts: {id, icon (inner <svg> string), title, sub, pills (label strings), cta, overlay}
 function proCard(opts){opts=opts||{};var cls='pro-card'+(opts.overlay?' in-overlay':'');var pills=(opts.pills||[]).map(function(p){return'<span class="pro-card-pill">'+p+'</span>';}).join('');var cta=opts.cta||'Unlock with Pro &middot; &pound;3.99/mo &rarr;';return'<div class="'+cls+'"'+(opts.id?' id="'+opts.id+'"':'')+' role="button" tabindex="0" onclick="openProOverlay()" onkeydown="if(event.key===&apos;Enter&apos;||event.key===&apos; &apos;){event.preventDefault();openProOverlay();}"><div class="pro-card-hd"><div class="pro-card-ico">'+(opts.icon||'')+'</div><div class="pro-card-tx"><div class="pro-card-ttl">'+(opts.title||'')+'</div><div class="pro-card-sub">'+(opts.sub||'')+'</div></div></div><div class="pro-card-pills">'+pills+'</div><div class="pro-card-cta">'+cta+'</div></div>';}
 var PRO_LOCK_SVG='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
-function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return proCard({icon:PRO_LOCK_SVG,title:'See the next 7 days at a glance',sub:'Plan golden hour shoots and ideal flight windows days before you head out.',pills:['&#128197; 7-day Forecast','&#127749; Golden Hour','&#128247; Photo Conditions','&#128168; Wind Detail','&#127788; Hazard Map','&#9992;&#65039; Flight Log']});}
+function proUpsellStrip(){if(!PAID_FEATURES_ENABLED||isPro())return'';return proCard({icon:PRO_LOCK_SVG,title:'See the next 7 days at a glance',sub:'Plan golden hour shoots and ideal flight windows days before you head out.',pills:['&#128197; 7-day Forecast','&#127749; Golden Hour','&#128506;&#65039; Sun Path Map','&#9728;&#65039; Sunrise/Sunset %','&#128247; Photo Conditions','&#128168; Wind Detail','&#127788; Hazard Map','&#9992;&#65039; Flight Log']});}
 function proAccountCard(){if(!isPro()||!proUser)return'';var initials=(proUser.name||proUser.email||'P').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();return'<div class="pro-account-card"><div class="pro-avatar">'+esc(initials)+'</div><div style="flex:1;min-width:0;"><div class="pro-account-name">'+esc(proUser.name||proUser.email||'Pro user')+'</div><div class="pro-account-badge">DroneChecker Pro</div></div><div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;"><button class="pro-signout-btn" onclick="signOutPro()">Sign out</button><button class="pro-signout-btn" onclick="openBillingPortal()" style="font-size:10px;opacity:.7;">Manage subscription</button></div></div>';}
 
 // ---- SETTINGS ----
@@ -4518,6 +4639,7 @@ function locateOnRestrictMap(){
     showToast('No location available');
   }
 }
+function flyToUserLocation(lat,lng){if(!restrictMap)return;restrictMap.flyTo([lat,lng],restrictMap.getZoom()||13,{duration:0.8});}
 function fetchGroundHazards(){if(_fetchDebTimer)clearTimeout(_fetchDebTimer);_fetchDebTimer=setTimeout(_doFetchGroundHazards,400);}
 function _doFetchGroundHazards(){if(!restrictMap||!restrictHazardsLayer)return;var zoom=restrictMap.getZoom();var warn=document.getElementById('restrict-zoom-warn');if(zoom<11){if(warn){warn.style.display='';warn.textContent='Zoom in further to see hazards (current zoom: '+Math.round(zoom)+')';}restrictHazardsLayer.clearLayers();HAZARD_TYPES.forEach(function(h){if(hazardLayerGroups[h.key])hazardLayerGroups[h.key].clearLayers();});return;}if(warn)warn.style.display='none';var statusEl=document.getElementById('restrict-load-status');var ts=0.25,bounds=restrictMap.getBounds(),tileKeys=[],sLat=Math.floor(bounds.getSouth()*4)/4,nLat=Math.floor(bounds.getNorth()*4)/4,wLng=Math.floor(bounds.getWest()*4)/4,eLng=Math.floor(bounds.getEast()*4)/4;for(var la=sLat;la<=nLat+0.001;la=Math.round((la+ts)*1000)/1000){for(var lo=wLng;lo<=eLng+0.001;lo=Math.round((lo+ts)*1000)/1000){tileKeys.push(la+'_'+lo);}}var needFetch=tileKeys.filter(function(k){return _tileCache[k]===undefined;});if(!needFetch.length){renderHazardFeaturesFromCache(tileKeys,statusEl);return;}if(statusEl){statusEl.style.display='';statusEl.style.color='var(--muted)';statusEl.textContent='Loading…';}var pending=needFetch.length;needFetch.forEach(function(key){fetch('/hazard-tiles/v1/'+key+'.geojson').then(function(r){if(r.status===404){_tileCache[key]=[];return;}if(!r.ok)throw new Error('HTTP '+r.status);return r.json().then(function(d){_tileCache[key]=(d&&d.features)||[];});}).catch(function(){_tileCache[key]=[];}).then(function(){pending--;if(pending===0)renderHazardFeaturesFromCache(tileKeys,statusEl);});}); }
 function renderHazardFeaturesFromCache(tileKeys,statusEl){var seen={},all=[];tileKeys.forEach(function(k){(_tileCache[k]||[]).forEach(function(f){if(f.id){if(seen[f.id])return;seen[f.id]=true;}all.push(f);});});renderHazardFeatures(all,statusEl);}

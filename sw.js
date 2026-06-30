@@ -43,7 +43,7 @@ self.addEventListener('notificationclick', function(e) {
   );
 });
 
-const CACHE = 'dronechecker-v118';
+const CACHE = 'dronechecker-v119';
 
 const STATIC = [
   '/',
@@ -126,7 +126,13 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // HTML pages: network-first so updates deploy immediately
+  // HTML pages: network-first so updates deploy immediately, but on a poor
+  // connection a hung fetch must not strand the page forever (the native TWA
+  // splash screen waits on this navigation finishing) — race it against a
+  // short timeout and fall back to any cached copy already on the device.
+  // The network call keeps running in the background either way and still
+  // refreshes the cache once it lands, so deploys propagate normally on a
+  // decent connection.
   if (e.request.mode === 'navigate' ||
       url.endsWith('.html') ||
       url.endsWith('/') ||
@@ -135,17 +141,20 @@ self.addEventListener('fetch', e => {
       url.endsWith('/privacy') ||
       url.endsWith('/terms')) {
     e.respondWith(
-      fetch(e.request)
-        .then(res => {
+      caches.match(e.request).then(cached => {
+        const fallback = () =>
+          cached || caches.match('/app.html') || caches.match('/index.html');
+        const networkPromise = fetch(e.request).then(res => {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
           return res;
-        })
-        .catch(() =>
-          caches.match(e.request).then(cached =>
-            cached || caches.match('/app.html') || caches.match('/index.html')
-          )
-        )
+        });
+        if (!cached) return networkPromise.catch(fallback);
+        return Promise.race([
+          networkPromise.catch(fallback),
+          new Promise(resolve => setTimeout(() => resolve(cached), 3000))
+        ]);
+      })
     );
     return;
   }

@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.8.0';
+var APP_VERSION='1.8.1';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -3252,12 +3252,17 @@ function loadProUser(){
         proUser=restored;
         try{localStorage.setItem('dc_pro_user',JSON.stringify(restored));}catch(e){}
         updateProUI();
+        // isPro may have just flipped (e.g. localStorage was stale/empty) — the
+        // dashboard already rendered once with the pre-confirmation status, so
+        // force it to redraw with the server-confirmed value. See loadProUser().
+        _lastDashSig=null;if(wxData){renderDash();renderFc();}
         if(isPro())setTimeout(prefetchSavedLocations,1000);
       } else if(proUser){
         // Firebase says no session — clear stale localStorage
         proUser=null;
         try{localStorage.removeItem('dc_pro_user');}catch(e){}
         updateProUI();
+        _lastDashSig=null;if(wxData){renderDash();renderFc();}
       }
     });
   }catch(e){}

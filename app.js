@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.8.2';
+var APP_VERSION='1.8.3';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -2291,6 +2291,61 @@ function renderFc(){
   if(!wxData||!wxData.hourly)return;
   var hours=wxData.hourly,now=new Date(),rows='',count=0;
   var maxHours=isPro()?72:6;
+
+  // "Now" tile — live current conditions (same source as the Dashboard's
+  // condition strip), shown above the hourly list so users don't have to
+  // switch tabs to see what it's doing right now.
+  if(wxData.current){
+    var nc=wxData.current;
+    var nWind=nc.wind_speed_10m||0,nGust=nc.wind_gusts_10m||0,nVis=nc.visibility||10000,nWmo=nc.weather_code||0;
+    var nRawTemp=nc.temperature_2m||0,nTemp=Math.round(nRawTemp);
+    var nW80=nc.wind_speed_80m||0,nW120=nc.wind_speed_120m||0;
+    var nPrecip=0;
+    if(hours.precipitation_probability){
+      var _nowSlot=Math.floor(Date.now()/3600000);
+      for(var ni=0;ni<hours.time.length;ni++){
+        if(Math.floor(locEntryMs(hours.time[ni])/3600000)===_nowSlot){nPrecip=Math.round(hours.precipitation_probability[ni]||0);break;}
+      }
+    }
+    var nRatingWmo=precipAdjustWmo(nWmo,nPrecip);
+    var nInfo=wmoInfo(nWmo,now);
+    var nFcTempPrimary=tmp(nRawTemp)+tmpU();
+    var nFcTempSecondary=unitMode==='mph'?Math.round(nRawTemp)+'°C':Math.round(nRawTemp*9/5+32)+'°F';
+    var nPrecipBadge=nPrecip>0?'<span style="font-size:11px;color:'+(nPrecip>=60?'var(--red)':nPrecip>=30?'var(--amber)':'var(--muted)')+';">💧'+nPrecip+'% rain</span>':'';
+    var nRating=flyRating(nWind,nGust,nVis,nRatingWmo,currentKp,nTemp,nW80,nW120);
+    var nAriaLabel='Now. '+nInfo.desc+'.'+(nPrecip>0?' '+nPrecip+' percent chance of rain.':'')+' '+spd(nWind)+' '+spdU()+' wind. '+(nRating.lvl==='green'?'Good to fly.':'Caution: '+nRating.desc)+'. Tap for full conditions.';
+    rows+=
+      '<div class="fc-item" id="fc-row-now" onclick="toggleFcDetail(&apos;now&apos;)" role="button" aria-expanded="false" aria-label="'+nAriaLabel+'" style="border-left:3px solid var(--accent);padding-left:11px;">'+
+        '<div class="fc-time" style="color:var(--accent);">Now</div>'+
+        '<div class="fc-icon">'+nInfo.emoji+'</div>'+
+        '<div class="fc-temp">'+nFcTempPrimary+'<br><span style="font-size:11px;color:var(--muted);">'+nFcTempSecondary+'</span></div>'+
+        '<div class="fc-desc">'+nInfo.desc+(nPrecipBadge?' &middot; '+nPrecipBadge:'')+'</div>'+
+        (function(){
+          var d=getDrone();
+          var r10=nWind>=d.windRed?'red':nWind>=d.windAmber?'amber':'green';
+          var r80=nW80>=d.windRed?'red':nW80>=d.windAmber?'amber':'green';
+          var r120=nW120>=d.windRed?'red':nW120>=d.windAmber?'amber':'green';
+          var col10=r10==='red'?'var(--red)':r10==='amber'?'var(--amber)':'var(--green)';
+          var col80=r80==='red'?'var(--red)':r80==='amber'?'var(--amber)':'var(--green)';
+          var col120=r120==='red'?'var(--red)':r120==='amber'?'var(--amber)':'var(--green)';
+          var altWorse=r80!=='green'||r120!=='green';
+          if(!altWorse){
+            return'<div class="fc-wind"><div style="color:'+col10+';">'+spd(nWind)+' '+spdU()+'</div><div style="font-size:9px;color:#22c55e;opacity:.75;margin-top:2px;">↑ alt ✓</div></div>';
+          }
+          return'<div class="fc-wind-stack">'+
+            '<div class="fc-wind-row"><span class="fc-wind-alt">↑120</span><span class="fc-wind-val" style="color:'+col120+';">'+spd(nW120)+'</span></div>'+
+            '<div class="fc-wind-row"><span class="fc-wind-alt">↑80</span><span class="fc-wind-val" style="color:'+col80+';">'+spd(nW80)+'</span></div>'+
+            '<div class="fc-wind-row"><span class="fc-wind-alt">↑10</span><span class="fc-wind-val" style="color:'+col10+';">'+spd(nWind)+'</span></div>'+
+          '</div>';
+        })()+
+        '<div class="fc-dot '+nRating.lvl+'"></div>'+
+        '<div class="fc-chevron">▾</div>'+
+      '</div>'+
+      '<div class="fc-detail" id="fc-det-now">'+
+        buildFcHourDetail(nWind,nGust,nVis,nRatingWmo,nRawTemp,nW80,nW120,nPrecip,currentKp)+
+      '</div>';
+  }
+
   for(var i=0;i<hours.time.length&&count<maxHours;i++){
     var t=new Date(hours.time[i]);if(locEntryMs(hours.time[i])<Date.now())continue;
     var wmo=hours.weather_code[i],info=wmoInfo(wmo,t),wind=hours.wind_speed_10m[i]||0,gust=hours.wind_gusts_10m[i]||0,vis=hours.visibility[i]||10000,temp=Math.round(hours.temperature_2m[i]);

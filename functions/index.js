@@ -485,8 +485,9 @@ exports.stripeWebhook = onRequest(
 // (the caller persists them at whichever field path matches its shape:
 // `alertState.<id>.*` for the new array, flat `alertXxx` for legacy).
 // ----------------------------------------------------------------
-async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, uid, now) {
+async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, uid, now, sendTracker) {
   if (!alert.lat || !alert.lng) return {newState: null, staleToken: false};
+  const capReached = () => sendTracker && sendTracker.maxPerDay > 0 && sendTracker.count >= sendTracker.maxPerDay;
 
   const utcOffset = alert.utcOffsetMinutes || 0;
   const localHour = getLocalHour(now, utcOffset);
@@ -551,7 +552,7 @@ async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, ui
   let staleToken = false;
 
   // ---- Morning forecast ----
-  if (isMorningTime) {
+  if (isMorningTime && !capReached()) {
     const lastMorning = state.morningLastSentAt;
     const hrsSinceMorning = lastMorning
       ? (now.getTime() - lastMorning.toDate().getTime()) / 3600000
@@ -562,7 +563,7 @@ async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, ui
         : `${droneName}: flying conditions at ${locationName} look ${ratingWord} today. Check back later.`;
       const result = await sendFcmData(fcmToken, `☀️ Morning forecast — ${locationName}`, body, uid);
       if (result === 'stale') { staleToken = true; }
-      else if (result) { newState.morningLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
+      else if (result) { newState.morningLastSentAt = admin.firestore.FieldValue.serverTimestamp(); if (sendTracker) sendTracker.count++; }
     }
   }
 
@@ -570,7 +571,7 @@ async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, ui
   if (inWindow && !staleToken) {
     newState.lastRatingGood = isGood;
 
-    if (isGood && !wasGood) {
+    if (isGood && !wasGood && !capReached()) {
       // Window just opened
       const result = await sendFcmData(
         fcmToken,
@@ -582,9 +583,10 @@ async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, ui
       else if (result) {
         newState.lastSentAt = admin.firestore.FieldValue.serverTimestamp();
         newState.repeatLastSentAt = admin.firestore.FieldValue.serverTimestamp();
+        if (sendTracker) sendTracker.count++;
       }
 
-    } else if (!isGood && wasGood && alert.notifyOnClose) {
+    } else if (!isGood && wasGood && alert.notifyOnClose && !capReached()) {
       // Window just closed
       const result = await sendFcmData(
         fcmToken,
@@ -595,9 +597,10 @@ async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, ui
       if (result === 'stale') { staleToken = true; }
       else if (result) {
         newState.repeatLastSentAt = admin.firestore.FieldValue.delete();
+        if (sendTracker) sendTracker.count++;
       }
 
-    } else if (isGood && wasGood && alert.repeatIntervalHours > 0) {
+    } else if (isGood && wasGood && alert.repeatIntervalHours > 0 && !capReached()) {
       // Still good — repeat reminder
       const repeatLast = state.repeatLastSentAt || state.lastSentAt;
       const hrsSinceRepeat = repeatLast
@@ -611,7 +614,7 @@ async function evaluateAndNotifyAlert(alert, state, windThresholds, fcmToken, ui
           uid
         );
         if (result === 'stale') { staleToken = true; }
-        else if (result) { newState.repeatLastSentAt = admin.firestore.FieldValue.serverTimestamp(); }
+        else if (result) { newState.repeatLastSentAt = admin.firestore.FieldValue.serverTimestamp(); if (sendTracker) sendTracker.count++; }
       }
     }
   }
@@ -642,6 +645,15 @@ exports.sendFlightAlerts = onSchedule(
       const fcmToken = data.fcmToken;
       if (!fcmToken) return;
 
+      // ---- Daily send cap (rolling 24h, shared across all of this user's alerts) ----
+      // maxAlertsPerDay is a user-level preference (Settings → Flight alerts), not per-alert —
+      // it throttles total pushes regardless of how many of their alerts fire.
+      const DAY_MS = 24 * 60 * 60 * 1000;
+      const capWindowStart = data.dailyAlertSendWindowStart ? data.dailyAlertSendWindowStart.toDate().getTime() : 0;
+      const capWindowExpired = (now.getTime() - capWindowStart) > DAY_MS;
+      const sendTracker = {maxPerDay: data.maxAlertsPerDay || 0, count: capWindowExpired ? 0 : (data.dailyAlertSendCount || 0)};
+      const capInitialCount = sendTracker.count;
+
       // ---- Multi-alert path (post-migration: `alerts` array + `alertState` map) ----
       if (data.alerts) {
         if (data.alertsEnabled === false) return; // master pause switch — independent of each alert's own `enabled`
@@ -653,7 +665,7 @@ exports.sendFlightAlerts = onSchedule(
           if (staleToken) break;
           if (!alert.enabled) continue;
           const state = (data.alertState && data.alertState[alert.id]) || {};
-          const result = await evaluateAndNotifyAlert(alert, state, data.windThresholds, fcmToken, uid, now);
+          const result = await evaluateAndNotifyAlert(alert, state, data.windThresholds, fcmToken, uid, now, sendTracker);
           if (result.newState) {
             for (const key of Object.keys(result.newState)) {
               update[`alertState.${alert.id}.${key}`] = result.newState[key];
@@ -665,6 +677,11 @@ exports.sendFlightAlerts = onSchedule(
         if (staleToken) {
           update.fcmToken = admin.firestore.FieldValue.delete();
           update.alertAutoDisabled = true;
+        }
+
+        if (capWindowExpired || sendTracker.count !== capInitialCount) {
+          update.dailyAlertSendCount = sendTracker.count;
+          update.dailyAlertSendWindowStart = capWindowExpired ? now : (data.dailyAlertSendWindowStart || now);
         }
 
         if (Object.keys(update).length) {
@@ -683,7 +700,7 @@ exports.sendFlightAlerts = onSchedule(
         lastSentAt: data.alertLastSentAt,
         repeatLastSentAt: data.alertRepeatLastSentAt,
       };
-      const result = await evaluateAndNotifyAlert(alertSettings, legacyState, data.windThresholds, fcmToken, uid, now);
+      const result = await evaluateAndNotifyAlert(alertSettings, legacyState, data.windThresholds, fcmToken, uid, now, sendTracker);
 
       const update = {};
       if (result.newState) {
@@ -697,6 +714,10 @@ exports.sendFlightAlerts = onSchedule(
         update.fcmToken = admin.firestore.FieldValue.delete();
         update['alertSettings.enabled'] = false;
         update.alertAutoDisabled = true;
+      }
+      if (capWindowExpired || sendTracker.count !== capInitialCount) {
+        update.dailyAlertSendCount = sendTracker.count;
+        update.dailyAlertSendWindowStart = capWindowExpired ? now : (data.dailyAlertSendWindowStart || now);
       }
 
       if (Object.keys(update).length) {

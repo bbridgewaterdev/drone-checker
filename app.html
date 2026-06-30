@@ -1342,6 +1342,20 @@
 
         <div id="alert-list-view">
           <div style="padding:14px 20px 10px;font-size:12px;color:var(--muted);line-height:1.6;">Up to 3 alerts — different locations, drones or schedules.</div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Max alerts per day</div>
+              <div class="settings-row-sub">Limit pushes across all alerts combined</div>
+            </div>
+            <select class="settings-select" id="alert-daily-cap-select" onchange="saveMaxAlertsPerDay(this.value)">
+              <option value="0">No limit</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
           <div id="alert-list-body"></div>
           <div style="padding:16px 20px 4px;">
             <button id="alert-add-btn" onclick="openAlertEditor()" style="width:100%;background:#f59e0b;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">+ Add alert</button>

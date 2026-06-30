@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.8.7';
+var APP_VERSION='1.8.8';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -3867,6 +3867,10 @@ function deleteAccountFromSettings(){
 
 // ---- Flight alerts (up to MAX_ALERTS profiles per user) ----
 var MAX_ALERTS=3;
+// Global cap on push notifications per rolling 24h, across all of a user's alerts combined.
+// 0 = no limit. Eagerly hydrated from local cache (see cloud-sync-local-fallback convention) —
+// syncAlertSettingsFromCloud overwrites with the authoritative value on a fresh sign-in.
+var _maxAlertsPerDay=(function(){try{return parseInt(localStorage.getItem('dc_max_alerts_day'))||0;}catch(e){return 0;}})();
 function genAlertId(){return 'a'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function loadAlertsLocal(){try{return JSON.parse(localStorage.getItem('dc_alerts'))||[];}catch(e){return [];}}
 function saveAlertsLocal(arr){try{localStorage.setItem('dc_alerts',JSON.stringify(arr));}catch(e){}}
@@ -3928,6 +3932,7 @@ function syncAlertSettingsFromCloud(uid,cb){
         _alerts=[];
       }
       if(d.alertsEnabled!==undefined)_alertsEnabled=d.alertsEnabled;
+      if(d.maxAlertsPerDay!==undefined){_maxAlertsPerDay=d.maxAlertsPerDay;try{localStorage.setItem('dc_max_alerts_day',String(_maxAlertsPerDay));}catch(e){}}
       if(d.fcmToken)_fcmToken=d.fcmToken;
       // If the cloud function silently disabled alerts (stale FCM token), notify the user
       if(d.alertAutoDisabled){
@@ -3945,6 +3950,16 @@ function saveAlertsToCloud(arr){
   if(!proUser||!proUser.uid||!_fbLoaded)return;
   var db=firebase.firestore();
   db.collection('users').doc(proUser.uid).set({alerts:arr},{merge:true}).catch(function(){});
+}
+function saveMaxAlertsPerDay(val){
+  _maxAlertsPerDay=parseInt(val)||0;
+  try{localStorage.setItem('dc_max_alerts_day',String(_maxAlertsPerDay));}catch(e){}
+  if(proUser&&proUser.uid&&_fbLoaded){
+    try{
+      firebase.firestore().collection('users').doc(proUser.uid).set({maxAlertsPerDay:_maxAlertsPerDay},{merge:true}).catch(function(e){console.error('[DC] saveMaxAlertsPerDay error:',e);});
+    }catch(e){console.error('[DC] saveMaxAlertsPerDay cloud error:',e);}
+  }
+  showToast(_maxAlertsPerDay?('Max '+_maxAlertsPerDay+' alert'+(_maxAlertsPerDay===1?'':'s')+' per day'):'No daily limit');
 }
 function saveFCMTokenToFirestore(token){
   if(!proUser||!proUser.uid||!_fbLoaded)return;
@@ -4007,6 +4022,8 @@ function populateAlertSheet(){
     else statusSub.textContent='Off — toggle to enable';
   }
   if(configSection)configSection.style.display=isEnabled?'block':'none';
+  var capSel=document.getElementById('alert-daily-cap-select');
+  if(capSel)capSel.value=String(_maxAlertsPerDay||0);
   closeAlertEditor();
   renderAlertList();
 }

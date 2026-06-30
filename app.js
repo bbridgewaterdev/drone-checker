@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.8.6';
+var APP_VERSION='1.8.7';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -619,6 +619,13 @@ function renderFavBar(){
     b.addEventListener('click',(function(name,lat,lng){return function(){loadFav(name,lat,lng);};})(f.name,f.lat,f.lng));
     bar.appendChild(b);
   });
+  if(!isPro()){
+    var cap=document.createElement('span');
+    cap.className='fav-lbl';
+    cap.style.marginLeft='auto';
+    cap.textContent=favs.length+'/2 saved';
+    bar.appendChild(cap);
+  }
 }
 function loadFav(name,lat,lng){
   uLat=lat;uLng=lng;
@@ -1292,6 +1299,19 @@ function finishOnboarding(){
   try{localStorage.setItem('dc_onboarded','1');}catch(e){}
   var overlay=document.getElementById('onboard-overlay');
   if(overlay)overlay.style.display='none';
+}
+function replayOnboarding(){
+  closeSettings();
+  var cur=document.getElementById('onboard-'+onboardSlide);
+  if(cur)cur.classList.remove('on');
+  onboardSlide=0;
+  var first=document.getElementById('onboard-0');
+  if(first)first.classList.add('on');
+  document.querySelectorAll('.onboard-dot').forEach(function(d,i){d.classList.toggle('on',i===0);});
+  var btn=document.getElementById('onboard-btn');
+  if(btn)btn.textContent='Next';
+  var overlay=document.getElementById('onboard-overlay');
+  if(overlay)overlay.style.display='flex';
 }
 function getLoc(forceFresh){
   if(!navigator.geolocation)return;
@@ -4050,6 +4070,7 @@ function openAlertEditor(id){
   if(!a)a={windowStart:6,windowEnd:21,minRating:'green',activeDays:[0,1,2,3,4,5,6],droneKey:selectedDrone};
   populateAlertLocSelect(a);
   populateAlertTimeSelects(a);
+  updateAlertWindowHint();
   populateAlertDays(a);
   populateAlertMorning(a);
   var rSel=document.getElementById('alert-rating-select');
@@ -4132,6 +4153,24 @@ function populateAlertTimeSelects(s){
     var o2=document.createElement('option');o2.value=h;o2.textContent=lbl;
     if(h===(s.windowEnd!==undefined?s.windowEnd:21))o2.selected=true;
     toSel.appendChild(o2);
+  }
+}
+function updateAlertWindowHint(){
+  var fromSel=document.getElementById('alert-from-select');
+  var toSel=document.getElementById('alert-to-select');
+  var hint=document.getElementById('alert-window-hint');
+  if(!fromSel||!toSel||!hint)return;
+  var from=parseInt(fromSel.value),to=parseInt(toSel.value);
+  if(from===to){
+    hint.style.display='block';
+    hint.style.color='var(--red)';
+    hint.textContent='From and Until are the same time — this window would never open.';
+  } else if(from>to){
+    hint.style.display='block';
+    hint.style.color='var(--muted)';
+    hint.textContent='Covers overnight: '+pad(from)+':00 → '+pad(to)+':00 the next day.';
+  } else {
+    hint.style.display='none';
   }
 }
 
@@ -4237,6 +4276,9 @@ function saveAlertFromEditor(){
     catch(e){lat=uLat;lng=uLng;locationName='Current';}
   }
   if(!lat||!lng){showToast('No location available — search for a location first');return;}
+  var windowStart=parseInt(fromSel?fromSel.value:6);
+  var windowEnd=parseInt(toSel?toSel.value:21);
+  if(windowStart===windowEnd){showToast('From and Until can\'t be the same time — that window would never open');return;}
   var activeDays=[];
   var chips=document.querySelectorAll('#alert-days-row .alert-day-chip');
   chips.forEach(function(c,i){if(c.classList.contains('active'))activeDays.push(i);});
@@ -4254,8 +4296,8 @@ function saveAlertFromEditor(){
     lat:lat,lng:lng,
     droneKey:droneSel?droneSel.value:selectedDrone,
     droneName:droneSel&&droneSel.selectedIndex>-1?droneSel.options[droneSel.selectedIndex].text:getDrone().name,
-    windowStart:parseInt(fromSel?fromSel.value:6),
-    windowEnd:parseInt(toSel?toSel.value:21),
+    windowStart:windowStart,
+    windowEnd:windowEnd,
     minRating:ratSel?ratSel.value:'green',
     activeDays:activeDays,
     notifyOnClose:!!(worsenToggle&&worsenToggle.checked),

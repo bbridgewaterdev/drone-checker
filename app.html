@@ -1236,6 +1236,13 @@
         </div>
         <a href="https://play.google.com/store/apps/details?id=uk.co.dronechecker.twa" target="_blank" rel="noopener noreferrer" class="settings-btn">Review</a>
       </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-label">How DroneChecker works</div>
+          <div class="settings-row-sub">Replay the welcome intro</div>
+        </div>
+        <button class="settings-btn" onclick="replayOnboarding()">Replay</button>
+      </div>
 
       <div class="settings-section">Drone</div>
       <div class="settings-row">
@@ -1355,12 +1362,13 @@
           <div class="settings-section">Time window</div>
           <div class="settings-row">
             <div class="settings-row-label">From</div>
-            <select class="settings-select" id="alert-from-select"></select>
+            <select class="settings-select" id="alert-from-select" onchange="updateAlertWindowHint()"></select>
           </div>
           <div class="settings-row">
             <div class="settings-row-label">Until</div>
-            <select class="settings-select" id="alert-to-select"></select>
+            <select class="settings-select" id="alert-to-select" onchange="updateAlertWindowHint()"></select>
           </div>
+          <div id="alert-window-hint" style="display:none;padding:0 20px 12px;font-size:11px;line-height:1.5;"></div>
 
           <div class="settings-section">Active days</div>
           <div class="alert-days-row" id="alert-days-row"></div>
@@ -1376,7 +1384,7 @@
           <div class="settings-row">
             <div>
               <div class="settings-row-label">Conditions worsen</div>
-              <div class="settings-row-sub">Alert when fly window closes</div>
+              <div class="settings-row-sub">Alert me as soon as it stops being flyable</div>
             </div>
             <label class="settings-toggle">
               <input type="checkbox" id="alert-worsen-toggle">
@@ -1384,7 +1392,10 @@
             </label>
           </div>
           <div class="settings-row">
-            <div class="settings-row-label">Repeat reminder</div>
+            <div>
+              <div class="settings-row-label">Repeat reminder</div>
+              <div class="settings-row-sub">Re-notify while it stays flyable</div>
+            </div>
             <select class="settings-select" id="alert-repeat-select">
               <option value="0">Off</option>
               <option value="2">Every 2 hrs</option>

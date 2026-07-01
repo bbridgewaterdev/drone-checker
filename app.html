@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
+  <meta name="google" content="notranslate">
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -41,8 +42,10 @@
   <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" integrity="sha384-p5cy4wHtKSqjnLUNjQ+8ffCwUp0vlLS+6lg1lc3qqXax2E1EmVCMCAimU+R0MOZH" crossorigin="anonymous" />
   <title>DroneChecker — Know Before You Fly</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9;}
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{overscroll-behavior-y:contain;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#f1f5f9;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+    input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;}
     :root{
       --bg:#0f172a;--bg2:#1e293b;--bg3:#334155;
       --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
@@ -81,6 +84,8 @@
     .alert-days-row{display:flex;gap:5px;padding:6px 20px 12px;flex-wrap:wrap;}
     .alert-day-chip{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);color:var(--muted);background:transparent;cursor:pointer;transition:.15s;font-family:inherit;}
     .alert-day-chip.active{background:rgba(245,158,11,.15);border-color:#f59e0b;color:#f59e0b;}
+    .feedback-cat-chip{flex:1;font-size:13px;font-weight:600;padding:9px 0;border-radius:20px;border:1.5px solid var(--border);color:var(--muted);background:transparent;cursor:pointer;transition:.15s;font-family:inherit;}
+    .feedback-cat-chip.active{background:rgba(245,158,11,.15);border-color:#f59e0b;color:#f59e0b;}
     .settings-select{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-size:13px;font-weight:600;outline:none;font-family:inherit;cursor:pointer;}
     .settings-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
     .settings-btn.danger{color:var(--red);border-color:rgba(239,68,68,.3);}
@@ -771,7 +776,7 @@
         <strong>Advisory only.</strong> All ratings are guidance only — not official aviation advice. Always verify airspace and NOTAMs independently before flying.<br><br>
         <strong>You are responsible.</strong> The pilot in command is solely responsible for safe and lawful operations at all times, including holding a valid CAA Operator ID and Flyer ID where required.<br><br>
         <strong>No liability.</strong> DroneChecker accepts no liability for any loss, damage or legal consequence from reliance on this app.<br><br>
-        <strong>Data.</strong> Free users: no personal data stored on our servers. Pro subscribers: email and flight data stored securely. See <a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Privacy Policy</a> &amp; <a href="/terms.html" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">Terms</a>.
+        <strong>Data.</strong> Free users: no personal data stored on our servers. Pro subscribers: email and flight data stored securely. See <a href="/privacy.html" style="color:var(--accent);">Privacy Policy</a> &amp; <a href="/terms.html" style="color:var(--accent);">Terms</a>.
       </div>
       <label class="disclaimer-check">
         <input type="checkbox" id="disclaimer-cb" onchange="updateDisclaimerBtn()"/>
@@ -891,7 +896,7 @@
           Sign in with email instead
         </button>
 
-        <div class="pro-privacy-note">Free users remain completely anonymous.<br><a href="/privacy.html" target="_blank" rel="noopener noreferrer">Privacy policy</a></div>
+        <div class="pro-privacy-note">Free users remain completely anonymous.<br><a href="/privacy.html">Privacy policy</a></div>
         <button class="pro-free-link" onclick="closeProOverlay()">No thanks, continue for free</button>
       </div>
     </div>
@@ -1284,7 +1289,7 @@
           <div class="settings-row-label">Send feedback</div>
           <div class="settings-row-sub">Report a bug or suggest a feature</div>
         </div>
-        <a href="#" onclick="this.href=buildFeedbackMailto();return true;" id="feedback-link" class="settings-btn">Send</a>
+        <button class="settings-btn" onclick="closeSettings();openFeedbackSheet();">Send</button>
       </div>
 
       <div class="settings-section" id="settings-account-section" style="display:none;">Account</div>
@@ -1446,6 +1451,32 @@
         </div>
 
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Sheet -->
+<div class="settings-overlay" id="feedback-sheet-overlay" onclick="if(event.target===this)closeFeedbackSheet()">
+  <div class="settings-sheet">
+    <div class="settings-header">
+      <div class="settings-title">Send feedback</div>
+      <button class="settings-close" onclick="closeFeedbackSheet()">×</button>
+    </div>
+    <div class="settings-body">
+      <div style="padding:10px 20px 4px;font-size:12px;color:var(--muted);line-height:1.6;">Bug report or feature idea — tell us what's going on.</div>
+      <div style="display:flex;gap:8px;padding:12px 20px 4px;">
+        <button type="button" class="feedback-cat-chip active" data-cat="bug" onclick="selectFeedbackCategory('bug')">Bug</button>
+        <button type="button" class="feedback-cat-chip" data-cat="idea" onclick="selectFeedbackCategory('idea')">Idea</button>
+        <button type="button" class="feedback-cat-chip" data-cat="other" onclick="selectFeedbackCategory('other')">Other</button>
+      </div>
+      <div style="padding:12px 20px 4px;">
+        <textarea id="feedback-text" placeholder="What's going on, or what would help?" maxlength="2000" style="width:100%;min-height:100px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;color:var(--text);font-size:14px;font-family:inherit;resize:none;box-sizing:border-box;"></textarea>
+      </div>
+      <div style="padding:8px 20px 4px;font-size:11px;color:var(--muted);line-height:1.5;">App version, drone and location are attached automatically — no need to type them.</div>
+      <div style="padding:16px 20px 4px;">
+        <button id="feedback-send-btn" onclick="sendFeedback()" style="width:100%;background:#f59e0b;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;color:#000;cursor:pointer;font-family:inherit;">Send feedback</button>
+      </div>
+      <div style="padding:8px 20px 20px;text-align:center;font-size:11px;color:var(--muted);">Prefer email? <a href="#" onclick="this.href=buildFeedbackMailto();return true;" style="color:var(--accent);">bbridgewater.dev@gmail.com</a></div>
     </div>
   </div>
 </div>

@@ -52,7 +52,7 @@ var DRONES={
     try{localStorage.setItem(CACHE_KEY,JSON.stringify(data));localStorage.setItem(TS_KEY,String(Date.now()));}catch(e){}
   }).catch(function(){});
 }());
-var APP_VERSION='1.8.8';
+var APP_VERSION='1.8.10';
 var isIOS=(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.userAgent.includes('Mac')&&'ontouchend' in document))&&!window.MSStream;
 var isAndroid=/Android/.test(navigator.userAgent);
 var isStandalone=window.matchMedia('(display-mode: standalone)').matches||!!window.navigator.standalone;
@@ -2191,11 +2191,11 @@ function renderDash(){
       '</div></div>'
     :'')+
     '<div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;">'+
-    '<a href="/faq.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--muted);text-decoration:none;">FAQ</a>'+
+    '<a href="/faq.html" style="font-size:12px;color:var(--muted);text-decoration:none;">FAQ</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+
-    '<a href="/privacy.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--muted);text-decoration:none;">Privacy Policy</a>'+
+    '<a href="/privacy.html" style="font-size:12px;color:var(--muted);text-decoration:none;">Privacy Policy</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+
-    '<a href="/terms.html" target="_blank" rel="noopener noreferrer" style="font-size:12px;color:var(--muted);text-decoration:none;">Terms of Service</a>'+
+    '<a href="/terms.html" style="font-size:12px;color:var(--muted);text-decoration:none;">Terms of Service</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+
     '<a href="'+buildFeedbackMailto()+'" style="font-size:12px;color:var(--muted);text-decoration:none;">Send Feedback</a>'+
     '<span style="font-size:12px;color:var(--border);">|</span>'+
@@ -4005,6 +4005,68 @@ function openAlertSheet(){
 function closeAlertSheet(){
   var overlay=document.getElementById('alert-sheet-overlay');
   if(overlay)overlay.classList.remove('open');
+}
+
+// ---- Feedback sheet ----
+var _feedbackCategory='bug';
+function selectFeedbackCategory(cat){
+  _feedbackCategory=cat;
+  document.querySelectorAll('.feedback-cat-chip').forEach(function(b){b.classList.toggle('active',b.dataset.cat===cat);});
+}
+function openFeedbackSheet(){
+  var overlay=document.getElementById('feedback-sheet-overlay');
+  if(!overlay)return;
+  var ta=document.getElementById('feedback-text');
+  if(ta)ta.value='';
+  selectFeedbackCategory('bug');
+  var btn=document.getElementById('feedback-send-btn');
+  if(btn){btn.disabled=false;btn.textContent='Send feedback';btn.style.background='#f59e0b';}
+  overlay.classList.add('open');
+}
+function closeFeedbackSheet(){
+  var overlay=document.getElementById('feedback-sheet-overlay');
+  if(overlay)overlay.classList.remove('open');
+}
+function sendFeedback(){
+  var ta=document.getElementById('feedback-text');
+  var msg=ta?ta.value.trim():'';
+  if(!msg){showToast('Write a quick note first');return;}
+  if(msg.length>2000){showToast('Keep it under 2000 characters');return;}
+  var btn=document.getElementById('feedback-send-btn');
+  if(btn){btn.disabled=true;btn.textContent='Sending…';}
+  var timedOut=false;
+  var timeoutId=setTimeout(function(){
+    timedOut=true;
+    if(btn){btn.disabled=false;btn.textContent='Send feedback';}
+    showToast('Could not send — check your connection and try again');
+  },10000);
+  loadFirebase(function(){
+    if(timedOut)return;
+    var doc={
+      message:msg,
+      category:_feedbackCategory,
+      appVersion:APP_VERSION,
+      platform:isIOS?'iOS':isAndroid?'Android':'Web',
+      standalone:!!isStandalone,
+      location:(document.getElementById('loc-name')||{}).textContent||'unknown',
+      drone:getDrone().name,
+      units:unitMode,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if(proUser&&proUser.uid)doc.uid=proUser.uid;
+    firebase.firestore().collection('feedback').add(doc).then(function(){
+      clearTimeout(timeoutId);
+      if(timedOut)return;
+      if(btn){btn.disabled=true;btn.textContent='Sent — thanks';btn.style.background='#22c55e';}
+      setTimeout(closeFeedbackSheet,1200);
+    }).catch(function(e){
+      clearTimeout(timeoutId);
+      if(timedOut)return;
+      console.error('[DC] sendFeedback error:',e);
+      showToast('Could not send — check your connection and try again');
+      if(btn){btn.disabled=false;btn.textContent='Send feedback';}
+    });
+  });
 }
 
 function populateAlertSheet(){
